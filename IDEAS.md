@@ -28,6 +28,8 @@ Gamify agentic coding, and how IDEs look and how new devs interact with their ID
 
 ie: you're in the IDE, and you see your friends you are connected to via GitHub, you see a notification that says "John has made 10 commits this week"
 
+Daily, weekly challenges. Achievements for devs
+
 Notes:
 
 ### Detecting autism / ADHD / neurodivergence
