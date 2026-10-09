@@ -22,6 +22,8 @@ Notes:
 ### Gamify agentic coding
 Gamify agentic coding, and how IDEs look and how new devs interact with their IDE in this era of agentic coding
 
+ie: you're in the IDE, and you see your friends you are connected to via GitHub, you see a notification that says "John has made 10 commits this week"
+
 Notes:
 
 ### Detecting autism / ADHD / neurodivergence
