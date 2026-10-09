@@ -17,6 +17,10 @@ Notes:
 ### Machine learning auto tagging samples
 Machine learning auto tagging samples
 
+Something that sees your project vibe, and recommend samples based on that
+
+Live listening rooms by taste cluster: making the graph more interactive, customizable, 3d and rotatable
+
 Notes:
 
 ### Gamify agentic coding
