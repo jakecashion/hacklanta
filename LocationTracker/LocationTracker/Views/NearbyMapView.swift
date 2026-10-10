@@ -14,6 +14,7 @@ struct NearbyMapView: View {
     @State private var users = MockData.currentUsers()
     @State private var anchored = false
     @State private var selected: NearbyUser?
+    @State private var lastSelected = MockData.currentUsers()[0]
     @State private var showDevMenu = false
 
     var body: some View {
@@ -52,7 +53,11 @@ struct NearbyMapView: View {
                 .background(Capsule().fill(Color.ink).offset(x: Brut.shadowSmall, y: Brut.shadowSmall))
                 .padding(.top, 18)
         }
-        .sheet(item: $selected, onDismiss: { matchStore.sheetDidDismiss() }) { user in
+        // One sheet that stays up while `selected` changes. With `.sheet(item:)`, tapping a second pin
+        // re-presents the sheet and it loses its detent (it opens full height).
+        .sheet(isPresented: Binding(get: { selected != nil }, set: { if !$0 { selected = nil } }),
+               onDismiss: { matchStore.sheetDidDismiss() }) {
+            let user = selected ?? lastSelected   // `lastSelected` fills the card while the sheet closes
             NearbyUserCard(
                 user: user,
                 onRecommend: { open(user, .songSearch) },
@@ -62,6 +67,7 @@ struct NearbyMapView: View {
             .presentationBackgroundInteraction(.enabled)
             .brutScreen()
         }
+        .onChange(of: selected) { _, new in if let new { lastSelected = new } }
         // Put the mock people around the real position once the tracker has a fix.
         .onChange(of: tracker.totalCount) { _, _ in
             guard !anchored, let fix = tracker.fixes.first else { return }
