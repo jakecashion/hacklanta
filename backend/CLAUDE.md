@@ -20,3 +20,19 @@ uv run python seed.py --remove  # delete them (their profiles cascade)
 - The users have no password (they can't log in) and use `<username>@example.invalid` emails.
 - It talks to the Supabase REST/Auth API, not Postgres directly, so it works without IPv6.
 - The Supabase project is shared with teammates, so run `--remove` before the demo if the fake users shouldn't be there.
+
+## API for the frontend
+Interactive docs at `http://localhost:8000/docs` (FastAPI). JSON is snake_case, timestamps are epoch milliseconds, and response shapes mirror `web_frontend/src/data/mock.ts`. There is no auth yet: every call passes the caller's `user_id` (get ids from `GET /api/users`).
+
+| Call | Does |
+|---|---|
+| `GET /api/users` | Everyone with a profile, to pick "me" in dev |
+| `PUT /api/session` / `DELETE /api/session?user_id=` | Save my location + now-playing song / turn sharing off |
+| `GET /api/nearby?user_id=` | People within 250 m, online (seen in the last 15 min), unblocked, sharing a genre: `NearbyUser[]` |
+| `GET /api/search?q=` | Last.fm track search: `Song[]` |
+| `POST /api/shares` | Send a `song` or `meetup` message |
+| `GET /api/inbox?user_id=&kind=&range=&tz_offset_min=&unlistened=&sender_id=` | `Recommendation[]`, newest first |
+| `POST /api/shares/{id}/listened?user_id=` / `DELETE /api/shares/{id}?user_id=` | Mark heard / remove from my inbox |
+| `GET /api/blocks?user_id=` / `POST /api/blocks` / `DELETE /api/blocks/{blocked_id}?user_id=` | Manage blocked people |
+
+CORS allows any `localhost` port; set `CORS_ORIGINS` for a deployed frontend. Seeded sessions go stale after 15 minutes, so rerun `seed.py` before a demo.

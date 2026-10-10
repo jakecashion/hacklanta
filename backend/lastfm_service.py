@@ -166,6 +166,16 @@ async def fetch_top_genres_from_tracks(
         return await _top_genres_for_artists(client, artists, top_n_genres)
 
 
+async def search_tracks(query: str, limit: int = 10) -> list[dict[str, str]]:
+    """Searches Last.fm tracks by title/artist text. Returns [{title, artist}]."""
+    async with httpx.AsyncClient(timeout=15) as client:
+        data = await _lastfm_get(client, "track.search", track=query, limit=limit)
+    tracks = data.get("results", {}).get("trackmatches", {}).get("track", [])
+    if isinstance(tracks, dict):  # defensive: a lone result may not be wrapped in a list
+        tracks = [tracks]
+    return [{"title": t["name"], "artist": t["artist"]} for t in tracks if t.get("name") and t.get("artist")]
+
+
 def sync_music_taste_to_supabase(
     user_id: str,
     top_genres: list[str],

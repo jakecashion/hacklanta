@@ -164,6 +164,10 @@ create table if not exists public.user_sessions (
   updated_at    timestamptz not null default now()
 );
 
+-- RLS on with no policies: the public (anon) key can't read anyone's location.
+-- Only the backend (secret key) can.
+alter table public.user_sessions enable row level security;
+
 
 -- -----------------------------------------------------------------------------
 -- shares: "reply with a song" and "message to meet up" in one table. The song
