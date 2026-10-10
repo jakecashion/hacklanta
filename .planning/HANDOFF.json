@@ -1,0 +1,39 @@
+{
+  "version": "1.0",
+  "timestamp": "2026-10-10T21:33:04.795Z",
+  "phase": "1",
+  "phase_name": "Panel + Kill Test",
+  "phase_dir": ".planning/phases/01-panel-kill-test",
+  "plan": null,
+  "task": 2,
+  "total_tasks": 5,
+  "status": "paused",
+  "completed_tasks": [
+    {"id": 1, "name": "Build Phase 1 code: CEP panel, bridge.jsx kill-test functions, ws relay + ping.js, install/firewall scripts, README, KILL-TEST.md template", "status": "done", "commit": "8349281"},
+    {"id": 2, "name": "Install panel on dev machine (PlayerDebugMode=1 in CSXS.11, junction into %APPDATA%\\Adobe\\CEP\\extensions)", "status": "done", "commit": "8349281"}
+  ],
+  "remaining_tasks": [
+    {"id": 3, "name": "ENV-01/ENV-03: Restart Premiere, open panel, run Ping JSX / List V1 / Run kill test on C:\\collab-demo\\ project; fill and commit premiere-collab/KILL-TEST.md", "status": "not_started"},
+    {"id": 4, "name": "ENV-04: Host runs firewall.ps1 (elevated) + node relay.js; guest installs panel (install-panel.ps1, no -Link) and Pings relay over phone hotspot", "status": "not_started"},
+    {"id": 5, "name": "ENV-05: Confirm demo project at C:\\collab-demo\\ on both laptops (1 sequence, 4 clips on V1: Hero, Logo, Card, BG; no keyframes; Uniform Scale ON; English UI)", "status": "not_started"}
+  ],
+  "blockers": [
+    {"description": "Kill gate: setValue must visibly update the Program monitor on Scale, Rotation, Opacity, or the core is re-planned before Phase 2", "type": "human_action", "workaround": "None; run the test"},
+    {"description": "Unverified whether CEP follows a directory junction", "type": "technical", "workaround": "Run scripts/install-panel.ps1 without -Link (robocopy)"}
+  ],
+  "async_jobs": [],
+  "human_actions_pending": [
+    {"action": "Run the kill test in Premiere 22.3.1 and paste results into premiere-collab/KILL-TEST.md", "context": "Phase 1 kill gate (ENV-03); Claude cannot drive Premiere", "blocking": true},
+    {"action": "Run scripts/firewall.ps1 in an elevated PowerShell on the host laptop", "context": "ENV-04, TCP 8080 profile=any", "blocking": true},
+    {"action": "Copy repo to the second laptop, run install-panel.ps1, test Ping relay over the hotspot", "context": "ENV-04, ENV-01 on laptop 2", "blocking": true}
+  ],
+  "decisions": [
+    {"decision": "Skipped plan-phase; Phase 1 built inline via /gsd-fast at user request ('skip more and start building')", "rationale": "Time budget; no PLAN.md/SUMMARY.md for Phase 1", "phase": "1"},
+    {"decision": "Panel loads json2.js then bridge.jsx via $.evalFile on every panel load (no manifest ScriptPath)", "rationale": "Reload panel picks up .jsx edits", "phase": "1"},
+    {"decision": "Params found by component matchName (AE.ADBE Motion / AE.ADBE Opacity) + English param displayName, fallback to index (Scale 1, Rotation 4, Opacity 0)", "rationale": "displayName is localized", "phase": "1"},
+    {"decision": "Relay broadcasts all non-ping/hello messages to other clients, tagged with sender name; heartbeat ping every 20 s", "rationale": "Phase 1 minimum; Phase 2 adds rev sequencing in relay", "phase": "1"}
+  ],
+  "uncommitted_files": [],
+  "next_action": "Ask the user for kill-test output (KILL-TEST.md). If all three fields moved the Program monitor, start Phase 2 (sync engine sync.js + node --test, relay rev sequencing, 1 s poll diff, applyOps, echo suppression via shadow + epsilon).",
+  "context_notes": "Code exists but is untested inside Premiere. bridge.jsx functions: pc_ping, pc_listClips, pc_setParam, pc_killTest, pc_resetClip, pc_scanCost. Relay verified locally (3 ms round trip). Host LAN IP seen: 192.168.4.69 (Ethernet)."
+}

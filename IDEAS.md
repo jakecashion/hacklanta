@@ -69,3 +69,19 @@ AI meta analysis - on how users interact with the AI agents. Detecting behaviora
 Transcription of therapy conversations to help therapy be more personalized via user & therapist conversations. Ie workbooks, etc.
 
 Notes:
+
+### Live collaborative After Effects session
+We are moving towards an idea like this: https://www.tiktok.com/t/ZPLrspCAT/
+
+Start a session, friend joins. (editor's fastest gpu's fastest ram's, uses editor's machines, hosting their project). One person hosts the session locally.
+
+This will be in Adobe After Effects.
+
+Notes:
+- Decision: Server based? or hosting?
+- What are the components needed to connect to a netowkr, live on a server, or a computer?
+- Examples to learn from: Google Docs, Microsoft Word online (collaborative)
+- Decision (2026-10-10): Start with the Premiere Pro version. Do the After Effects version after.
+- Premiere Pro plugin research: [research/live-collab/06-premiere-pro-uxp.md](research/live-collab/06-premiere-pro-uxp.md)
+- We have Premiere Pro v22.3.1.2 on both machines. UXP needs 25.6, so we use CEP + ExtendScript: [research/live-collab/07-premiere-pro-22-cep.md](research/live-collab/07-premiere-pro-22-cep.md)
+- Both machines use Windows. MVP plan (both machines can edit; plan only, not built): [research/live-collab/08-mvp.md](research/live-collab/08-mvp.md)
