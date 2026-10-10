@@ -31,7 +31,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. An editor can open the collab panel from Window > Extensions in Premiere Pro 22.3.1 on both laptops, with `PlayerDebugMode` set and the panel folder copied by hand
   2. Kill gate: a `setValue` on Motion Scale, Motion Rotation and Opacity of a V1 clip each visibly changes the Program monitor, and the value read back is recorded and committed to the repo. If any of the three fails, the core is re-planned before Phase 2 starts
   3. A test message from the guest laptop reaches the relay running on the host laptop at the host's Tailscale `100.x` address and comes back (both laptops signed in to the same Tailscale account), with the TCP 8080 `profile=any` firewall rule in place. The fallback is also checked once: the phone hotspot with the host's direct LAN IP
-  4. Opening `C:\collab-demo\` on both laptops shows the same demo project: one sequence, 4 clips on V1 (Hero, Logo, Card, BG), no keyframes, Uniform Scale ON, English UI
+  4. Both laptops open the same demo project (`premiere-collab/demo/demo.prproj`, copied to any folder; footage paths may differ and are relinked once) with no offline media: one sequence, 4 clips on V1 in the same order (Hero, Logo, Card, BG), no keyframes, Uniform Scale ON, English UI
 
 **Plans**: TBD
 
@@ -60,7 +60,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. After the host has changed a clip's Scale, Rotation or Opacity, a guest who clicks Connect sees their timeline set to match the host's, with no session code and no Approve step (clips matched by `v{track}:{clip}`)
   2. Each panel shows which clips the other editor has selected, and it updates as the other editor changes their selection
   3. Each panel shows a change feed with author names, e.g. `Sam set Hero Scale to 150 (rev 12)`
-  4. A core-only demo script (big jump edits such as Scale 200, Rotation 90, Opacity 0, plus selection and the feed) is committed to the repo and has been run once end to end, clean, on two laptops over Tailscale, starting from a pristine `C:\collab-demo\`
+  4. A core-only demo script (big jump edits such as Scale 200, Rotation 90, Opacity 0, plus selection and the feed) is committed to the repo and has been run once end to end, clean, on two laptops over Tailscale, starting from a pristine copy of the demo project on each laptop
 
 **Plans**: TBD
 **UI hint**: yes

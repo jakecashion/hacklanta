@@ -19,7 +19,7 @@ Clip IDs are positions on V1 (`v0:0` to `v0:3`), so both laptops must have the s
 2. In the Project panel, **File > Import** (Ctrl+I) and go to
    `C:\Users\Public\Documents\Adobe\Premiere Pro\22.0\Tutorial\Going Home project\Footage\`.
    Pick 3 more clips, for example `A001_C064_09224Y_001.mp4`, `A002_C009_092221_001.mp4`, `A003_C021_0923NJ_001.mp4`.
-   This is Premiere's own tutorial footage, so the guest laptop should already have the same files at the same path.
+   The guest can keep its copy of these files anywhere; it relinks them once in B4.
 3. Drag them onto **V1** of **Sequence 01**, one after another, after the existing clip. All 4 clips go on V1, none on V2.
 4. Rename each clip **in the timeline** (right-click the clip > **Rename**), left to right: `Hero`, `Logo`, `Card`, `BG`. The change feed shows these names.
 5. For each clip, check in **Effect Controls**:
@@ -122,18 +122,21 @@ After any later code change, run this script again and click **Reload panel**.
 
 ### B4. Put the demo project in place
 
-1. Copy the project from the repo so it sits at exactly `C:\collab-demo\demo.prproj`. From the repo folder:
+Sync matches clips by their **position on V1**, never by file path. The project file and the footage can live anywhere on the guest; only the clip order on V1 has to match the host.
+
+1. Copy the project from the repo to any folder, for example `C:\collab-demo\`. From the repo folder:
    ```powershell
    New-Item -ItemType Directory -Force C:\collab-demo | Out-Null
    Copy-Item .\premiere-collab\demo\demo.prproj C:\collab-demo\demo.prproj
    ```
-2. Check the tutorial footage exists at the same path as on the host:
-   ```powershell
-   Test-Path "C:\Users\Public\Documents\Adobe\Premiere Pro\22.0\Tutorial\Going Home project\Footage\A001_C037_0921FG_001.mp4"
-   ```
-   It must print `True`. If it prints `False`, copy the 4 clips you used in A1 into that same folder.
-3. Open the project in Premiere. If Premiere asks to **Link Media**, the footage path differs; fix step 2 rather than relinking by hand.
-4. Don't change anything in the timeline before joining. Phase 2 has no join snapshot yet, so both laptops must start identical.
+2. Make sure the guest has the 4 clips from A1 somewhere. Usually they're already in the guest's own Premiere tutorial folder (search the disk for `A001_C037_0921FG_001.mp4`). If not, copy those 4 `.mp4` files from the host by USB into any folder.
+3. Open the project in Premiere. When it shows **Link Media** (the host's footage path doesn't exist here):
+   - Select the first missing file and click **Locate**.
+   - Browse to the folder from step 2 and select the matching file. Leave **Relink others automatically** ticked so the other 3 clips are found in the same folder.
+   - Click **OK**. Don't choose **Offline All**; the clips would show "Media Offline" and the demo has nothing to look at.
+4. **Save** the project (Ctrl+S) so Premiere doesn't ask again next time.
+5. Check the order: the panel's **List V1** button on both laptops shows the same names in the same order (`v0:0` Hero, `v0:1` Logo, `v0:2` Card, `v0:3` BG).
+6. Don't change anything in the timeline before connecting. Phase 2 has no join snapshot yet, so both laptops must start identical.
 
 ### B5. Install Tailscale with the same account
 
@@ -201,5 +204,6 @@ Put the playhead over **Hero** on both laptops.
 | Premiere quits after the splash | Not signed in to Adobe | B1 step 2 |
 | Guest log: `Scan error: No active sequence` | Sequence not open | Double-click Sequence 01 |
 | Edit shows in the feed but the picture doesn't change | Playhead isn't over that clip | Move the playhead onto the clip |
-| Edit lands on the wrong clip | Clip order on V1 differs | Re-copy `demo.prproj` from the repo (A1 step 7, B4) |
+| Edit lands on the wrong clip | Clip order on V1 differs | Re-copy `demo.prproj` from the repo and relink (A1 step 7, B4) |
+| Clip shows "Media Offline" on the guest | Footage not relinked | In the Project panel, right-click the clip > **Link Media**, point it at the guest's copy, save |
 | Feed shows `Apply failed ... Param Scale not found` | Premiere UI not in English | Switch Premiere's language to English |

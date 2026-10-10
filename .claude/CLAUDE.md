@@ -14,7 +14,7 @@ A Premiere Pro panel that lets two editors on two Windows machines join one live
 - **Tech stack**: CEP 11 + ExtendScript (ES3) panel, Node.js `ws` relay. Premiere 22.3.1.2 can't run UXP.
 - **Platform**: Two Windows laptops, both running Premiere 22.3.1.2.
 - **Network**: Same Wi-Fi or a phone hotspot. Fallback is a `cloudflared` tunnel. Windows Firewall rule for TCP 8080 must use `profile=any`, because venue and hotspot Wi-Fi are usually marked Public.
-- **Demo data**: The same project and media at `C:\collab-demo\` on both machines, unchanged before the join.
+- **Demo data**: The same project (`premiere-collab/demo/demo.prproj`) on both machines, with the same clips in the same order on V1, unchanged before the join. Project and footage paths may differ per laptop (relink once in Premiere); sync matches clips by V1 position, never by file path.
 - **Process**: Hackathon. Fast development matters more than polish, except on the demo path.
 
 <!-- GSD:project-end -->
