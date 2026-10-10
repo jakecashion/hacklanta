@@ -144,6 +144,63 @@ create policy "Users can unblock others."
 
 
 -- -----------------------------------------------------------------------------
+-- user_sessions: one row per stretch of a user being "live" on the map, with
+-- their device location and the song they're listening to.
+-- A session is active while ended_at is null; last_seen_at is bumped by the
+-- app's location updates, so stale active sessions can be treated as offline.
+-- -----------------------------------------------------------------------------
+create table if not exists public.user_sessions (
+  id                 uuid primary key default gen_random_uuid(),
+  user_id            uuid not null references public.profiles (id) on delete cascade,
+
+  latitude           double precision not null check (latitude between -90 and 90),
+  longitude          double precision not null check (longitude between -180 and 180),
+
+  -- What they're listening to right now (null = nothing playing)
+  now_playing_title  text,
+  now_playing_artist text,
+
+  started_at         timestamptz not null default timezone('utc'::text, now()),
+  last_seen_at       timestamptz not null default timezone('utc'::text, now()),
+  ended_at           timestamptz
+);
+
+-- At most one active session per user
+create unique index if not exists idx_user_sessions_one_active
+  on public.user_sessions (user_id) where ended_at is null;
+
+-- Bounding-box lookups for "who's nearby" over active sessions
+create index if not exists idx_user_sessions_active_location
+  on public.user_sessions (latitude, longitude) where ended_at is null;
+
+-- Locations are sensitive, so there is no public read: a user only sees their
+-- own sessions. "Who's nearby" goes through the backend (service role), which
+-- must also filter out blocked users.
+alter table public.user_sessions enable row level security;
+
+drop policy if exists "Users can view their own sessions." on public.user_sessions;
+create policy "Users can view their own sessions."
+  on public.user_sessions for select
+  using ((select auth.uid()) = user_id);
+
+drop policy if exists "Users can start their own sessions." on public.user_sessions;
+create policy "Users can start their own sessions."
+  on public.user_sessions for insert
+  with check ((select auth.uid()) = user_id);
+
+drop policy if exists "Users can update their own sessions." on public.user_sessions;
+create policy "Users can update their own sessions."
+  on public.user_sessions for update
+  using ((select auth.uid()) = user_id)
+  with check ((select auth.uid()) = user_id);
+
+drop policy if exists "Users can delete their own sessions." on public.user_sessions;
+create policy "Users can delete their own sessions."
+  on public.user_sessions for delete
+  using ((select auth.uid()) = user_id);
+
+
+-- -----------------------------------------------------------------------------
 -- Backfill: users who signed up before this script ran get a profile too
 -- (otherwise /api/sync-music-taste returns 404 for them)
 -- -----------------------------------------------------------------------------

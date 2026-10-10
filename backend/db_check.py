@@ -35,6 +35,18 @@ REQUIRED_TABLES: dict[str, list[str]] = {
         "created_at",
         "updated_at",
     ],
+    "blocks": ["blocker_id", "blocked_id", "created_at"],
+    "user_sessions": [
+        "id",
+        "user_id",
+        "latitude",
+        "longitude",
+        "now_playing_title",
+        "now_playing_artist",
+        "started_at",
+        "last_seen_at",
+        "ended_at",
+    ],
 }
 
 # PostgREST reloads its schema cache asynchronously after DDL
