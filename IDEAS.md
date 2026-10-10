@@ -81,3 +81,5 @@ Notes:
 - Decision: Server based? or hosting?
 - What are the components needed to connect to a netowkr, live on a server, or a computer?
 - Examples to learn from: Google Docs, Microsoft Word online (collaborative)
+- Decision (2026-10-10): Start with the Premiere Pro version. Do the After Effects version after.
+- Premiere Pro plugin research: [research/live-collab/06-premiere-pro-uxp.md](research/live-collab/06-premiere-pro-uxp.md)
