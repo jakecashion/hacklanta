@@ -5,6 +5,7 @@ Date: 2026-10-10. Written in ASD-STE100 Simplified Technical English.
 ## 1. Facts
 
 - Both machines have Premiere Pro **v22.3.1.2**.
+- Both machines use **Windows**. Use the Windows steps. The macOS steps are for reference only.
 - UXP plugins need Premiere 25.6 or later. **UXP does not work on 22.3.1.** Do not use `06-premiere-pro-uxp.md` for the build. Keep it for a later port.
 - Use a **CEP panel** (HTML + JavaScript + Node.js) and **ExtendScript** (`.jsx`) for the build.
 - The ExtendScript API is frozen. Adobe made no changes after 23.0. Everything we need is in 22.3.1.
@@ -155,7 +156,7 @@ Stop and plan again if a test fails.
 6. Bind `onActiveSequenceStructureChanged`. Move a clip by hand. Make sure the event fires.
 7. On two machines, move a clip on A. Make sure it moves on B and does not echo back.
 
-Note: test 4 is the most important. If `nodeId` is different on each machine, use a tag in the clip name (for example `Hero [cu:a1b2]`).
+Note: test 3 is the most important. Test 4 is less important now. The MVP (`08-mvp.md` §6.1) maps host `nodeId` to local `nodeId` at join. Then `nodeId` can be different on each machine. It must only stay the same on one machine during the session. If test 3 fails, use a tag in the clip name (for example `Hero [cu:a1b2]`).
 
 ## 9. Not verified
 
