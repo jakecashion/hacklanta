@@ -17,7 +17,9 @@ struct ContentView: View {
         }
         .preferredColorScheme(.dark)
         .onAppear {
-            NotificationManager.shared.onOpenMatch = { matchStore.openMatch(userId: $0) }
+            NotificationManager.shared.onOpenMatch = { id in
+                matchStore.whenReady { matchStore.openMatch(userId: id) }
+            }
             // No backend yet: optionally put the songs the user sends into the user's own playlist.
             matchStore.onSongSent = { [recommendations] song, line, user in
                 guard recommendations.loopbackSentSongs else { return }

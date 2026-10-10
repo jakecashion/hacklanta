@@ -10,7 +10,7 @@ struct NearbyMapView: View {
             center: MockData.defaultCenter,
             latitudinalMeters: 1000, longitudinalMeters: 1000))
     )
-    @State private var users = MockData.nearbyUsers(around: MockData.defaultCenter)
+    @State private var users = MockData.currentUsers()
     @State private var anchored = false
     @State private var selected: NearbyUser?
     @State private var showDevMenu = false
@@ -40,7 +40,7 @@ struct NearbyMapView: View {
             }
             .accessibilityLabel("Dev menu")
             .padding(12)
-            .sheet(isPresented: $showDevMenu) {
+            .sheet(isPresented: $showDevMenu, onDismiss: { matchStore.sheetDidDismiss() }) {
                 DevMenuView().preferredColorScheme(.dark)
             }
         }
@@ -53,7 +53,7 @@ struct NearbyMapView: View {
                 .background(Color.card, in: Capsule())
                 .padding(.bottom, 12)
         }
-        .sheet(item: $selected) { user in
+        .sheet(item: $selected, onDismiss: { matchStore.sheetDidDismiss() }) { user in
             NearbyUserCard(
                 user: user,
                 onRecommend: { open(user, .songSearch) },
@@ -67,8 +67,16 @@ struct NearbyMapView: View {
         .onChange(of: tracker.totalCount) { _, _ in
             guard !anchored, let fix = tracker.fixes.first else { return }
             anchored = true
-            users = MockData.nearbyUsers(
-                around: CLLocationCoordinate2D(latitude: fix.lat, longitude: fix.lon))
+            MockData.center = CLLocationCoordinate2D(latitude: fix.lat, longitude: fix.lon)
+            users = MockData.currentUsers()
+            // Keep an open card in step with the new positions.
+            if let id = selected?.id { selected = users.first { $0.id == id } }
+        }
+        // Tell the store when a sheet is up, and close it when the store asks.
+        .onChange(of: selected != nil || showDevMenu) { _, up in matchStore.isSheetUp = up }
+        .onChange(of: matchStore.closeSheetsToken) { _, _ in
+            selected = nil
+            showDevMenu = false
         }
     }
 
@@ -80,12 +88,9 @@ struct NearbyMapView: View {
         }
     }
 
-    /// A sheet cannot show while a full screen cover opens, so close the card first.
+    /// The card closes first. The match flow opens when the card is gone.
     private func open(_ user: NearbyUser, _ route: MatchRoute) {
-        selected = nil
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-            matchStore.open(user, route: route)
-        }
+        matchStore.whenReady { matchStore.open(user, route: route) }
     }
 }
 

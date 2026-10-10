@@ -13,7 +13,7 @@ struct RecommendationDetailView: View {
 
     /// The sender as a person we can reply to. `nil` for songs the user sent to themselves.
     private func sender(of item: Recommendation) -> NearbyUser? {
-        MockData.nearbyUsers(around: MockData.defaultCenter).first { $0.id == item.senderId }
+        MockData.currentUsers().first { $0.id == item.senderId }
     }
 
     var body: some View {
@@ -97,8 +97,9 @@ struct RecommendationDetailView: View {
 
     /// Mock songs have no Spotify link yet. Search for the song instead.
     private func spotifySearchURL(_ song: Song) -> URL {
-        let query = "\(song.title) \(song.artist)"
-            .addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        // Escape everything except letters, digits and - . _ ~ so a "/" in "AC/DC" cannot split the path.
+        let allowed = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-._~"))
+        let query = "\(song.title) \(song.artist)".addingPercentEncoding(withAllowedCharacters: allowed) ?? ""
         return URL(string: "https://open.spotify.com/search/\(query)")
             ?? URL(string: "https://open.spotify.com")!
     }

@@ -98,17 +98,31 @@ struct SongSearchView: View {
     }
 
     /// Mock search. Replace with a call to the backend (for example GET /api/search?q=).
+    /// Throw an error here to show the "Cannot search now." screen.
+    private func fetchSongs(_ query: String) async throws -> [Song] {
+        MockData.search(query)
+    }
+
     private func search() async {
         failed = false
         if trimmed.isEmpty {
+            isLoading = false
             results = Array(MockData.songs.prefix(4))
             return
         }
         isLoading = true
-        try? await Task.sleep(for: .milliseconds(350))   // debounce; cancelled when the query changes
-        if Task.isCancelled { return }
-        results = MockData.search(trimmed)
-        isLoading = false
+        do {
+            try await Task.sleep(for: .milliseconds(350))   // debounce; cancelled when the query changes
+            let found = try await fetchSongs(trimmed)
+            guard !Task.isCancelled else { return }
+            results = found
+            isLoading = false
+        } catch is CancellationError {
+            return   // A newer search has started. It sets the loading state.
+        } catch {
+            failed = true
+            isLoading = false
+        }
     }
 }
 

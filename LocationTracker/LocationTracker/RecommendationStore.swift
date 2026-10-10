@@ -14,6 +14,7 @@ final class RecommendationStore: ObservableObject {
     var newCount: Int { items.filter(\.isNew).count }
 
     private static let loopbackKey = "loopbackSentSongs"
+    private let ioQueue = DispatchQueue(label: "recommendations.io", qos: .utility)
     private let fileURL = FileManager.default
         .urls(for: .documentDirectory, in: .userDomainMask)[0]
         .appendingPathComponent("recommendations.json")
@@ -55,7 +56,7 @@ final class RecommendationStore: ObservableObject {
 
     /// Three mock songs from mock people, for demos.
     func addSamples() {
-        let people = MockData.nearbyUsers(around: MockData.defaultCenter)
+        let people = MockData.currentUsers()
         let samples: [(Int, Song, String, TimeInterval)] = [
             (0, MockData.songs[0], "You will love this one", -300),
             (1, MockData.songs[2], "Reminded me of last night", -7_200),
@@ -71,14 +72,24 @@ final class RecommendationStore: ObservableObject {
     // MARK: Storage
 
     private func load() {
-        guard let data = try? Data(contentsOf: fileURL),
-              let decoded = try? JSONDecoder().decode([Recommendation].self, from: data) else { return }
-        items = decoded
+        guard let data = try? Data(contentsOf: fileURL) else { return }   // no file yet
+        do {
+            items = try JSONDecoder().decode([Recommendation].self, from: data)
+        } catch {
+            // Do not lose the user's songs: keep the unreadable file, then start with an empty list.
+            print("Could not read recommendations:", error)
+            let backup = fileURL.deletingLastPathComponent().appendingPathComponent("recommendations.unreadable.json")
+            try? FileManager.default.removeItem(at: backup)
+            try? FileManager.default.moveItem(at: fileURL, to: backup)
+        }
     }
 
     private func save() {
-        if let data = try? JSONEncoder().encode(items) {
-            try? data.write(to: fileURL, options: .atomic)
+        guard let data = try? JSONEncoder().encode(items) else { return }
+        let url = fileURL
+        ioQueue.async {
+            do { try data.write(to: url, options: .atomic) }
+            catch { print("Could not save recommendations:", error) }
         }
     }
 }

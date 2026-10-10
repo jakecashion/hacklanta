@@ -62,6 +62,12 @@ enum MockData {
     /// Default map center (Atlanta) when the tracker has no fix yet.
     static let defaultCenter = CLLocationCoordinate2D(latitude: 33.7490, longitude: -84.3880)
 
+    /// Where the mock people are placed. The map moves it to the real position after the first fix.
+    /// Use `currentUsers()` everywhere (not `defaultCenter`) so a person has the same coordinates on every screen.
+    static var center = defaultCenter
+
+    static func currentUsers() -> [NearbyUser] { nearbyUsers(around: center) }
+
     static let match = Match(id: "match-1", user: nearbyUsers(around: defaultCenter)[0])
 
     /// Four mock people at fixed offsets (north, east in meters) from `center`.

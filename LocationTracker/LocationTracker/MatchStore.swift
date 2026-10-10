@@ -14,9 +14,32 @@ final class MatchStore: ObservableObject {
         match = MockData.match
     }
 
+    // A full screen cover cannot show while a sheet is up. `NearbyMapView` tells the store
+    // when a sheet is up, and the store waits for it to close before it runs the action.
+    var isSheetUp = false
+    @Published var closeSheetsToken = 0
+    private var deferredAction: (() -> Void)?
+
+    /// Run `action` now, or after the open sheet has closed.
+    func whenReady(_ action: @escaping () -> Void) {
+        if isSheetUp {
+            deferredAction = action
+            closeSheetsToken += 1
+        } else {
+            action()
+        }
+    }
+
+    /// Call from the sheet's `onDismiss`.
+    func sheetDidDismiss() {
+        let action = deferredAction
+        deferredAction = nil
+        action?()
+    }
+
     /// Open the match screen for a mock person, for example from a notification tap.
     func openMatch(userId: String) {
-        let users = MockData.nearbyUsers(around: MockData.defaultCenter)
+        let users = MockData.currentUsers()
         guard let user = users.first(where: { $0.id == userId }) else { return }
         path = []
         match = Match(id: user.id, user: user)

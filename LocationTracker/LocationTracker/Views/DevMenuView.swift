@@ -11,7 +11,7 @@ struct DevMenuView: View {
     @State private var personId = MockData.match.user.id
     @State private var message: String?
 
-    private let people = MockData.nearbyUsers(around: MockData.defaultCenter)
+    private let people = MockData.currentUsers()
 
     private var person: NearbyUser { people.first { $0.id == personId } ?? people[0] }
 
@@ -52,10 +52,8 @@ struct DevMenuView: View {
 
                 Section("Match flow") {
                     Button("Open match screen now") {
-                        dismiss()
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-                            matchStore.openMatch(userId: personId)
-                        }
+                        let id = personId
+                        matchStore.whenReady { matchStore.openMatch(userId: id) }
                     }
                 }
 
