@@ -175,6 +175,8 @@ Both panels' peers line: `Here: Guest, Host` (order may differ).
 
 ### C3. Sync both ways
 
+Quick smoke test. For the full test (conflicts, undo, connection loss, latency), use `TEST-PLAN-TWO-LAPTOPS.md`.
+
 Put the playhead over **Hero** on both laptops.
 
 1. **Host → guest:** on the host, select Hero, Effect Controls > Scale, type `150`, Enter. Within about 1 s the guest's Program monitor shows Hero bigger, and both feeds show `Host set Hero Scale to 150 (rev N)`.

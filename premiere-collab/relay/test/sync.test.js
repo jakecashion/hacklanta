@@ -49,6 +49,16 @@ test('remote commit is applied; Premiere rounding does not echo back', () => {
   assert.deepEqual(s.diff([clip('v0:0', 100, 33.3, 100)]), []);
 });
 
+test('a failed apply does not send the old value back', () => {
+  const s = createSync();
+  s.reset([clip('v0:0', 100, 0, 100)]);
+  const remote = { opId: 'other-1', author: 'Alex', clipId: 'v0:0', field: 'Motion.Scale', value: 175 };
+  assert.deepEqual(s.receiveCommit({ rev: 1, op: remote }), remote);
+  // Apply failed (e.g. no active sequence), so afterApply is never called.
+  assert.deepEqual(s.diff([clip('v0:0', 100, 0, 100)]), [], 'unchanged timeline is not a local edit');
+  assert.equal(s.shadowValue('v0:0', 'Motion.Scale'), 100);
+});
+
 test('conflict: a pending local edit beats an earlier remote commit', () => {
   const s = createSync();
   s.reset([clip('v0:0', 100, 0, 100)]);

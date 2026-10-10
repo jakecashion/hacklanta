@@ -7,7 +7,10 @@
 // Commits arrive in relay (rev) order. Rules:
 //   - own op: clear the pending mark (shadow already has the value)
 //   - field pending with a newer local op: skip; our op comes later in relay order and wins
-//   - otherwise: apply, then set the shadow from Premiere's read-back (kills rounding echoes)
+//   - otherwise: apply, then set the shadow from Premiere's read-back (kills rounding echoes).
+//     The shadow changes only after a successful apply: if the apply fails (no active
+//     sequence, keyframed param), the shadow keeps Premiere's real value, so the next scan
+//     doesn't mistake the unapplied value for a local edit and send the old value back.
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();
   else root.PCSync = factory();
@@ -67,8 +70,7 @@
         if (mine === op.opId) pending.delete(k);
         return null; // own op, or a remote op that our pending op will override
       }
-      shadow.set(k, op.value);
-      return op;
+      return op; // caller applies it, then calls afterApply with the read-back
     }
 
     // After applyOps: store what Premiere actually holds so the next scan matches.
