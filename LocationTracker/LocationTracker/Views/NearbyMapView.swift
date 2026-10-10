@@ -25,33 +25,31 @@ struct NearbyMapView: View {
                 }
             }
         }
-        .mapStyle(.standard(elevation: .flat))
+        .mapStyle(.standard(elevation: .flat, pointsOfInterest: .excludingAll))
         .mapControls {
             MapUserLocationButton()
             MapCompass()
         }
         .overlay(alignment: .topLeading) {
             Button { showDevMenu = true } label: {
-                Image(systemName: "wrench.and.screwdriver")
-                    .font(.body.weight(.semibold))
-                    .foregroundStyle(.white)
-                    .frame(width: 44, height: 44)
-                    .background(Color.card, in: Circle())
+                IconBox(systemName: "wrench.and.screwdriver", fill: .cubeYellow, size: 44)
             }
             .accessibilityLabel("Dev menu")
             .padding(12)
             .sheet(isPresented: $showDevMenu, onDismiss: { matchStore.sheetDidDismiss() }) {
-                DevMenuView().preferredColorScheme(.dark)
+                DevMenuView().brutScreen()
             }
         }
-        .overlay(alignment: .bottom) {
+        .overlay(alignment: .top) {
             Text(pillText)
-                .font(.footnote.weight(.semibold))
-                .foregroundStyle(.white)
+                .font(.footnote.weight(.bold))
+                .foregroundStyle(Color.ink)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 10)
-                .background(Color.card, in: Capsule())
-                .padding(.bottom, 12)
+                .background(Capsule().fill(Color.cubeYellow))
+                .overlay(Capsule().stroke(Color.ink, lineWidth: Brut.border))
+                .background(Capsule().fill(Color.ink).offset(x: Brut.shadowSmall, y: Brut.shadowSmall))
+                .padding(.top, 18)
         }
         .sheet(item: $selected, onDismiss: { matchStore.sheetDidDismiss() }) { user in
             NearbyUserCard(
@@ -59,9 +57,9 @@ struct NearbyMapView: View {
                 onRecommend: { open(user, .songSearch) },
                 onMeetUp: { open(user, .meetup) }
             )
-            .presentationDetents([.height(300)])
+            .presentationDetents([.height(230)])
             .presentationBackgroundInteraction(.enabled)
-            .preferredColorScheme(.dark)
+            .brutScreen()
         }
         // Put the mock people around the real position once the tracker has a fix.
         .onChange(of: tracker.totalCount) { _, _ in
@@ -82,7 +80,7 @@ struct NearbyMapView: View {
 
     private var pillText: String {
         switch users.count {
-        case 0: "No one near you yet"
+        case 0: "no one near you yet"
         case 1: "1 person near you"
         default: "\(users.count) people near you"
         }
@@ -98,5 +96,5 @@ struct NearbyMapView: View {
     NearbyMapView()
         .environmentObject(LocationTracker.shared)
         .environmentObject(MatchStore())
-        .preferredColorScheme(.dark)
+        .brutScreen()
 }

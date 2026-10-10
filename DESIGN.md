@@ -1,22 +1,25 @@
 # Design Guidelines — Neobrutalism
 
 ## Visual Style
-- **Aesthetic**: Playful, handcrafted brutalism — warm cream backgrounds, bold black borders, pastel accent colors, rounded corners, scattered decorative elements (stars, blobs, sparkles)
+- **Aesthetic**: Playful, handcrafted brutalism — white backgrounds, bold black borders, Rubik's cube accent colors, rounded corners, scattered decorative elements (stars, blobs, sparkles)
 - **Mood**: Friendly, energetic, approachable — brutalist structure with a joyful, indie personality. Feels like a zine made digital
 - **Inspiration**: parastoo.ui, Neo Brutalism UI component library, Gumroad, indie SaaS
 
 ## Color Palette
-- **Background**: `#FAFADF` — warm cream, not white and not bright yellow
-- **Surface / Card**: `#FFFFFF` — white cards on cream background
-- **Border + Shadow**: `#111111` — all borders and hard shadows use this
-- **Primary / CTA**: `#E8635A` — coral, buttons and primary actions
-- **Secondary**: `#7B6CF6` — purple, secondary buttons and icon backgrounds
-- **Teal**: `#4ECDC4` — mint, accent buttons and decoration
-- **Yellow**: `#FFE566` — tags, badges, decorative stars
-- **Pink**: `#F9A8B8` — soft accent, CTA blocks, testimonial borders
-- **Lavender**: `#C4B5FD` — CTA section backgrounds, secondary borders
-- **Text Primary**: `#111111`
+Rubik's cube colours. Hex values come from the CSS tokens on rubiks.com (`--_color---primary--*`). Swift names are in `Theme.swift`.
+- **Background / Surface**: `#FFFFFF` — cube white (`page`, `surface`)
+- **Border + Shadow**: `#010101` — cube body black. All borders and hard shadows use this (`ink`)
+- **Primary / CTA**: `#EC2236` — red, buttons and primary actions, white text (`cubeRed`)
+- **Secondary**: `#28B1E6` — blue, secondary buttons and icon backgrounds, **black text** (`cubeBlue`)
+- **Green**: `#52B44D` — "near" rings, now-playing and success states (`cubeGreen`)
+- **Yellow**: `#FCE000` — tags, badges, decorative stars (`cubeYellow`)
+- **Orange**: `#F28820` — soft accent, warnings, blocked (`cubeOrange`)
+- **Light blue**: `#B9E5FB` — soft fills and placeholders (`lightBlue`)
+- **Text Primary**: `#010101`
 - **Text Secondary**: `#555555` — body copy inside cards
+- Light tints from the site if needed: red `#F26D5F`, orange `#FAAC65`, yellow `#FDEB81`, green `#AED27C`, blue `#B9E5FB`
+
+Contrast: white text only on red. Use black text on blue, green, yellow and orange.
 
 ## Typography
 - **Primary Font**: DM Sans (preferred) — friendly geometric sans-serif. Alternatives: Space Grotesk, Nunito

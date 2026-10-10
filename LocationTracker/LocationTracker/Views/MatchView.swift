@@ -16,8 +16,7 @@ struct MatchFlowView: View {
                     }
                 }
         }
-        .tint(.violet)
-        .preferredColorScheme(.dark)
+        .brutScreen()
     }
 }
 
@@ -30,27 +29,15 @@ struct MatchView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 16) {
-                PulsingRings().frame(height: 120).padding(.top, 8)
-
-                VStack(spacing: 6) {
-                    Text("Someone near you")
-                        .font(.footnote.weight(.semibold))
-                        .foregroundStyle(Color.mint)
-                    Text("\(user.name) is \(distanceText)")
-                        .font(.largeTitle.bold())
-                        .multilineTextAlignment(.center)
-                    if let genreLine {
-                        Text(genreLine).foregroundStyle(Color.secondaryText)
-                    }
-                }
+            VStack(spacing: 18) {
+                header
 
                 if outOfRange {
                     Label("\(user.name) moved out of range", systemImage: "location.slash")
-                        .font(.subheadline)
+                        .font(.subheadline.weight(.semibold))
                         .padding(12)
                         .frame(maxWidth: .infinity)
-                        .background(Color.card, in: RoundedRectangle(cornerRadius: 12))
+                        .brutCard(fill: .cubeOrange, shadow: 0)
                 }
 
                 nowPlayingCard
@@ -62,40 +49,67 @@ struct MatchView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
 
-                Button {
-                    tapHaptic()
-                    store.path.append(.songSearch)
-                } label: {
-                    Label("Recommend a song", systemImage: "music.note.list")
-                }
-                .buttonStyle(PrimaryButtonStyle())
-                .disabled(outOfRange)
+                VStack(spacing: 6) {
+                    Button {
+                        tapHaptic()
+                        store.path.append(.songSearch)
+                    } label: {
+                        Label("send a song", systemImage: "music.note.list")
+                    }
+                    .buttonStyle(.brutPrimary)
+                    .disabled(outOfRange)
 
-                Button {
-                    tapHaptic()
-                    store.path.append(.meetup)
-                } label: {
-                    Label("Meet up", systemImage: "figure.wave")
+                    Button {
+                        tapHaptic()
+                        store.path.append(.meetup)
+                    } label: {
+                        Label("meet up", systemImage: "figure.wave")
+                    }
+                    .buttonStyle(.brutSecondary)
+                    .disabled(outOfRange)
                 }
-                .buttonStyle(SecondaryButtonStyle())
-                .disabled(outOfRange)
 
-                Button("Not now") { store.close() }
-                    .foregroundStyle(Color.secondaryText)
-                    .padding(.top, 4)
+                Button("not now") { store.close() }
+                    .buttonStyle(BrutLinkStyle())
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 24)
-            .foregroundStyle(.white)
         }
-        .background(Color.appBackground.ignoresSafeArea())
+        .pageBackground()
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button { store.close() } label: { Image(systemName: "xmark") }
+                Button { store.close() } label: { Image(systemName: "xmark").fontWeight(.bold) }
                     .accessibilityLabel("Close")
             }
         }
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private var header: some View {
+        ZStack {
+            // Scattered decoration. Positions are offsets from the centre.
+            DecorStar(color: .cubeYellow, size: 34, rotation: 12).offset(x: -130, y: -40)
+            DecorStar(color: .cubeOrange, size: 22, rotation: -8).offset(x: 120, y: -70)
+            DecorBlob(color: .lightBlue, size: 54).offset(x: 135, y: 30)
+            DecorStar(color: .cubeGreen, size: 18).offset(x: -110, y: 60)
+
+            VStack(spacing: 8) {
+                PulsingRings().frame(height: 110)
+
+                Text("someone's near you!")
+                    .font(.scribble(22))
+                    .foregroundStyle(Color.cubeRed)
+                    .rotationEffect(.degrees(-3))
+                Text("\(user.name) is \(distanceText)")
+                    .font(.system(.largeTitle, weight: .heavy))
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(-2)
+                if let genreLine {
+                    Text(genreLine).foregroundStyle(Color.inkSecondary)
+                }
+            }
+        }
+        .padding(.top, 8)
     }
 
     private var nowPlayingCard: some View {
@@ -103,20 +117,18 @@ struct MatchView: View {
             CoverArt(url: user.nowPlaying?.artworkURL)
             VStack(alignment: .leading, spacing: 4) {
                 if let song = user.nowPlaying {
-                    Text("NOW PLAYING")
-                        .font(.caption2.weight(.semibold))
-                        .foregroundStyle(Color.secondaryText)
+                    GenreChip(text: "now playing", fill: .cubeGreen)
                     Text(song.title).font(.headline).lineLimit(2)
-                    Text(song.artist).font(.footnote).foregroundStyle(Color.secondaryText)
+                    Text(song.artist).font(.footnote).foregroundStyle(Color.inkSecondary)
                 } else {
-                    Text("Not playing music right now").foregroundStyle(Color.secondaryText)
+                    Text("not playing music right now").foregroundStyle(Color.inkSecondary)
                 }
             }
             Spacer(minLength: 0)
             if user.nowPlaying != nil { EqualizerView() }
         }
         .padding(16)
-        .background(Color.card, in: RoundedRectangle(cornerRadius: 20))
+        .brutCard(radius: Brut.radiusLarge)
     }
 
     /// Rounds to the nearest 10 m. Under 20 m: "right next to you".
@@ -130,8 +142,8 @@ struct MatchView: View {
         let g = user.sharedGenres
         switch g.count {
         case 0: return nil
-        case 1: return "You both like \(g[0])"
-        default: return "You both like \(g[0]) and \(g[1])"
+        case 1: return "you both like \(g[0])"
+        default: return "you both like \(g[0]) and \(g[1])"
         }
     }
 }
@@ -143,7 +155,7 @@ private struct PulsingRings: View {
         ZStack {
             ForEach(0..<2, id: \.self) { i in
                 Circle()
-                    .stroke(Color.mint.opacity(0.6), lineWidth: 2)
+                    .stroke(Color.ink, lineWidth: 2)
                     .frame(width: 40, height: 40)
                     .scaleEffect(animate ? 3 : 1)
                     .opacity(animate ? 0 : 0.8)
@@ -152,7 +164,9 @@ private struct PulsingRings: View {
                         value: animate
                     )
             }
-            Circle().fill(Color.mint).frame(width: 20, height: 20)
+            Circle().fill(Color.cubeGreen).frame(width: 24, height: 24)
+                .overlay(Circle().stroke(Color.ink, lineWidth: Brut.border))
+                .background(Circle().fill(Color.ink).offset(x: 3, y: 3))
         }
         .onAppear { animate = true }
     }
@@ -161,7 +175,7 @@ private struct PulsingRings: View {
 #Preview("Match") {
     NavigationStack { MatchView(match: MockData.match) }
         .environmentObject(MatchStore())
-        .preferredColorScheme(.dark)
+        .brutScreen()
 }
 
 #Preview("No song") {
@@ -169,11 +183,11 @@ private struct PulsingRings: View {
     m = Match(id: m.id, user: NearbyUser(id: "u", name: "Maya", distanceMeters: 15, nowPlaying: nil, sharedGenres: ["indie rock"]))
     return NavigationStack { MatchView(match: m) }
         .environmentObject(MatchStore())
-        .preferredColorScheme(.dark)
+        .brutScreen()
 }
 
 #Preview("Out of range") {
     NavigationStack { MatchView(match: MockData.match, outOfRange: true) }
         .environmentObject(MatchStore())
-        .preferredColorScheme(.dark)
+        .brutScreen()
 }

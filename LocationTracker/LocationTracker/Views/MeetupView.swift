@@ -6,6 +6,7 @@ struct MeetupView: View {
 
     @State private var text = ""
     @State private var selectedPreset: String?
+    @FocusState private var focused: Bool
     private let limit = 140
 
     private let presets: [(icon: String, text: String)] = [
@@ -17,66 +18,65 @@ struct MeetupView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Say hi to \(user.name)").font(.title.bold())
-                    Text("Pick a message or write your own.").foregroundStyle(Color.secondaryText)
+            VStack(alignment: .leading, spacing: 18) {
+                ZStack(alignment: .topTrailing) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("say hi to \(user.name)").font(.system(.largeTitle, weight: .heavy))
+                        Text("pick a message or write your own.").foregroundStyle(Color.inkSecondary)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    DecorStar(color: .cubeYellow, size: 26, rotation: 12).offset(x: -4, y: -14)
                 }
 
                 ForEach(presets, id: \.text) { preset in
+                    let isSelected = selectedPreset == preset.text
                     Button {
                         tapHaptic()
                         selectedPreset = preset.text
                         text = preset.text
                     } label: {
-                        HStack {
-                            Image(systemName: preset.icon).frame(width: 28)
-                            Text(preset.text)
+                        HStack(spacing: 12) {
+                            IconBox(systemName: preset.icon, fill: isSelected ? .cubeGreen : .lightBlue, size: 40)
+                            Text(preset.text).font(.body.weight(.semibold)).multilineTextAlignment(.leading)
                             Spacer()
-                            if selectedPreset == preset.text {
-                                Image(systemName: "checkmark.circle.fill").foregroundStyle(Color.violet)
-                            }
+                            if isSelected { Image(systemName: "checkmark").fontWeight(.bold) }
                         }
-                        .padding(16)
+                        .padding(14)
                         .frame(maxWidth: .infinity)
-                        .background(Color.card, in: RoundedRectangle(cornerRadius: 16))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 16)
-                                .stroke(Color.violet, lineWidth: selectedPreset == preset.text ? 2 : 0)
-                        )
+                        // Selected card lifts (shadow). Others stay flat.
+                        .brutCard(shadow: isSelected ? Brut.shadowMedium : 0)
                     }
-                    .foregroundStyle(.white)
+                    .buttonStyle(.plain)
                 }
 
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Or write your own").font(.footnote).foregroundStyle(Color.secondaryText)
-                    TextField("Type a message", text: $text, axis: .vertical)
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("or write your own").font(.footnote.weight(.semibold)).foregroundStyle(Color.inkSecondary)
+                    TextField("type a message", text: $text, axis: .vertical)
                         .lineLimit(3...5)
-                        .padding(14)
-                        .background(Color.card, in: RoundedRectangle(cornerRadius: 14))
+                        .focused($focused)
+                        .brutInput(focused: focused)
                         .onChange(of: text) { _, new in
                             if new.count > limit { text = String(new.prefix(limit)) }
                             if new != selectedPreset { selectedPreset = nil }
                         }
                     Text("\(text.count)/\(limit)")
-                        .font(.caption).foregroundStyle(Color.secondaryText)
+                        .font(.caption).foregroundStyle(Color.inkSecondary)
                         .frame(maxWidth: .infinity, alignment: .trailing)
                 }
 
                 Button {
                     tapHaptic()
                     store.send(.meetup(text: text.trimmingCharacters(in: .whitespacesAndNewlines)))
-                } label: { Text("Send") }
-                .buttonStyle(PrimaryButtonStyle())
+                } label: { Text("send") }
+                .buttonStyle(.brutPrimary)
                 .disabled(!canSend)
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 24)
-            .foregroundStyle(.white)
         }
         .scrollDismissesKeyboard(.interactively)
-        .background(Color.appBackground.ignoresSafeArea())
-        .navigationTitle("Meet up")
+        .pageBackground()
+        .navigationTitle("meet up")
         .navigationBarTitleDisplayMode(.inline)
     }
 }
@@ -84,5 +84,5 @@ struct MeetupView: View {
 #Preview {
     NavigationStack { MeetupView(user: MockData.match.user) }
         .environmentObject(MatchStore())
-        .preferredColorScheme(.dark)
+        .brutScreen()
 }

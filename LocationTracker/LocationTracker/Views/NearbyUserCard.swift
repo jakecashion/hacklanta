@@ -12,53 +12,53 @@ struct NearbyUserCard: View {
                 CoverArt(url: user.nowPlaying?.artworkURL, size: 64)
                 VStack(alignment: .leading, spacing: 4) {
                     if let song = user.nowPlaying {
-                        Text("NOW PLAYING")
-                            .font(.caption2.weight(.semibold))
-                            .foregroundStyle(Color.secondaryText)
+                        GenreChip(text: "now playing", fill: .cubeGreen)
                         Text(song.title).font(.headline).lineLimit(2)
-                        Text(song.artist).font(.footnote).foregroundStyle(Color.secondaryText)
+                        Text(song.artist).font(.footnote).foregroundStyle(Color.inkSecondary)
                     } else {
-                        Text("Not playing music right now").foregroundStyle(Color.secondaryText)
+                        Text("not playing music right now").foregroundStyle(Color.inkSecondary)
                     }
                 }
                 Spacer(minLength: 0)
             }
 
             HStack(spacing: 8) {
-                Text("\(user.name) · \(distanceText) away")
-                    .font(.subheadline.weight(.semibold))
-                ForEach(user.sharedGenres.prefix(3), id: \.self) { GenreChip(text: $0) }
+                Text("\(user.name) · \(distanceText)")
+                    .font(.subheadline.weight(.bold))
+                ForEach(user.sharedGenres.prefix(2), id: \.self) { GenreChip(text: $0) }
             }
             .lineLimit(1)
 
-            HStack(spacing: 12) {
+            HStack(spacing: 8) {
                 Button { tapHaptic(); onRecommend() } label: {
-                    Label("Recommend a song", systemImage: "music.note.list")
+                    Label("send a song", systemImage: "music.note.list")
                         .minimumScaleFactor(0.8)
                 }
-                .buttonStyle(PrimaryButtonStyle())
+                .buttonStyle(.brutPrimary)
                 Button { tapHaptic(); onMeetUp() } label: {
-                    Label("Meet up", systemImage: "figure.wave")
+                    Label("meet up", systemImage: "figure.wave")
+                        .minimumScaleFactor(0.8)
                 }
-                .buttonStyle(SecondaryButtonStyle())
+                .buttonStyle(.brutSecondary)
             }
         }
         .padding(20)
-        .foregroundStyle(.white)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.appBackground.ignoresSafeArea())
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .pageBackground()
     }
 
     private var distanceText: String {
         if user.distanceMeters < 20 { return "right next to you" }
-        return "\(Int((user.distanceMeters / 10).rounded()) * 10) m"
+        return "\(Int((user.distanceMeters / 10).rounded()) * 10) m away"
     }
 }
 
 #Preview("Playing") {
     NearbyUserCard(user: MockData.nearbyUsers(around: MockData.defaultCenter)[0], onRecommend: {}, onMeetUp: {})
+        .brutScreen()
 }
 
 #Preview("No song") {
     NearbyUserCard(user: MockData.nearbyUsers(around: MockData.defaultCenter)[3], onRecommend: {}, onMeetUp: {})
+        .brutScreen()
 }

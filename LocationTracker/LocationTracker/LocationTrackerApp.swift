@@ -8,6 +8,7 @@ struct LocationTrackerApp: App {
 
     init() {
         NotificationManager.shared.configure()
+        configureBrutAppearance()
     }
 
     var body: some Scene {
@@ -16,7 +17,6 @@ struct LocationTrackerApp: App {
                 .environmentObject(tracker)
                 .environmentObject(matchStore)
                 .environmentObject(recommendations)
-                .tint(.violet)
         }
     }
 }

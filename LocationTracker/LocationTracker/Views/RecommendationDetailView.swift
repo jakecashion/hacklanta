@@ -21,11 +21,11 @@ struct RecommendationDetailView: View {
             if let item {
                 content(item)
             } else {
-                Text("This song is not in your playlist.").foregroundStyle(Color.secondaryText)
+                Text("this song is not in your playlist.").foregroundStyle(Color.inkSecondary)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.appBackground.ignoresSafeArea())
+        .pageBackground()
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { store.markRead(id) }
     }
@@ -33,17 +33,21 @@ struct RecommendationDetailView: View {
     private func content(_ item: Recommendation) -> some View {
         ScrollView {
             VStack(spacing: 16) {
-                CoverArt(url: item.song.artworkURL, size: 200)
-                    .padding(.top, 8)
+                ZStack {
+                    DecorStar(color: .cubeYellow, size: 34, rotation: 12).offset(x: -125, y: -80)
+                    DecorStar(color: .cubeOrange, size: 22, rotation: -10).offset(x: 130, y: -95)
+                    DecorBlob(color: .lightBlue, size: 50).offset(x: 130, y: 85)
+                    CoverArt(url: item.song.artworkURL, size: 200)
+                        .background(RoundedRectangle(cornerRadius: 25).fill(Color.ink).offset(x: Brut.shadowLarge, y: Brut.shadowLarge))
+                }
+                .padding(.top, 8)
                 VStack(spacing: 4) {
-                    Text(item.song.title).font(.title.bold()).multilineTextAlignment(.center)
-                    Text(item.song.artist).font(.title3).foregroundStyle(Color.secondaryText)
+                    Text(item.song.title).font(.system(.title, weight: .heavy)).multilineTextAlignment(.center)
+                    Text(item.song.artist).font(.title3).foregroundStyle(Color.inkSecondary)
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("SENT BY")
-                        .font(.caption2.weight(.semibold))
-                        .foregroundStyle(Color.secondaryText)
+                    GenreChip(text: "sent by", fill: .cubeOrange)
                     Text("\(item.senderName) · \(item.timeText)").font(.headline)
                     if !item.note.isEmpty {
                         Text("\"\(item.note)\"").italic()
@@ -56,15 +60,15 @@ struct RecommendationDetailView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(16)
-                .background(Color.card, in: RoundedRectangle(cornerRadius: 20))
+                .brutCard(radius: Brut.radiusLarge)
 
                 Button {
                     tapHaptic()
                     openURL(spotifySearchURL(item.song))
                 } label: {
-                    Label("Open in Spotify", systemImage: "arrow.up.right.square")
+                    Label("open in spotify", systemImage: "arrow.up.right.square")
                 }
-                .buttonStyle(PrimaryButtonStyle())
+                .buttonStyle(.brutPrimary)
 
                 // UI only for now.
                 // TODO: add the track to the Spotify queue (POST /v1/me/player/queue).
@@ -73,10 +77,10 @@ struct RecommendationDetailView: View {
                     tapHaptic()
                     queued = true
                 } label: {
-                    Label(queued ? "Added to queue" : "Add to queue",
+                    Label(queued ? "added to queue" : "add to queue",
                           systemImage: queued ? "checkmark" : "text.badge.plus")
                 }
-                .buttonStyle(SecondaryButtonStyle())
+                .buttonStyle(BrutButtonStyle(fill: queued ? .cubeGreen : .cubeBlue, textColor: .ink))
                 .disabled(queued)
 
                 if let user = sender(of: item) {
@@ -84,14 +88,13 @@ struct RecommendationDetailView: View {
                         tapHaptic()
                         matchStore.open(user, route: .songSearch)
                     } label: {
-                        Label("Send a song back", systemImage: "arrowshape.turn.up.left")
+                        Label("send a song back", systemImage: "arrowshape.turn.up.left")
                     }
-                    .buttonStyle(SecondaryButtonStyle())
+                    .buttonStyle(.brutGhost)
                 }
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 24)
-            .foregroundStyle(.white)
         }
     }
 
@@ -112,5 +115,5 @@ struct RecommendationDetailView: View {
     return NavigationStack { RecommendationDetailView(id: store.items[0].id) }
         .environmentObject(store)
         .environmentObject(MatchStore())
-        .preferredColorScheme(.dark)
+        .brutScreen()
 }

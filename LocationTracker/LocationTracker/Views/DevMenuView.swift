@@ -61,6 +61,8 @@ struct DevMenuView: View {
                     Section { Text(message).font(.footnote).foregroundStyle(.secondary) }
                 }
             }
+            .scrollContentBackground(.hidden)
+            .pageBackground()
             .navigationTitle("Dev menu")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -108,4 +110,5 @@ struct DevMenuView: View {
     DevMenuView()
         .environmentObject(MatchStore())
         .environmentObject(RecommendationStore())
+        .brutScreen()
 }

@@ -13,12 +13,13 @@ struct RecommendationsView: View {
                     list
                 }
             }
-            .background(Color.appBackground.ignoresSafeArea())
-            .navigationTitle("Songs for you")
+            .pageBackground()
+            .navigationTitle("songs for you")
             .toolbar {
                 if store.newCount > 0 {
                     ToolbarItem(placement: .topBarTrailing) {
-                        Button("Mark all read") { store.markAllRead() }
+                        Button("mark all read") { store.markAllRead() }
+                            .font(.subheadline.weight(.bold))
                     }
                 }
             }
@@ -32,10 +33,11 @@ struct RecommendationsView: View {
         List {
             Section {
                 ForEach(store.items) { item in
-                    NavigationLink(value: item.id) { RecommendationRow(item: item) }
-                        .listRowBackground(
-                            RoundedRectangle(cornerRadius: 16).fill(Color.card).padding(.vertical, 4))
+                    RecommendationRow(item: item)
+                        .background(NavigationLink(value: item.id) { EmptyView() }.opacity(0))
+                        .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 6, leading: 20, bottom: 10, trailing: 24))
                         .swipeActions {
                             Button(role: .destructive) { store.delete(item.id) } label: {
                                 Label("Delete", systemImage: "trash")
@@ -44,8 +46,8 @@ struct RecommendationsView: View {
                 }
             } header: {
                 Text(summary)
-                    .font(.subheadline)
-                    .foregroundStyle(Color.secondaryText)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Color.inkSecondary)
                     .textCase(nil)
             }
         }
@@ -54,16 +56,17 @@ struct RecommendationsView: View {
     }
 
     private var emptyState: some View {
-        VStack(spacing: 10) {
-            Image(systemName: "music.note.list")
-                .font(.system(size: 44))
-                .foregroundStyle(Color.secondaryText)
-            Text("No songs yet").font(.title3.bold())
-            Text("When someone near you sends a song, it shows here.")
-                .foregroundStyle(Color.secondaryText)
+        VStack(spacing: 14) {
+            ZStack {
+                DecorStar(color: .cubeYellow, size: 30, rotation: 10).offset(x: -60, y: -30)
+                DecorStar(color: .cubeOrange, size: 20, rotation: -10).offset(x: 62, y: -38)
+                IconBox(systemName: "music.note.list", fill: .lightBlue, size: 72)
+            }
+            Text("no songs yet").font(.title2.weight(.heavy))
+            Text("when someone near you sends a song, it shows here.")
+                .foregroundStyle(Color.inkSecondary)
                 .multilineTextAlignment(.center)
         }
-        .foregroundStyle(.white)
         .padding(.horizontal, 32)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -83,27 +86,31 @@ private struct RecommendationRow: View {
             CoverArt(url: item.song.artworkURL, size: 56)
             VStack(alignment: .leading, spacing: 2) {
                 Text(item.song.title)
-                    .font(item.isNew ? .headline : .body)
+                    .font(item.isNew ? .headline : .body.weight(.semibold))
                     .lineLimit(1)
                 Text(item.song.artist)
-                    .font(.footnote).foregroundStyle(Color.secondaryText)
+                    .font(.footnote).foregroundStyle(Color.inkSecondary)
                 Text("from \(item.senderName) · \(item.timeText)")
-                    .font(.caption).foregroundStyle(Color.secondaryText)
+                    .font(.caption).foregroundStyle(Color.inkSecondary)
                 if !item.note.isEmpty {
                     Text("\"\(item.note)\"")
                         .font(.caption.italic())
-                        .foregroundStyle(Color.secondaryText)
+                        .foregroundStyle(Color.inkSecondary)
                         .lineLimit(1)
                 }
             }
             Spacer(minLength: 0)
             if item.isNew {
-                Circle().fill(Color.mint).frame(width: 10, height: 10)
-                    .accessibilityLabel("New")
+                Text("new")
+                    .font(.caption.weight(.bold))
+                    .padding(.horizontal, 8).padding(.vertical, 3)
+                    .background(Capsule().fill(Color.cubeGreen))
+                    .overlay(Capsule().stroke(Color.ink, lineWidth: 1.5))
             }
         }
-        .foregroundStyle(.white)
-        .padding(.vertical, 6)
+        .padding(12)
+        // New songs lift off the page with a shadow. Read songs stay flat.
+        .brutCard(shadow: item.isNew ? Brut.shadowMedium : 0)
     }
 }
 
@@ -114,7 +121,7 @@ private struct RecommendationRow: View {
     return RecommendationsView()
         .environmentObject(store)
         .environmentObject(MatchStore())
-        .preferredColorScheme(.dark)
+        .brutScreen()
 }
 
 #Preview("Empty") {
@@ -123,5 +130,5 @@ private struct RecommendationRow: View {
     return RecommendationsView()
         .environmentObject(store)
         .environmentObject(MatchStore())
-        .preferredColorScheme(.dark)
+        .brutScreen()
 }
