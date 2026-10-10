@@ -12,6 +12,16 @@ Our hackathon ideas, in one place. Devs and Claude agents both read and add here
 ### Proximity music app
 An app that can view people that are listening to similar genres of music around them, ie: similar to Pokémon Go, how, there's a person, and Pokémon pop up around them. Proximity music app
 
+MVP Feature and Requirement list:
+
+- Requirement: We need data on songs listened to
+- Requirement: Need device location
+- E: If two users are near each other, need to know if they are near, and have similar song taste, and then send notifications
+  - F: two options: reply with a song line, or message to meet up
+    - F: Playlist of song recommendations that people have sent you
+    - Add on feature: Visualization of song location data of users for labels, Venues, bands,
+- E: UI: Map people nearby current song's they are listening to
+
 Notes:
 
 Extension Ideas:
