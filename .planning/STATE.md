@@ -2,7 +2,7 @@
 gsd_state_version: '1.0'
 status: planning
 progress:
-  total_phases: 3
+  total_phases: 4
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -59,6 +59,10 @@ Recent decisions affecting current work:
 - [Roadmap]: Change feed promoted to core (PRES-03); demo script is core-only (DEMO-01) with one clean rehearsal
 - [Roadmap]: No `--enable-nodejs`; firewall rule is TCP 8080 with `profile=any`; Tailscale (same account on both laptops) is the default network, phone hotspot with the direct IP is the fallback, cloudflared dropped (2026-10-10); panel folder is copied by hand
 - [Roadmap]: All v2 items (including Resync SYNC-08 and EDIT-*/RES-*) stay behind the stretch gate after Phase 3, worked in the priority order listed in ROADMAP.md
+
+### Roadmap Evolution
+
+- Phase 4 added (2026-10-10): Timeline Integration (ENV-06 probes, EDIT-01 rename, EDIT-02 move, EDIT-03 trim), pulled out of the stretch list; runs after Phase 3, not on the demo path
 
 ### Pending Todos
 
