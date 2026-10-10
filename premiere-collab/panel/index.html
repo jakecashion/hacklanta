@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Live Collab</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <h1>Live Collab</h1>
+    <span id="badge" class="badge off">Not connected</span>
+  </header>
+
+  <section>
+    <h2>Connection</h2>
+    <label>Relay <input id="url" value="ws://localhost:8080"></label>
+    <label>Name <input id="name" value="Editor"></label>
+    <div class="row">
+      <button id="connect">Connect</button>
+      <button id="disconnect">Disconnect</button>
+      <button id="pingRelay">Ping relay</button>
+    </div>
+    <div id="peers" class="muted">No peers</div>
+  </section>
+
+  <section>
+    <h2>Kill test</h2>
+    <div class="row">
+      <label class="inline">Clip # (V1) <input id="clipIdx" type="number" value="0" min="0"></label>
+    </div>
+    <div class="row">
+      <button id="jsxPing">Ping JSX</button>
+      <button id="list">List V1</button>
+      <button id="kill">Run kill test</button>
+      <button id="reset">Reset clip</button>
+      <button id="scan">Scan cost</button>
+    </div>
+    <div class="row">
+      <select id="field">
+        <option>Motion.Scale</option>
+        <option>Motion.Rotation</option>
+        <option>Opacity.Opacity</option>
+      </select>
+      <input id="value" type="number" value="200" class="short">
+      <button id="set">Set</button>
+    </div>
+  </section>
+
+  <section class="grow">
+    <h2>Log <button id="clear" class="small">Clear</button> <button id="reload" class="small">Reload panel</button></h2>
+    <pre id="log"></pre>
+  </section>
+
+  <script src="js/CSInterface.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

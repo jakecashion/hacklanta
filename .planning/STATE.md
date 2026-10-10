@@ -22,7 +22,7 @@ See: .planning/PROJECT.md (updated 2026-10-10)
 
 Phase: 1 of 3 (Panel + Kill Test)
 Plan: 0 of TBD in current phase
-Status: Ready to plan
+Status: In progress (Phase 1 code built, awaiting manual kill test in Premiere)
 Last activity: 2026-10-10 — Roadmap revised for a 6-8 h build (3 phases, 16/16 v1 requirements mapped)
 
 Progress: [░░░░░░░░░░] 0%
@@ -82,6 +82,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-10-10
-Stopped at: Roadmap revised to 3 phases; Phase 1 ready to plan
+Last session: 2026-10-10 (Phase 1 build)
+Stopped at: Phase 1 scaffold built (premiere-collab/), panel junction-installed on dev machine; next: kill test in Premiere + guest relay ping over hotspot
 Resume file: None
