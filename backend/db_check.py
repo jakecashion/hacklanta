@@ -1,15 +1,28 @@
-"""Startup check that the Supabase tables/columns the backend needs exist."""
+"""Startup check that the Supabase tables/columns the backend needs exist.
+
+If tables are missing and SUPABASE_DB_URL is set, db/schema.sql is applied
+automatically over a direct Postgres connection (the REST API keys can't run
+DDL). Can also be run by hand from backend/: `uv run python db_check.py`
+"""
 
 import logging
+import os
+import time
+from pathlib import Path
 
 import httpx
+import psycopg
+from dotenv import load_dotenv
 from supabase import Client, PostgrestAPIError, SupabaseException
 
 from spotify_service import get_supabase_client
 
+load_dotenv()
+
 logger = logging.getLogger("uvicorn.error")
 
-SCHEMA_FILE = "db/schema.sql"
+# Relative to the backend/ working directory
+SCHEMA_FILE = Path("db/schema.sql")
 
 # Keep in sync with db/schema.sql
 REQUIRED_TABLES: dict[str, list[str]] = {
@@ -23,6 +36,10 @@ REQUIRED_TABLES: dict[str, list[str]] = {
         "updated_at",
     ],
 }
+
+# PostgREST reloads its schema cache asynchronously after DDL
+RECHECK_ATTEMPTS = 5
+RECHECK_DELAY_SECONDS = 1.0
 
 
 def check_tables(client: Client | None = None) -> list[str]:
@@ -45,16 +62,55 @@ def check_tables(client: Client | None = None) -> list[str]:
     return problems
 
 
+def apply_schema(db_url: str) -> None:
+    """Run db/schema.sql in a single transaction (rolled back on any error)."""
+    # bytes (not str) so psycopg runs it as a multi-statement script
+    sql = SCHEMA_FILE.read_bytes()
+    with psycopg.connect(db_url) as conn:
+        conn.execute(sql)
+
+
 def log_table_check() -> bool:
-    """Run the check and log the result. Returns True if all tables are OK."""
+    """Check tables, apply the schema if needed, and log the result.
+
+    Returns True if all tables are OK.
+    """
     problems = check_tables()
     if not problems:
         logger.info("Database check passed: %s", ", ".join(REQUIRED_TABLES))
         return True
 
     for problem in problems:
-        logger.error("Database check failed: %s", problem)
-    logger.error(
-        "Run %s in the Supabase SQL Editor to create missing tables.", SCHEMA_FILE
-    )
+        logger.warning("Database check failed: %s", problem)
+
+    db_url = os.environ.get("SUPABASE_DB_URL")
+    if not db_url:
+        logger.error(
+            "Set SUPABASE_DB_URL to apply %s automatically, or run it in the "
+            "Supabase SQL Editor.",
+            SCHEMA_FILE,
+        )
+        return False
+
+    logger.info("Applying %s ...", SCHEMA_FILE)
+    try:
+        apply_schema(db_url)
+    except (OSError, psycopg.Error) as e:
+        logger.error("Applying %s failed: %s", SCHEMA_FILE, e)
+        return False
+
+    for _ in range(RECHECK_ATTEMPTS):
+        time.sleep(RECHECK_DELAY_SECONDS)
+        problems = check_tables()
+        if not problems:
+            logger.info("Schema applied; database check passed.")
+            return True
+
+    for problem in problems:
+        logger.error("Database check still failing after apply: %s", problem)
     return False
+
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+    raise SystemExit(0 if log_table_check() else 1)

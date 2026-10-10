@@ -1,9 +1,9 @@
 import os
 from collections import Counter
-from typing import List, Optional
+
 import httpx
 from dotenv import load_dotenv
-from supabase import create_client, Client
+from supabase import Client, create_client
 
 load_dotenv()
 
@@ -33,7 +33,7 @@ async def fetch_top_genres_from_artists(
     limit: int = 50,
     time_range: str = "medium_term",
     top_n_genres: int = 5,
-) -> List[str]:
+) -> list[str]:
     """
     Fetches the user's top artists from Spotify and computes the top N genres
     based on frequency across those artists.
@@ -65,7 +65,7 @@ async def fetch_top_genres_from_tracks(
     limit: int = 50,
     time_range: str = "medium_term",
     top_n_genres: int = 5,
-) -> List[str]:
+) -> list[str]:
     """
     Alternative: Fetches top 50 tracks, gets unique artist IDs from those tracks,
     queries Spotify artist details in batch, and calculates top N genres.
@@ -113,8 +113,8 @@ async def fetch_top_genres_from_tracks(
 
 def sync_music_taste_to_supabase(
     user_id: str,
-    top_genres: List[str],
-    supabase_client: Optional[Client] = None,
+    top_genres: list[str],
+    supabase_client: Client | None = None,
 ) -> list:
     """
     Updates the 'music_taste' list column in the public.profiles table in Supabase.

@@ -2,12 +2,12 @@ import asyncio
 import os
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import Literal, Optional
+from typing import Literal
 
 import httpx
 import uvicorn
 from dotenv import load_dotenv
-from fastapi import FastAPI, Header, HTTPException
+from fastapi import FastAPI, HTTPException
 from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel
 from supabase import PostgrestAPIError, SupabaseException
@@ -35,8 +35,8 @@ app = FastAPI(title="Hacklanta Music Service", version="1.0.0", lifespan=lifespa
 class SyncRequest(BaseModel):
     user_id: str
     spotify_access_token: str
-    mode: Optional[Literal["artists", "tracks"]] = "artists"  # "artists" or "tracks"
-    time_range: Optional[Literal["short_term", "medium_term", "long_term"]] = (
+    mode: Literal["artists", "tracks"] | None = "artists"  # "artists" or "tracks"
+    time_range: Literal["short_term", "medium_term", "long_term"] | None = (
         "medium_term"  # "short_term", "medium_term", "long_term"
     )
 
