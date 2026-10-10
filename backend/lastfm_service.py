@@ -1,4 +1,5 @@
 import asyncio
+import hashlib
 import os
 from collections import Counter
 
@@ -53,18 +54,40 @@ class LastFmError(Exception):
         self.message = message
 
 
-async def _lastfm_get(client: httpx.AsyncClient, method: str, **params) -> dict:
+def get_lastfm_api_key() -> str:
     api_key = os.environ.get("LASTFM_API_KEY")
     if not api_key:
         raise ValueError("LASTFM_API_KEY must be set.")
+    return api_key
+
+
+def sign_lastfm_params(params: dict[str, str | int]) -> str:
+    """
+    Builds the api_sig for Last.fm calls that require authentication (e.g. scrobbling):
+    md5 of the alphabetically sorted name+value pairs followed by LASTFM_SHARED_SECRET.
+    Pass every param except `format` and `callback`; read-only calls don't need this.
+    """
+    secret = os.environ.get("LASTFM_SHARED_SECRET")
+    if not secret:
+        raise ValueError("LASTFM_SHARED_SECRET must be set.")
+    payload = "".join(f"{k}{params[k]}" for k in sorted(params)) + secret
+    return hashlib.md5(payload.encode("utf-8")).hexdigest()
+
+
+async def _lastfm_get(client: httpx.AsyncClient, method: str, **params) -> dict:
     resp = await client.get(
         LASTFM_API_BASE,
-        params={"method": method, "api_key": api_key, "format": "json", **params},
+        params={"method": method, "api_key": get_lastfm_api_key(), "format": "json", **params},
     )
-    resp.raise_for_status()
-    data = resp.json()
-    if "error" in data:
+    # Errors usually carry a JSON body (sometimes with a non-200 status, e.g. 404 for an
+    # unknown user), so check it before falling back to the HTTP status.
+    try:
+        data = resp.json()
+    except ValueError:
+        data = {}
+    if isinstance(data, dict) and "error" in data:
         raise LastFmError(int(data["error"]), data.get("message", "Unknown Last.fm error"))
+    resp.raise_for_status()
     return data
 
 
