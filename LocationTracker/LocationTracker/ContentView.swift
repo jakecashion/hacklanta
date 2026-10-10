@@ -2,15 +2,32 @@ import SwiftUI
 import CoreLocation
 
 struct ContentView: View {
+    @EnvironmentObject var matchStore: MatchStore
+
+    var body: some View {
+        TabView {
+            NearbyMapView()
+                .tabItem { Label("Map", systemImage: "map") }
+            TrackerView()
+                .tabItem { Label("Tracker", systemImage: "location") }
+        }
+        .preferredColorScheme(.dark)
+        .onAppear {
+            NotificationManager.shared.onOpenMatch = { matchStore.openMatch(userId: $0) }
+        }
+        .fullScreenCover(item: $matchStore.match) { match in
+            MatchFlowView(match: match)
+        }
+    }
+}
+
+struct TrackerView: View {
     @EnvironmentObject var tracker: LocationTracker
     @EnvironmentObject var matchStore: MatchStore
 
     var body: some View {
         NavigationStack {
             List {
-                Section("Demo") {
-                    Button("Simulate match") { matchStore.simulateMatch() }
-                }
                 Section {
                     LabeledContent("Authorization", value: authText)
                     LabeledContent("Tracking", value: tracker.isTracking ? "On" : "Off")
@@ -35,9 +52,6 @@ struct ContentView: View {
                 }
             }
             .navigationTitle("Location Tracker")
-        }
-        .fullScreenCover(item: $matchStore.match) { match in
-            MatchFlowView(match: match)
         }
     }
 
