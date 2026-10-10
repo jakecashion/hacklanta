@@ -1,3 +1,4 @@
+import asyncio
 import os
 from collections import Counter
 
@@ -7,7 +8,22 @@ from supabase import Client, create_client
 
 load_dotenv()
 
-SPOTIFY_API_BASE = "https://api.spotify.com/v1"
+LASTFM_API_BASE = "https://ws.audioscrobbler.com/2.0/"
+TAGS_PER_ARTIST = 5
+
+# Last.fm tags are user-generated; drop ones that aren't genres.
+NON_GENRE_TAGS = {
+    "seen live",
+    "favorites",
+    "favourites",
+    "favorite",
+    "albums i own",
+    "female vocalists",
+    "male vocalists",
+    "american",
+    "british",
+    "under 2000 listeners",
+}
 
 
 def get_supabase_client() -> Client:
@@ -28,87 +44,103 @@ def get_supabase_client() -> Client:
 
 
 
+class LastFmError(Exception):
+    """Last.fm returns HTTP 200 with an {"error": code, "message": ...} body on failure."""
+
+    def __init__(self, code: int, message: str):
+        super().__init__(message)
+        self.code = code
+        self.message = message
+
+
+async def _lastfm_get(client: httpx.AsyncClient, method: str, **params) -> dict:
+    api_key = os.environ.get("LASTFM_API_KEY")
+    if not api_key:
+        raise ValueError("LASTFM_API_KEY must be set.")
+    resp = await client.get(
+        LASTFM_API_BASE,
+        params={"method": method, "api_key": api_key, "format": "json", **params},
+    )
+    resp.raise_for_status()
+    data = resp.json()
+    if "error" in data:
+        raise LastFmError(int(data["error"]), data.get("message", "Unknown Last.fm error"))
+    return data
+
+
+async def _artist_top_tags(
+    client: httpx.AsyncClient, artist: str, sem: asyncio.Semaphore
+) -> list[tuple[str, int]]:
+    """Returns [(tag, count 0-100)] for an artist; empty if Last.fm doesn't know the artist."""
+    async with sem:
+        try:
+            data = await _lastfm_get(client, "artist.getTopTags", artist=artist, autocorrect=1)
+        except LastFmError as e:
+            if e.code == 6:  # artist not found
+                return []
+            raise
+    tags = data.get("toptags", {}).get("tag", [])
+    return [
+        (name, int(t.get("count", 0)))
+        for t in tags[:TAGS_PER_ARTIST]
+        if (name := t.get("name", "").strip().lower())
+        and name not in NON_GENRE_TAGS
+        and name != artist.lower()
+    ]
+
+
+async def _top_genres_for_artists(
+    client: httpx.AsyncClient, artists: list[str], top_n_genres: int
+) -> list[str]:
+    sem = asyncio.Semaphore(5)
+    tag_lists = await asyncio.gather(*(_artist_top_tags(client, a, sem) for a in artists))
+    genre_scores: Counter[str] = Counter()
+    for tags in tag_lists:
+        for name, count in tags:
+            genre_scores[name] += count
+    return [genre for genre, _ in genre_scores.most_common(top_n_genres)]
+
+
 async def fetch_top_genres_from_artists(
-    spotify_access_token: str,
+    lastfm_username: str,
     limit: int = 50,
-    time_range: str = "medium_term",
+    period: str = "6month",
     top_n_genres: int = 5,
 ) -> list[str]:
     """
-    Fetches the user's top artists from Spotify and computes the top N genres
-    based on frequency across those artists.
-    
-    time_range options: 'short_term' (~4 weeks), 'medium_term' (~6 months), 'long_term' (~1 year)
+    Fetches the user's top artists from Last.fm, looks up each artist's top tags,
+    and returns the top N tags (as genres) weighted by Last.fm's tag counts.
+
+    period options: 'overall', '7day', '1month', '3month', '6month', '12month'
     """
-    headers = {"Authorization": f"Bearer {spotify_access_token}"}
-    params = {"limit": limit, "time_range": time_range}
-
-    async with httpx.AsyncClient() as client:
-        resp = await client.get(f"{SPOTIFY_API_BASE}/me/top/artists", headers=headers, params=params)
-        resp.raise_for_status()
-        data = resp.json()
-
-    artists = data.get("items", [])
-    genre_counter = Counter()
-
-    for artist in artists:
-        for genre in artist.get("genres", []):
-            genre_counter[genre] += 1
-
-    # Extract top N most common genres
-    top_genres = [genre for genre, _ in genre_counter.most_common(top_n_genres)]
-    return top_genres
+    async with httpx.AsyncClient(timeout=15) as client:
+        data = await _lastfm_get(
+            client, "user.getTopArtists", user=lastfm_username, period=period, limit=limit
+        )
+        artists = [a["name"] for a in data.get("topartists", {}).get("artist", [])]
+        return await _top_genres_for_artists(client, artists, top_n_genres)
 
 
 async def fetch_top_genres_from_tracks(
-    spotify_access_token: str,
+    lastfm_username: str,
     limit: int = 50,
-    time_range: str = "medium_term",
+    period: str = "6month",
     top_n_genres: int = 5,
 ) -> list[str]:
     """
-    Alternative: Fetches top 50 tracks, gets unique artist IDs from those tracks,
-    queries Spotify artist details in batch, and calculates top N genres.
+    Alternative: Fetches the user's top tracks, collects the unique artists behind
+    them, and calculates the top N tags (as genres) across those artists.
     """
-    headers = {"Authorization": f"Bearer {spotify_access_token}"}
-    params = {"limit": limit, "time_range": time_range}
-
-    async with httpx.AsyncClient() as client:
-        # 1. Fetch top tracks
-        resp = await client.get(f"{SPOTIFY_API_BASE}/me/top/tracks", headers=headers, params=params)
-        resp.raise_for_status()
-        tracks_data = resp.json()
-
-        # Collect unique artist IDs (max 50 artists can be queried at once)
-        artist_ids = []
-        for track in tracks_data.get("items", []):
-            for artist in track.get("artists", []):
-                aid = artist.get("id")
-                if aid and aid not in artist_ids:
-                    artist_ids.append(aid)
-                    if len(artist_ids) == 50:
-                        break
-            if len(artist_ids) == 50:
-                break
-
-        if not artist_ids:
-            return []
-
-        # 2. Fetch artist details to get genres
-        artists_resp = await client.get(
-            f"{SPOTIFY_API_BASE}/artists",
-            headers=headers,
-            params={"ids": ",".join(artist_ids)},
+    async with httpx.AsyncClient(timeout=15) as client:
+        data = await _lastfm_get(
+            client, "user.getTopTracks", user=lastfm_username, period=period, limit=limit
         )
-        artists_resp.raise_for_status()
-        artists_data = artists_resp.json()
-
-    genre_counter = Counter()
-    for artist in artists_data.get("artists", []):
-        for genre in artist.get("genres", []):
-            genre_counter[genre] += 1
-
-    return [genre for genre, _ in genre_counter.most_common(top_n_genres)]
+        artists: list[str] = []
+        for track in data.get("toptracks", {}).get("track", []):
+            name = track.get("artist", {}).get("name")
+            if name and name not in artists:
+                artists.append(name)
+        return await _top_genres_for_artists(client, artists, top_n_genres)
 
 
 def sync_music_taste_to_supabase(

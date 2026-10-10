@@ -10,7 +10,7 @@
 
 
 -- -----------------------------------------------------------------------------
--- profiles: one row per auth user, holds their music taste (top Spotify genres)
+-- profiles: one row per auth user, holds their music taste (top Last.fm genres)
 -- -----------------------------------------------------------------------------
 create table if not exists public.profiles (
   -- Linked directly to the Supabase Auth user id

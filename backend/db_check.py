@@ -15,7 +15,7 @@ import psycopg
 from dotenv import load_dotenv
 from supabase import Client, PostgrestAPIError, SupabaseException
 
-from spotify_service import get_supabase_client
+from lastfm_service import get_supabase_client
 
 load_dotenv()
 

@@ -13,7 +13,8 @@ from pydantic import BaseModel
 from supabase import PostgrestAPIError, SupabaseException
 
 from db_check import log_table_check
-from spotify_service import (
+from lastfm_service import (
+    LastFmError,
     fetch_top_genres_from_artists,
     fetch_top_genres_from_tracks,
     sync_music_taste_to_supabase,
@@ -34,10 +35,10 @@ app = FastAPI(title="Hacklanta Music Service", version="1.0.0", lifespan=lifespa
 
 class SyncRequest(BaseModel):
     user_id: str
-    spotify_access_token: str
+    lastfm_username: str
     mode: Literal["artists", "tracks"] | None = "artists"  # "artists" or "tracks"
-    time_range: Literal["short_term", "medium_term", "long_term"] | None = (
-        "medium_term"  # "short_term", "medium_term", "long_term"
+    period: Literal["overall", "7day", "1month", "3month", "6month", "12month"] | None = (
+        "6month"
     )
 
 
@@ -55,19 +56,19 @@ def health_check():
 @app.post("/api/sync-music-taste", response_model=SyncResponse)
 async def sync_music_taste(payload: SyncRequest):
     """
-    Syncs user's top 5 genres from Spotify into Supabase.
+    Syncs user's top 5 genres from Last.fm into Supabase.
     """
     try:
         if payload.mode == "tracks":
             top_genres = await fetch_top_genres_from_tracks(
-                spotify_access_token=payload.spotify_access_token,
-                time_range=payload.time_range or "medium_term",
+                lastfm_username=payload.lastfm_username,
+                period=payload.period or "6month",
                 top_n_genres=5,
             )
         else:
             top_genres = await fetch_top_genres_from_artists(
-                spotify_access_token=payload.spotify_access_token,
-                time_range=payload.time_range or "medium_term",
+                lastfm_username=payload.lastfm_username,
+                period=payload.period or "6month",
                 top_n_genres=5,
             )
 
@@ -83,14 +84,18 @@ async def sync_music_taste(payload: SyncRequest):
             music_taste=top_genres,
             success=True,
         )
+    except LastFmError as e:
+        # Last.fm reports errors in a 200 body: 6 = unknown user, 17 = private listening
+        # data, 29 = rate limit; anything else (bad API key, etc.) is a gateway problem.
+        status = {6: 404, 17: 403, 29: 429}.get(e.code, 502)
+        raise HTTPException(status_code=status, detail=f"Last.fm API error: {e.message}")
     except httpx.HTTPStatusError as e:
-        # Surface Spotify's status (e.g. 401 expired token) instead of a generic 500.
         raise HTTPException(
-            status_code=e.response.status_code,
-            detail=f"Spotify API error: {e.response.text}",
+            status_code=502,
+            detail=f"Last.fm API error: {e.response.status_code} {e.response.text}",
         )
     except httpx.RequestError as e:
-        raise HTTPException(status_code=502, detail=f"Could not reach Spotify: {e}")
+        raise HTTPException(status_code=502, detail=f"Could not reach Last.fm: {e}")
     except LookupError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except (ValueError, SupabaseException, PostgrestAPIError) as e:
