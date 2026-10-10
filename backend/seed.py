@@ -1,10 +1,11 @@
-"""Seed (or remove) 5 fake dev users and profiles in Supabase over the REST/Auth API.
+"""Seed (or remove) fake dev users, profiles and blocks in Supabase over the REST/Auth API.
 
 From backend/:  uv run python seed.py          # create/refresh fake users
                 uv run python seed.py --remove  # delete them again
 
 Users get no password (they can't log in) and @example.invalid emails.
 Idempotent. The on_auth_user_created trigger creates each profile row.
+The 5 main users block some imaginary users (never each other); see BLOCKS.
 """
 
 import sys
@@ -21,6 +22,26 @@ FAKE_USERS = [
     ("lofi_leo", "Leo Tanaka", ["lo-fi", "chillout", "ambient", "hip-hop", "jazz"]),
 ]
 
+# Imaginary users that exist only to be blocked (blocks.blocked_id needs a real profile)
+BLOCKED_USERS = [
+    ("spam_sam", "Sam Spamington", ["house", "electronic", "dance", "pop", "edm"]),
+    ("creepy_carl", "Carl Hovers", ["jazz", "soul", "indie", "rock", "hip-hop"]),
+    ("troll_tina", "Tina Troll", ["metal", "punk rock", "rock", "hip-hop", "alternative"]),
+    ("ex_eddie", "Eddie Exley", ["indie pop", "dream pop", "alternative", "soul", "r&b"]),
+]
+
+# (blocker, blocked). Seed users never block each other, only the imaginary users above.
+BLOCKS = [
+    ("maya_beats", "creepy_carl"),
+    ("maya_beats", "spam_sam"),
+    ("dj_nolan", "spam_sam"),
+    ("sunnyvinyl", "ex_eddie"),
+    ("sunnyvinyl", "creepy_carl"),
+    ("ironhaze", "troll_tina"),
+    ("lofi_leo", "troll_tina"),
+    ("lofi_leo", "ex_eddie"),
+]
+
 
 def fake_auth_users(client):
     users = client.auth.admin.list_users(per_page=1000)
@@ -30,7 +51,8 @@ def fake_auth_users(client):
 def seed():
     client = get_supabase_client()
     existing = fake_auth_users(client)
-    for username, display_name, taste in FAKE_USERS:
+    ids = {}
+    for username, display_name, taste in FAKE_USERS + BLOCKED_USERS:
         email = f"{username}@{EMAIL_DOMAIN}"
         user = existing.get(email)
         if user is None:
@@ -46,7 +68,13 @@ def seed():
                 }
             ).user
         client.table("profiles").update({"music_taste": taste}).eq("id", user.id).execute()
+        ids[username] = user.id
         print(user.id, username, taste)
+
+    rows = [{"blocker_id": ids[a], "blocked_id": ids[b]} for a, b in BLOCKS]
+    client.table("blocks").upsert(rows, on_conflict="blocker_id,blocked_id", ignore_duplicates=True).execute()
+    for blocker, blocked in BLOCKS:
+        print(blocker, "blocks", blocked)
 
 
 def remove():

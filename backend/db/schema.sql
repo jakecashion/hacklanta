@@ -103,6 +103,47 @@ create trigger on_auth_user_created
 
 
 -- -----------------------------------------------------------------------------
+-- blocks: one row per "blocker blocked blocked" relationship
+-- Directional: A blocking B does not mean B blocked A. For "either direction"
+-- checks, look for (a, b) or (b, a).
+-- -----------------------------------------------------------------------------
+create table if not exists public.blocks (
+  blocker_id uuid not null references public.profiles (id) on delete cascade,
+  blocked_id uuid not null references public.profiles (id) on delete cascade,
+
+  created_at timestamptz not null default timezone('utc'::text, now()),
+
+  -- One block per pair, so re-blocking is a no-op (insert ... on conflict do nothing)
+  primary key (blocker_id, blocked_id),
+  -- Can't block yourself
+  constraint blocks_no_self_block check (blocker_id <> blocked_id)
+);
+
+-- The primary key already covers "who did I block" (blocker_id lookups).
+-- This covers the reverse: "who has blocked me" (blocked_id lookups).
+create index if not exists idx_blocks_blocked_id
+  on public.blocks (blocked_id);
+
+alter table public.blocks enable row level security;
+
+-- Only the blocker can see their blocks; the blocked user never learns about it.
+drop policy if exists "Users can view their own blocks." on public.blocks;
+create policy "Users can view their own blocks."
+  on public.blocks for select
+  using ((select auth.uid()) = blocker_id);
+
+drop policy if exists "Users can block others." on public.blocks;
+create policy "Users can block others."
+  on public.blocks for insert
+  with check ((select auth.uid()) = blocker_id);
+
+drop policy if exists "Users can unblock others." on public.blocks;
+create policy "Users can unblock others."
+  on public.blocks for delete
+  using ((select auth.uid()) = blocker_id);
+
+
+-- -----------------------------------------------------------------------------
 -- Backfill: users who signed up before this script ran get a profile too
 -- (otherwise /api/sync-music-taste returns 404 for them)
 -- -----------------------------------------------------------------------------
