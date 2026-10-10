@@ -22,6 +22,39 @@ Date: 2026-10-10. Written in ASD-STE100 Simplified Technical English.
 5. Start from Adobe's sample panel: https://github.com/Adobe-CEP/Samples/tree/master/PProPanel
 6. Restart Premiere. Open the panel from Window > Extensions.
 
+### Tools
+
+Do not use the UXP Developer Tool (UDT). UDT is for UXP plugins only. Use these tools:
+
+| Task | Tool | How |
+|---|---|---|
+| Load the panel | Debug mode + extensions folder | Do steps 1–2 above. Use a symlink to the repo folder. Then you do not copy after each change. |
+| Debug panel JS | Chrome DevTools | Add a `.debug` file to the panel root (see below). Open `http://localhost:8088` in Chrome. |
+| Debug `.jsx` | VS Code + Adobe "ExtendScript Debugger" extension | Install the extension. Select Premiere Pro as the target. Do not use ExtendScript Toolkit. It is 32-bit and does not run on new macOS. |
+| Reload panel JS | Premiere | Close the panel. Open it again. |
+| Reload `.jsx` | Premiere | Load the `.jsx` again from the panel. If the change does not apply, restart Premiere. |
+| Sign and package | `ZXPSignCmd` | Not necessary for the hackathon. Debug mode loads unsigned panels. |
+
+Symlink commands:
+
+- Windows (Command Prompt as administrator): `mklink /D "%APPDATA%\Adobe\CEP\extensions\<panel>" "<repo>\<panel>"`
+- macOS: `ln -s "<repo>/<panel>" ~/Library/Application\ Support/Adobe/CEP/extensions/<panel>`
+
+`.debug` file (put it in the panel root, next to `CSXS/`):
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<ExtensionList>
+  <Extension Id="<extension id from manifest.xml>">
+    <HostList>
+      <Host Name="PPRO" Port="8088"/>
+    </HostList>
+  </Extension>
+</ExtensionList>
+```
+
+Install on each machine: Premiere 22.3.1, VS Code with the ExtendScript Debugger extension, and Chrome.
+
 ## 3. Parts
 
 | Part | Runs in | Does |
@@ -131,6 +164,7 @@ Note: test 4 is the most important. If `nodeId` is different on each machine, us
 - If all events in §4 exist in 22.3.1. The sample panel is the latest version.
 - If Premiere has an undo group for scripts.
 - If setting `start` changes `end` too, or if we must set both.
+- The `.debug` file format, port 8088, and the VS Code ExtendScript Debugger support for Premiere 22.3.1. These come from general CEP knowledge, not from a source we read. First-hour test 1 checks the panel load.
 
 ## 10. Sources
 
