@@ -14,6 +14,11 @@ An app that can view people that are listening to similar genres of music around
 
 Notes:
 
+Extension Ideas:
+- montezation by selling aggregate data of users, whats popular where
+- conquest
+- social features
+
 ### Machine learning auto tagging samples
 Machine learning auto tagging samples
 
