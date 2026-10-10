@@ -113,7 +113,7 @@ function pollOnce() {
     try {
       if (!sync) return;
       const clips = await scan();
-      if (!clips) return;
+      if (!clips || !sync) return; // sync may have stopped while the scan ran
       for (const op of sync.diff(clips)) send({ type: 'op', ...op });
       showSyncStatus();
     } finally {
@@ -133,6 +133,7 @@ function onCommit(msg) {
     if (toApply) {
       const res = await jsx(`pc_applyOps(${JSON.stringify(JSON.stringify([toApply]))})`);
       if (!res.ok) log('Apply error', res);
+      if (!sync) return; // disconnected while applying
       for (const r of res.results || []) {
         if (r.ok) sync.afterApply(r.clipId, r.field, r.after);
         else log('Apply failed', r);
@@ -165,8 +166,13 @@ function relayUrl(text) {
 }
 
 $('connect').onclick = () => {
+  const host = $('url').value.trim();
+  if (!host || /\s/.test(host)) {
+    log(`Host IP "${host}" is not valid: type only the IP (e.g. 100.101.102.103 or localhost), and your name in Name`);
+    return;
+  }
   if (ws) ws.close();
-  const url = relayUrl($('url').value.trim());
+  const url = relayUrl(host);
   const name = $('name').value.trim() || 'Editor';
   setBadge('wait', 'Connecting…');
   log('Connecting to ' + url);

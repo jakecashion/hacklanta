@@ -83,5 +83,5 @@ Items acknowledged and deferred at milestone close, most recent first:
 ## Session Continuity
 
 Last session: 2026-10-10 17:45 (resumed)
-Stopped at: Phase 2 code built inline (sync.js engine, relay rev sequencing, pc_scan/pc_applyOps, 1 s poll, Changes feed); 12 node tests pass. Glenn's sync.js/test replaced by user decision. Next: two-laptop test of Phase 2 in Premiere (and Phase 1 Tasks 4-5)
+Stopped at: Phase 2 verified on one laptop with fake-peer.js (89 remote edits applied, own edits sent, no echo, 0 apply errors). Next: two-laptop test (Phase 1 Tasks 4-5: Tailscale, firewall, guest install), then Phase 3
 Resume file: .planning/phases/01-panel-kill-test/.continue-here.md
