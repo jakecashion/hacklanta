@@ -1,0 +1,46 @@
+{
+  "version": "1.0",
+  "timestamp": "2026-10-10T22:57:45.010Z",
+  "phase": "1",
+  "phase_name": "Panel + Kill Test (Phase 2 code also built and verified on one laptop)",
+  "phase_dir": ".planning/phases/01-panel-kill-test",
+  "plan": null,
+  "task": 3,
+  "total_tasks": 5,
+  "status": "paused",
+  "completed_tasks": [
+    {"id": 1, "name": "Phase 1 code: CEP panel, bridge.jsx, relay, scripts", "status": "done", "commit": "8349281"},
+    {"id": 2, "name": "Panel installed on dev machine (junction + PlayerDebugMode)", "status": "done", "commit": "8349281"},
+    {"id": 3, "name": "ENV-03 kill test in Premiere: PASS (Scale/Rotation/Opacity move the Program monitor, exact read-back, 3-6 ms; Reload panel picks up .jsx edits)", "status": "done", "commit": "1565351"},
+    {"id": "2.x", "name": "Phase 2 Live Param Sync built inline: sync.js, relay rev sequencing, pc_scan/pc_applyOps, 1 s poll, Changes feed, 12 node tests; verified on one laptop with fake-peer.js (89 remote edits applied, no echo)", "status": "done", "commit": "acbf6af"},
+    {"id": "4.0", "name": "Phase 4 Timeline Integration added to roadmap (ENV-06, EDIT-01..03 moved out of stretch)", "status": "done", "commit": "3633b61"},
+    {"id": "doc", "name": "SETUP-TWO-LAPTOPS.md walkthrough for Tasks 4-5; demo.prproj in repo; footage paths may differ (relink once)", "status": "done", "commit": "3fb1e23"}
+  ],
+  "remaining_tasks": [
+    {"id": 4, "name": "ENV-04: Tailscale on both laptops (same account), firewall.ps1 on host, guest install-panel.ps1, guest Ping relay over Tailscale; hotspot fallback once. Follow premiere-collab/SETUP-TWO-LAPTOPS.md Parts A-C", "status": "not_started"},
+    {"id": 5, "name": "ENV-05: build 4-clip sequence (Hero, Logo, Card, BG) on host, commit demo.prproj (A1 step 7), guest copies and relinks footage", "status": "not_started"},
+    {"id": "2.v", "name": "Phase 2 two-laptop verification (SETUP-TWO-LAPTOPS.md C3): sync both ways, conflict, no echo", "status": "not_started"},
+    {"id": "3", "name": "Phase 3: snapshot join from host, other editor's selection, demo script + one clean rehearsal (can start with fake-peer.js before laptop 2 is ready)", "status": "not_started"}
+  ],
+  "blockers": [
+    {"description": "Second laptop not set up yet (Tailscale, Creative Cloud sign-in, panel install, demo project)", "type": "human_action", "workaround": "Build Phase 3 against fake-peer.js on one laptop meanwhile"}
+  ],
+  "async_jobs": [],
+  "human_actions_pending": [
+    {"action": "Walk through premiere-collab/SETUP-TWO-LAPTOPS.md Part A on the host (A1 4-clip sequence + commit, Tailscale, firewall.ps1 elevated, push, relay)", "context": "Phase 1 Tasks 4-5", "blocking": true},
+    {"action": "Walk through Part B on the guest (Creative Cloud sign-in, clone research branch, install-panel.ps1 without -Link, copy demo.prproj and relink footage, Tailscale same account)", "context": "Phase 1 Tasks 4-5", "blocking": true},
+    {"action": "Run Part C: guest Ping relay, then two-way sync test", "context": "Phase 1 ENV-04 + Phase 2 success criteria", "blocking": true},
+    {"action": "Tell Glenn Freeman his sync.js and test/sync.test.js were replaced", "context": "User chose 'Mine, drop Glenn's' for the sync engine", "blocking": false}
+  ],
+  "decisions": [
+    {"decision": "Tailscale is the primary network (same account on both laptops); phone hotspot with direct LAN IP is the fallback; cloudflared dropped", "rationale": "Avoids venue/hotspot client isolation; no code change needed", "phase": "1"},
+    {"decision": "Phase 2 built inline (no PLAN.md); sync engine is ours, Glenn's replaced", "rationale": "User choice; ours was already wired into panel/relay and async-safe", "phase": "2"},
+    {"decision": "Panel serializes all Premiere work (scan, apply) through one promise queue; shadow set from read-back; own ops recognized by opId prefix", "rationale": "Prevents scan/apply interleave echoes and same-name author collisions", "phase": "2"},
+    {"decision": "Clips matched by V1 position (v{track}:{clip}); footage/project paths may differ per laptop, guest relinks once", "rationale": "Sync never reads file paths", "phase": "1"},
+    {"decision": "Panel mirrors its log to panel/panel-log.txt (gitignored)", "rationale": "User's pasted logs never arrive in chat; read the file instead", "phase": "1"},
+    {"decision": "Phase 4 Timeline Integration after Phase 3 (probes first, then rename, move, trim)", "rationale": "User wants timeline edits after the demo core", "phase": "4"}
+  ],
+  "uncommitted_files": [],
+  "next_action": "Ask whether laptop 2 is ready. If yes, guide the user through SETUP-TWO-LAPTOPS.md and read panel-log.txt for results. If not, start Phase 3 inline (snapshot join from relay op log/host scan, selection presence, demo script) testing against relay/fake-peer.js.",
+  "context_notes": "Premiere on the dev laptop needed Creative Cloud sign-in to launch (not a cache issue). Relay test: cd premiere-collab/relay; npm test (12 pass). One-laptop test: node relay.js + node fake-peer.js + panel Connect to localhost. Host LAN IP 192.168.4.69. Branch research is pushed and in sync with origin at 3fb1e23 plus this WIP commit."
+}
