@@ -95,7 +95,7 @@ struct NearbyMapView: View {
         switch visibleUsers.count {
         case 0: "no one near you yet"
         case 1: "1 person near you"
-        default: "\(users.count) people near you"
+        default: "\(visibleUsers.count) people near you"
         }
     }
 
