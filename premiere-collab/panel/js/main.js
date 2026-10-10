@@ -196,6 +196,8 @@ $('connect').onclick = () => {
     try { msg = JSON.parse(e.data); } catch (_) { return log('Bad message: ' + e.data); }
     if (msg.type === 'commit') {
       onCommit(msg);
+    } else if (msg.type === 'cursor') {
+      // 20 Hz pointer traffic from cursor.ps1; the helper draws it, the panel ignores it.
     } else if (msg.type === 'pong') {
       log(`Pong from relay: round trip ${Date.now() - msg.t} ms`);
     } else if (msg.type === 'welcome') {
