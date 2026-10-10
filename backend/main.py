@@ -1,5 +1,8 @@
+import asyncio
 import os
-from typing import List, Literal, Optional
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
+from typing import Literal, Optional
 
 import httpx
 import uvicorn
@@ -7,7 +10,9 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel
+from supabase import PostgrestAPIError, SupabaseException
 
+from db_check import log_table_check
 from spotify_service import (
     fetch_top_genres_from_artists,
     fetch_top_genres_from_tracks,
@@ -16,7 +21,15 @@ from spotify_service import (
 
 load_dotenv()
 
-app = FastAPI(title="Hacklanta Music Service", version="1.0.0")
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
+    # Verify required Supabase tables exist (sync client -> worker thread).
+    await asyncio.to_thread(log_table_check)
+    yield
+
+
+app = FastAPI(title="Hacklanta Music Service", version="1.0.0", lifespan=lifespan)
 
 
 class SyncRequest(BaseModel):
@@ -30,7 +43,7 @@ class SyncRequest(BaseModel):
 
 class SyncResponse(BaseModel):
     user_id: str
-    music_taste: List[str]
+    music_taste: list[str]
     success: bool
 
 
@@ -80,10 +93,10 @@ async def sync_music_taste(payload: SyncRequest):
         raise HTTPException(status_code=502, detail=f"Could not reach Spotify: {e}")
     except LookupError as e:
         raise HTTPException(status_code=404, detail=str(e))
-    except Exception as e:
+    except (ValueError, SupabaseException, PostgrestAPIError) as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8000))
+    port = int(os.environ.get("PORT", "8000"))
     uvicorn.run("main:app", host="0.0.0.0", port=port, reload=True)
