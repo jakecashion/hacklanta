@@ -111,11 +111,11 @@ async def fetch_top_genres_from_tracks(
     return [genre for genre, _ in genre_counter.most_common(top_n_genres)]
 
 
-async def sync_music_taste_to_supabase(
+def sync_music_taste_to_supabase(
     user_id: str,
     top_genres: List[str],
     supabase_client: Optional[Client] = None,
-) -> dict:
+) -> list:
     """
     Updates the 'music_taste' list column in the public.profiles table in Supabase.
     """
