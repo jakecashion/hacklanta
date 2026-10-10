@@ -27,6 +27,14 @@ Clip IDs are positions on V1 (`v0:0` to `v0:3`), so both laptops must have the s
    - **Uniform Scale** is ticked.
    - No stopwatch is turned on (blue) next to Scale, Rotation or Opacity. A keyframed value can't be synced.
 6. **File > Save** (Ctrl+S). Close Premiere.
+7. Copy the saved project into the repo so the guest gets it with the code (A4 pushes it):
+   ```powershell
+   Copy-Item C:\collab-demo\demo.prproj C:\Users\jakca\Development\hacklanta\premiere-collab\demo\demo.prproj
+   cd C:\Users\jakca\Development\hacklanta
+   git add premiere-collab/demo/demo.prproj
+   git commit -m "demo: 4-clip demo sequence"
+   ```
+   The repo holds only the project file. The footage stays in Premiere's tutorial folder on each laptop.
 
 **Check:** the panel's **List V1** button (next time Premiere is open) shows 4 clips with IDs `v0:0` to `v0:3`.
 
@@ -64,9 +72,9 @@ git push
 ```
 (If you can't push, copy the `premiere-collab` folder to the guest by USB instead.)
 
-### A5. Copy the demo project for the guest
+### A5. Demo project for the guest
 
-Copy the whole `C:\collab-demo\` folder to a USB stick, OneDrive or a zip. You'll put it at `C:\collab-demo\` on the guest in B4.
+Nothing to do if you did A1 step 7 and A4: the project is in the repo at `premiere-collab/demo/demo.prproj`. (Without Git on the guest, copy `C:\collab-demo\demo.prproj` to the USB stick too.)
 
 ### A6. Start the relay
 
@@ -114,7 +122,11 @@ After any later code change, run this script again and click **Reload panel**.
 
 ### B4. Put the demo project in place
 
-1. Copy the `collab-demo` folder from A5 so the project sits at exactly `C:\collab-demo\demo.prproj`.
+1. Copy the project from the repo so it sits at exactly `C:\collab-demo\demo.prproj`. From the repo folder:
+   ```powershell
+   New-Item -ItemType Directory -Force C:\collab-demo | Out-Null
+   Copy-Item .\premiere-collab\demo\demo.prproj C:\collab-demo\demo.prproj
+   ```
 2. Check the tutorial footage exists at the same path as on the host:
    ```powershell
    Test-Path "C:\Users\Public\Documents\Adobe\Premiere Pro\22.0\Tutorial\Going Home project\Footage\A001_C037_0921FG_001.mp4"
@@ -189,5 +201,5 @@ Put the playhead over **Hero** on both laptops.
 | Premiere quits after the splash | Not signed in to Adobe | B1 step 2 |
 | Guest log: `Scan error: No active sequence` | Sequence not open | Double-click Sequence 01 |
 | Edit shows in the feed but the picture doesn't change | Playhead isn't over that clip | Move the playhead onto the clip |
-| Edit lands on the wrong clip | Clip order on V1 differs | Re-copy `C:\collab-demo\` from the host (A5, B4) |
+| Edit lands on the wrong clip | Clip order on V1 differs | Re-copy `demo.prproj` from the repo (A1 step 7, B4) |
 | Feed shows `Apply failed ... Param Scale not found` | Premiere UI not in English | Switch Premiere's language to English |
