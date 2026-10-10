@@ -28,13 +28,14 @@ Two editors change the same Premiere timeline at the same time, and each sees th
 - [ ] Both users can change Motion (Position, Scale, Rotation) and Opacity on video clips in the active sequence, and the other machine shows the change within 1–2 seconds
 - [ ] No echo loops; the last edit in host order wins for each field (shadow + pending rule, `08` §8)
 - [ ] Each panel shows the other user's selected clips and playhead time
+- [ ] Change feed with author names (promoted from stretch, 2026-10-10)
+- [ ] Resync button to pull the host's state
 
 **Stretch (only after core is demo-solid):**
 
 - [ ] Move a clip on the same track
 - [ ] Trim a clip (in point, out point)
 - [ ] Rename a clip
-- [ ] Change feed (e.g. `Sam moved Hero (rev 12)`)
 
 ### Out of Scope
 
@@ -86,10 +87,10 @@ Two editors change the same Premiere timeline at the same time, and each sees th
 |----------|-----------|---------|
 | Premiere first, After Effects later | Team decision 2026-10-10 | — Pending |
 | CEP + ExtendScript instead of UXP | Both machines run 22.3.1; UXP needs 25.6 | — Pending |
-| Host-authoritative relay on the host laptop | Simple ordering via `rev`; no cloud server needed | — Pending |
-| Clip ID = host `nodeId` + guest map by track/clip index | Both machines open the same project file, so the indexes match at join | — Pending |
+| Relay on the host laptop is the sequencer (assigns `rev`, keeps the op log); host panel approves and supplies the snapshot | All clients run the same code path; no cloud server needed (research 2026-10-10) | — Pending |
+| Clip ID = position (`v{track}:{clip}`) for core; switch to `nodeId` only if stretch move lands | Core never adds or moves clips; removes the unverified `nodeId` dependency (research 2026-10-10) | — Pending |
 | Last-writer-wins per field, no locks | Simplest conflict rule that converges | — Pending |
-| Core = connect + join + Motion/Opacity sync + presence; stretch = move/trim/rename/feed | Demo-safe under a 12-hour budget | — Pending |
+| Core = connect + join + Motion/Opacity sync + presence + change feed + Resync; stretch = rename/move/trim + other safety nets | Demo-safe under a 12-hour budget; feed is cheap and makes edits readable on stage | — Pending |
 | Run the API checks (`08` §12) before building | Several of the API behaviours the plan depends on are unverified | — Pending |
 | Pitch under the Creative (Adobe) track to remote editor pairs | It's an Adobe tool, and "Google Docs for Premiere" is a clear story | — Pending |
 
