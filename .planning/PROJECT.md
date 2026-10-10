@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A Premiere Pro panel that lets two editors on two Windows machines join one live session and edit the same timeline together, like Google Docs for Premiere. One editor hosts the session and runs a small relay. The other joins with the host's IP and a session code. Each editor sees the other's edits, selection and playhead live. Built for the Hacklanta Creative track (sponsored by Adobe). The After Effects version comes later.
+A Premiere Pro panel that lets two editors on two Windows machines join one live session and edit the same timeline together, like Google Docs for Premiere. One editor hosts the session and runs a small relay. The other connects by typing the host's IP. Each editor sees the other's edits, selection and a live change feed. Built for the Hacklanta Creative track (sponsored by Adobe). The After Effects version comes later.
 
 ## Core Value
 
@@ -16,26 +16,22 @@ Two editors change the same Premiere timeline at the same time, and each sees th
 
 ### Active
 
-**Core (must work for the demo; everything above the demo-safe line):**
+Scope cut on 2026-10-10 to a 6–8 hour build. Detail and IDs are in `REQUIREMENTS.md`.
 
-- [ ] Panel loads in Premiere Pro 22.3.1 on both machines (unsigned CEP panel, `PlayerDebugMode`)
-- [ ] The 6 pre-build API checks in `research/live-collab/08-mvp.md` §12 have run on real Premiere, and their results set the final scope
-- [ ] Host starts a session; panel shows a 6-character code
-- [ ] Guest enters host IP and code, clicks Join; host clicks Approve
-- [ ] Status badge shows Not connected → Waiting → Connected
-- [ ] Panel shows both users' names and colors
-- [ ] On join, the guest timeline is changed to match the host timeline (snapshot + clip ID map)
-- [ ] Both users can change Motion (Position, Scale, Rotation) and Opacity on video clips in the active sequence, and the other machine shows the change within 1–2 seconds
-- [ ] No echo loops; the last edit in host order wins for each field (shadow + pending rule, `08` §8)
-- [ ] Each panel shows the other user's selected clips and playhead time
-- [ ] Change feed with author names (promoted from stretch, 2026-10-10)
-- [ ] Resync button to pull the host's state
+**Core (v1):**
 
-**Stretch (only after core is demo-solid):**
+- [ ] Panel loads in Premiere Pro 22.3.1 on both machines (unsigned CEP panel, `PlayerDebugMode`, manual copy)
+- [ ] Kill test: `setValue` on Motion Scale, Rotation and Opacity updates the Program monitor
+- [ ] Guest reaches the host relay over the hotspot
+- [ ] Guest types the host IP and their name, then clicks Connect; badge shows Not connected → Connected; both names shown
+- [ ] On connect, the guest timeline is set to match the host's (clips matched by position)
+- [ ] Both users can change Motion Scale, Motion Rotation and Opacity; the other machine shows it within 1–2 s
+- [ ] No echo loops; the last edit in relay order wins for each field
+- [ ] Each panel shows the other user's selected clips
+- [ ] Change feed with author names
+- [ ] Core-only demo script rehearsed once, clean, on two laptops
 
-- [ ] Move a clip on the same track
-- [ ] Trim a clip (in point, out point)
-- [ ] Rename a clip
+**Stretch (v2, in roadmap priority order):** 3-run rehearsal, fallback video, Resync, playhead, colors, rename, Motion Position, session code + Approve, mismatch check, Rejoin, fake-peer fallback, remaining probes, move, trim, drift hash, install script
 
 ### Out of Scope
 
@@ -55,7 +51,7 @@ Two editors change the same Premiere timeline at the same time, and each sees th
 
 ## Context
 
-- Hackathon: Hacklanta. Judging is 9am on 2026-10-11, with a 3-minute pitch and 2 minutes of Q&A. About 12 hours of build time, overnight.
+- Hackathon: Hacklanta. Judging is 9am on 2026-10-11, with a 3-minute pitch and 2 minutes of Q&A. Build budget cut to 6–8 hours, overnight (2026-10-10).
 - Judging criteria: fits the track prompt, how polished the demo is, how good the presentation is, and a clear use case.
 - Pitch user: remote editor pairs who need to work on one cut together, live.
 - Research already done in `research/live-collab/`:
@@ -74,10 +70,10 @@ Two editors change the same Premiere timeline at the same time, and each sees th
 
 ## Constraints
 
-- **Timeline**: About 12 hours of build time; demo at 9am 2026-10-11. The core must be demo-solid before any stretch work starts.
+- **Timeline**: 6–8 hours of build time; demo at 9am 2026-10-11. The core must be demo-solid before any stretch work starts.
 - **Tech stack**: CEP 11 + ExtendScript (ES3) panel, Node.js `ws` relay. Premiere 22.3.1.2 can't run UXP.
 - **Platform**: Two Windows laptops, both running Premiere 22.3.1.2.
-- **Network**: Same Wi-Fi or a phone hotspot. Fallback is a `cloudflared` tunnel. Windows Firewall must allow Node on Private networks.
+- **Network**: Same Wi-Fi or a phone hotspot. Fallback is a `cloudflared` tunnel. Windows Firewall rule for TCP 8080 must use `profile=any`, because venue and hotspot Wi-Fi are usually marked Public.
 - **Demo data**: The same project and media at `C:\collab-demo\` on both machines, unchanged before the join.
 - **Process**: Hackathon. Fast development matters more than polish, except on the demo path.
 
@@ -90,7 +86,7 @@ Two editors change the same Premiere timeline at the same time, and each sees th
 | Relay on the host laptop is the sequencer (assigns `rev`, keeps the op log); host panel approves and supplies the snapshot | All clients run the same code path; no cloud server needed (research 2026-10-10) | — Pending |
 | Clip ID = position (`v{track}:{clip}`) for core; switch to `nodeId` only if stretch move lands | Core never adds or moves clips; removes the unverified `nodeId` dependency (research 2026-10-10) | — Pending |
 | Last-writer-wins per field, no locks | Simplest conflict rule that converges | — Pending |
-| Core = connect + join + Motion/Opacity sync + presence + change feed + Resync; stretch = rename/move/trim + other safety nets | Demo-safe under a 12-hour budget; feed is cheap and makes edits readable on stage | — Pending |
+| Core = connect by IP + snapshot join + Scale/Rotation/Opacity sync + selection + change feed; everything else stretch | Scope cut to a 6–8 hour budget (2026-10-10); feed is cheap and makes edits readable on stage | — Pending |
 | Run the API checks (`08` §12) before building | Several of the API behaviours the plan depends on are unverified | — Pending |
 | Pitch under the Creative (Adobe) track to remote editor pairs | It's an Adobe tool, and "Google Docs for Premiere" is a clear story | — Pending |
 
@@ -112,4 +108,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-10-10 after initialization*
+*Last updated: 2026-10-10 after scope cut to 6–8 hours*

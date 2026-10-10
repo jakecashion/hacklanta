@@ -1,15 +1,13 @@
 {
-  "name": "relay",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "premiere-collab-relay",
+  "version": "0.1.0",
+  "private": true,
+  "description": "WebSocket relay for Premiere Live Collab",
+  "main": "relay.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node relay.js",
+    "ping": "node ping.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
     "ws": "8.22.0"
   }

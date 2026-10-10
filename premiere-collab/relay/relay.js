@@ -1,62 +1,72 @@
-// Room relay. Forwards each message to the other members of the sender's room. Reads no edits.
-// First message from a client must be {t:'join', room, name}.
+// relay.js - Phase 1 relay: ping/pong, presence of names, broadcast everything else.
+// Run on the host laptop: node relay.js [port]
 const os = require('os');
-const { WebSocketServer } = require('ws');
+const { WebSocketServer, WebSocket } = require('ws');
+
+const PORT = parseInt(process.argv[2] || process.env.PORT || '8080', 10);
 
 function lanIps() {
   const out = [];
-  for (const list of Object.values(os.networkInterfaces()))
-    for (const i of list || []) if (i.family === 'IPv4' && !i.internal) out.push(i.address);
+  for (const [ifname, addrs] of Object.entries(os.networkInterfaces())) {
+    for (const a of addrs || []) {
+      if (a.family === 'IPv4' && !a.internal) out.push({ ifname, address: a.address });
+    }
+  }
   return out;
 }
 
-function startRelay({ port = Number(process.env.PORT) || 8080, host = '0.0.0.0', pingMs = 20000 } = {}) {
-  const wss = new WebSocketServer({ host, port, maxPayload: 1 << 20 });
-  const rooms = new Map(); // room -> Set<ws>
+const wss = new WebSocketServer({ port: PORT });
 
-  wss.on('connection', (ws) => {
-    ws.isAlive = true;
-    ws.room = null;
-    ws.on('pong', () => { ws.isAlive = true; });
-    ws.on('message', (data) => {
-      let m;
-      try { m = JSON.parse(data.toString()); } catch { return; }
-      if (!ws.room) {
-        if (m.t !== 'join' || typeof m.room !== 'string' || !m.room) return;
-        ws.room = m.room; ws.name = String(m.name || '?');
-        if (!rooms.has(ws.room)) rooms.set(ws.room, new Set());
-        const peers = rooms.get(ws.room);
-        ws.send(JSON.stringify({ t: 'joined', room: ws.room, peers: [...peers].map((p) => p.name), ips: lanIps() }));
-        for (const p of peers) p.send(JSON.stringify({ t: 'peer', name: ws.name }));
-        peers.add(ws);
-        return;
-      }
-      for (const p of rooms.get(ws.room)) if (p !== ws && p.readyState === 1) p.send(data.toString());
-    });
-    ws.on('close', () => {
-      const peers = rooms.get(ws.room);
-      if (!peers) return;
-      peers.delete(ws);
-      for (const p of peers) p.send(JSON.stringify({ t: 'peer-left', name: ws.name }));
-      if (!peers.size) rooms.delete(ws.room);
-    });
+function broadcast(msg, except) {
+  const data = JSON.stringify(msg);
+  for (const c of wss.clients) {
+    if (c !== except && c.readyState === WebSocket.OPEN) c.send(data);
+  }
+}
+
+function sendPeers() {
+  const names = [...wss.clients].map((c) => c.name).filter(Boolean);
+  broadcast({ type: 'peers', names });
+}
+
+wss.on('connection', (ws, req) => {
+  ws.isAlive = true;
+  ws.on('pong', () => { ws.isAlive = true; });
+  const from = req.socket.remoteAddress;
+  console.log(`+ connection from ${from}`);
+  ws.send(JSON.stringify({ type: 'welcome', ips: lanIps().map((i) => i.address) }));
+
+  ws.on('message', (raw) => {
+    let msg;
+    try { msg = JSON.parse(raw); } catch (_) { return; }
+    if (msg.type === 'ping') {
+      ws.send(JSON.stringify({ type: 'pong', t: msg.t }));
+    } else if (msg.type === 'hello') {
+      ws.name = String(msg.name || 'Editor').slice(0, 40);
+      console.log(`  ${from} is "${ws.name}"`);
+      sendPeers();
+    } else {
+      broadcast({ ...msg, from: ws.name }, ws);
+    }
   });
 
-  const timer = setInterval(() => {
-    for (const ws of wss.clients) {
-      if (!ws.isAlive) { ws.terminate(); continue; }
-      ws.isAlive = false; ws.ping();
-    }
-  }, pingMs);
-  wss.on('close', () => clearInterval(timer));
-  return wss;
-}
+  ws.on('close', () => {
+    console.log(`- ${ws.name || from} left`);
+    sendPeers();
+  });
+});
 
-module.exports = { startRelay, lanIps };
+// Heartbeat: browser WebSockets auto-reply to pings; drop dead sockets and keep tunnels warm.
+const hb = setInterval(() => {
+  for (const ws of wss.clients) {
+    if (!ws.isAlive) { ws.terminate(); continue; }
+    ws.isAlive = false;
+    ws.ping();
+  }
+}, 20000);
+wss.on('close', () => clearInterval(hb));
 
-if (require.main === module) {
-  const wss = startRelay();
-  const port = wss.options.port;
-  console.log('relay listening on port ' + port);
-  for (const ip of lanIps()) console.log('  guest address: ws://' + ip + ':' + port);
-}
+wss.on('listening', () => {
+  console.log(`Relay listening on port ${PORT}`);
+  for (const i of lanIps()) console.log(`  Tell the guest: ws://${i.address}:${PORT}   (${i.ifname})`);
+});

@@ -1,40 +1,32 @@
-# 09 — Phase 1 probes: runbook and verdict
+# 09 — Phase 1 viability status
 
-Date: 2026-10-10. Code: `premiere-collab/`.
+Date: 2026-10-10.
 
-## Verdict (so far)
+## Verdict
 
 **Viability: UNPROVEN. Not shown low, not shown high.**
-The build machine has no Premiere Pro (no `C:\Program Files\Adobe`, no CEP registry key). The Premiere API probes could not run. Only the Premiere-free parts are verified. No claim about `setValue` on real clips is made here.
+The machine this was built on has no Premiere Pro, so the Premiere API could not be tested. The decisive question is still open: does `ComponentParam.setValue` on Motion and Opacity update the Program monitor, and can a message from one laptop apply to the other laptop's timeline in both directions?
 
-| Verified here (Node only) | Result |
-|---|---|
-| Relay: two clients, both directions, no self-echo, room isolation | pass (3 tests) |
-| Relay reachable on the LAN IPv4 address (10.0.0.83), round trip ~63 ms | pass (same machine, not a second laptop) |
-| `bridge.jsx` logic against a MOCK Premiere object | pass. Proves syntax and logic only |
+## What is proven (Node only, no Premiere)
 
-## Runbook (about 20 minutes, two laptops with Premiere 22.3.1)
+`premiere-collab/panel/js/sync.js` is the sync engine. `node --test premiere-collab/test/` runs 8 tests against a fake Premiere that rounds values:
+- an edit on one client appears on the other;
+- a rounded read-back is never re-sent (no echo), including Position arrays;
+- simultaneous edits to one field converge on the later rev;
+- different fields and clips merge;
+- a timeline read that began before a remote apply is dropped, not sent as a revert;
+- a 300-round fuzz of random edits and delivery order always converges and goes quiet.
 
-1. Both laptops: `powershell -ExecutionPolicy Bypass -File premiere-collab\scripts\install.ps1`. Restart Premiere. Open Window > Extensions > Live Collab. (Check 1.)
-2. Both: open the demo project (4 clips on V1, no keyframes, Uniform Scale ON, English UI).
-3. Host, elevated: `scripts\firewall.ps1`. Then `cd premiere-collab\relay; node relay.js`. Note the printed `ws://IP:8080`.
-4. Click each section in the panel, top to bottom:
-   - **Env + bridge**, **Dump components**, **setValue round trip**, then **Monitor changed YES/NO** (watch the Program monitor while the round trip runs). This is the kill gate (check 6).
-   - **Move/trim test** (check 4), **Scan timing**.
-   - **Record IDs**, move and trim a clip by hand, save and reopen, **Compare IDs** (check 3).
-   - **Bind events**, then for each of move / trim / Scale-or-Opacity edit: do the edit, click its Read counts button (check 5).
-   - **Connect** both panels to the relay (same room). Host uses `ws://localhost:8080`, guest the host IP. Click **Send Opacity to peer** on each laptop (checks 2 and 7).
-5. **Export results** on each laptop. The JSON lands in Documents. Commit both as `research/live-collab/results/`.
+The engine assumes one sequencer assigns `rev` (the relay, per `ARCHITECTURE.md`). That wiring is not built.
 
-## Decision rule
+## What still needs a Premiere machine
 
-The core is viable only if all of these pass on the real machines:
-- Check 6: `setValue` changes Position, Scale, Rotation and Opacity, reads back, and the Program monitor updates.
-- Check 7: a message from one laptop changes the other laptop's timeline, in both directions.
-- Check 1 and 2.
+Run the kill test in `premiere-collab/KILL-TEST.md` on both laptops (install with `scripts/install-panel.ps1`, relay with `node relay/relay.js`, firewall with `scripts/firewall.ps1`). The core is viable only if `setValue` visibly changes Position, Scale, Rotation and Opacity in the Program monitor and reads back, on both machines, and a relayed edit from each laptop applies on the other.
 
-If check 6 or 7 fails in either direction, report viability **low** and re-plan. Checks 3, 4, 5 only shape scope: 3 and 4 gate stretch, and a failed 5 means the 1 s timer is the only change detector.
+If either fails, report viability **low** and re-plan.
 
-## Not covered by these probes
+## Known gaps in the engine
 
-Firewall rule on the real hotspot, venue Wi-Fi isolation, `cloudflared` WebSocket pass-through, whether a changed `.jsx` needs a Premiere restart, undo behaviour after a remote `setValue`. ENV-05 (demo project) must be made by hand in Premiere.
+- `EPS` (1e-3) must be at least Premiere's real rounding step. Check the read-back output of the kill test and widen it if needed.
+- Pending edits have no timeout; an op the sequencer never commits blocks that field.
+- Join and resync (`load()`), presence and the change feed are untested.

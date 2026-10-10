@@ -1,56 +1,57 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8">
-<title>Live Collab probes</title>
-<style>
-  body { background:#232323; color:#ddd; font:12px Segoe UI, sans-serif; margin:8px; }
-  h3 { margin:12px 0 4px; font-size:12px; color:#9cf; }
-  button { background:#444; color:#eee; border:1px solid #666; padding:3px 8px; margin:2px 2px 2px 0; cursor:pointer; }
-  button:hover { background:#555; }
-  input { background:#111; color:#eee; border:1px solid #555; padding:2px 4px; width:150px; }
-  #log { background:#111; border:1px solid #444; height:230px; overflow:auto; white-space:pre-wrap; font:11px Consolas, monospace; padding:4px; }
-  table { width:100%; border-collapse:collapse; } td { border-bottom:1px solid #333; padding:2px 4px; }
-  .PASS { color:#6d6; } .FAIL { color:#f66; } .TODO { color:#aa8; }
-  textarea { width:100%; height:70px; background:#111; color:#eee; font:11px Consolas; }
-</style>
+  <meta charset="utf-8">
+  <title>Live Collab</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<b>Phase 1 probes</b> <span id="env"></span>
-<h3>Checks</h3>
-<table id="checks"></table>
+  <header>
+    <h1>Live Collab</h1>
+    <span id="badge" class="badge off">Not connected</span>
+  </header>
 
-<h3>1. Environment and API (this machine)</h3>
-<button id="bEnv">Env + bridge</button>
-<button id="bDump">Dump components</button>
-<button id="bRound">setValue round trip (4 fields, clip V1:0)</button>
-<button id="bVisYes">Monitor changed: YES</button><button id="bVisNo">Monitor changed: NO</button>
-<button id="bMove">Move/trim test (check 4)</button>
-<button id="bScan">Scan timing</button>
+  <section>
+    <h2>Connection</h2>
+    <label>Relay <input id="url" value="ws://localhost:8080"></label>
+    <label>Name <input id="name" value="Editor"></label>
+    <div class="row">
+      <button id="connect">Connect</button>
+      <button id="disconnect">Disconnect</button>
+      <button id="pingRelay">Ping relay</button>
+    </div>
+    <div id="peers" class="muted">No peers</div>
+  </section>
 
-<h3>2. nodeId stability (check 3)</h3>
-<button id="bIdRec">Record IDs</button> then edit clips (move, trim, save/reopen) <button id="bIdCmp">Compare IDs</button>
+  <section>
+    <h2>Kill test</h2>
+    <div class="row">
+      <label class="inline">Clip # (V1) <input id="clipIdx" type="number" value="0" min="0"></label>
+    </div>
+    <div class="row">
+      <button id="jsxPing">Ping JSX</button>
+      <button id="list">List V1</button>
+      <button id="kill">Run kill test</button>
+      <button id="reset">Reset clip</button>
+      <button id="scan">Scan cost</button>
+    </div>
+    <div class="row">
+      <select id="field">
+        <option>Motion.Scale</option>
+        <option>Motion.Rotation</option>
+        <option>Opacity.Opacity</option>
+      </select>
+      <input id="value" type="number" value="200" class="short">
+      <button id="set">Set</button>
+    </div>
+  </section>
 
-<h3>3. Events (check 5)</h3>
-<button id="bBind">Bind events</button>
-<button id="bEvMove">Read counts: I moved a clip</button>
-<button id="bEvTrim">...I trimmed a clip</button>
-<button id="bEvParam">...I changed Scale/Opacity</button>
-<button id="bEvSel">...I changed selection</button>
+  <section class="grow">
+    <h2>Log <button id="clear" class="small">Clear</button> <button id="reload" class="small">Reload panel</button></h2>
+    <pre id="log"></pre>
+  </section>
 
-<h3>4. Two machines via relay (check 2 + remote apply)</h3>
-<input id="relayUrl" value="ws://localhost:8080"> <input id="room" value="TEST01" style="width:70px">
-<input id="who" value="" style="width:70px" placeholder="name">
-<button id="bConn">Connect</button>
-<button id="bSend">Send Opacity to peer</button>
-<span id="peerState"></span>
-
-<h3>Results</h3>
-<button id="bExport">Export results</button><button id="bPresence">Read selection/playhead</button>
-<textarea id="out" readonly></textarea>
-<h3>Log</h3>
-<div id="log"></div>
-<script src="js/cep.js"></script>
-<script src="js/probe.js"></script>
+  <script src="js/CSInterface.js"></script>
+  <script src="js/main.js"></script>
 </body>
 </html>
