@@ -32,6 +32,8 @@ cd relay; npm install; node relay.js
 
 The relay prints `Tell the guest: ws://<ip>:8080`. Check it from the guest without Premiere: `node relay\ping.js ws://<ip>:8080` (needs Node), or use **Ping relay** in the panel.
 
+Two-laptop setup, step by step: see `SETUP-TWO-LAPTOPS.md`.
+
 Network order:
 
 1. **Tailscale (primary).** Install Tailscale on both laptops and sign both in to the same account. On the host, `tailscale ip -4` prints its `100.x.y.z` address. The guest connects to `ws://100.x.y.z:8080`; the relay's startup list includes that address too. Works on any network with internet, including venue Wi-Fi that blocks devices from reaching each other. Set it up before the venue.
