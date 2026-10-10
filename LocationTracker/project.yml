@@ -1,0 +1,25 @@
+name: LocationTracker
+options:
+  bundleIdPrefix: com.hacklanta
+  deploymentTarget:
+    iOS: "17.0"
+targets:
+  LocationTracker:
+    type: application
+    platform: iOS
+    sources: [LocationTracker]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.hacklanta.locationtracker
+        SWIFT_VERSION: "5.0"
+        GENERATE_INFOPLIST_FILE: NO
+        # Set your team in Xcode (Signing & Capabilities) or here:
+        # DEVELOPMENT_TEAM: XXXXXXXXXX
+    info:
+      path: LocationTracker/Info.plist
+      properties:
+        CFBundleDisplayName: Location Tracker
+        UILaunchScreen: {}
+        UIBackgroundModes: [location]
+        NSLocationWhenInUseUsageDescription: Tracks your location while you use the app.
+        NSLocationAlwaysAndWhenInUseUsageDescription: Tracks your location continuously, including in the background.
