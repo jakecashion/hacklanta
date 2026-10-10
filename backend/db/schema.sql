@@ -166,6 +166,30 @@ create table if not exists public.user_sessions (
 
 
 -- -----------------------------------------------------------------------------
+-- shares: "reply with a song" and "message to meet up" in one table. The song
+-- inbox is a query over this table (kind = 'song', recipient_id = me).
+-- Backend only: RLS is on with no policies, so the app must go through the API
+-- (the service-role key bypasses RLS).
+-- -----------------------------------------------------------------------------
+create table if not exists public.shares (
+  id           uuid primary key default gen_random_uuid(),
+  sender_id    uuid not null references public.profiles (id) on delete cascade,
+  recipient_id uuid not null references public.profiles (id) on delete cascade,
+  kind         text not null check (kind in ('song', 'meetup')),
+  track_title  text,
+  artist_name  text,
+  note         text check (char_length(note) <= 140),
+  created_at   timestamptz not null default now(),
+  listened_at  timestamptz
+);
+
+create index if not exists idx_shares_recipient
+  on public.shares (recipient_id, created_at desc);
+
+alter table public.shares enable row level security;
+
+
+-- -----------------------------------------------------------------------------
 -- Backfill: users who signed up before this script ran get a profile too
 -- (otherwise /api/sync-music-taste returns 404 for them)
 -- -----------------------------------------------------------------------------

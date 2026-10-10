@@ -47,6 +47,17 @@ REQUIRED_TABLES: dict[str, list[str]] = {
         "album_art_url",
         "updated_at",
     ],
+    "shares": [
+        "id",
+        "sender_id",
+        "recipient_id",
+        "kind",
+        "track_title",
+        "artist_name",
+        "note",
+        "created_at",
+        "listened_at",
+    ],
 }
 
 # PostgREST reloads its schema cache asynchronously after DDL
