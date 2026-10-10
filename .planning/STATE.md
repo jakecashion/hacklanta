@@ -66,7 +66,7 @@ None yet.
 
 ### Blockers/Concerns
 
-- [Phase 1]: Kill gate - `ComponentParam.setValue` must update the Program monitor on Scale, Rotation and Opacity, or the core is re-planned before Phase 2
+- [Phase 1]: Kill gate PASSED 2026-10-10 (see premiere-collab/KILL-TEST.md)
 - [Phase 1]: Unknowns to note during the kill test: Rotation above 360, Uniform Scale behavior, scan cost for 4 clips, whether a changed `.jsx` needs a Premiere restart. Skipped for now (v2): Position units, `nodeId`/move/trim probes, event coverage (sync relies on the 1 s poll)
 - [Phase 1]: Venue Wi-Fi may isolate clients; `cloudflared` WebSocket pass-through is unconfirmed (plan C only)
 - [Phase 2]: Echo loops and Premiere rounding the written value (shadow from read-back plus epsilon compare)
@@ -82,6 +82,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-10-10 (Phase 1 build)
-Stopped at: Phase 1 scaffold built (premiere-collab/), panel junction-installed on dev machine; next: kill test in Premiere + guest relay ping over hotspot
-Resume file: None
+Last session: 2026-10-10 17:45 (resumed)
+Stopped at: Kill gate PASSED on dev laptop (Scale/Rotation/Opacity move the Program monitor, exact read-back, 3-6 ms per write; Reload panel picks up .jsx edits). See premiere-collab/KILL-TEST.md. Next: Task 4 (firewall + guest relay ping over hotspot), Task 5 (demo project to 4 clips, copy to laptop 2), then Phase 2
+Resume file: .planning/phases/01-panel-kill-test/.continue-here.md

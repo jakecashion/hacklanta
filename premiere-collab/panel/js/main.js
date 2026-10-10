@@ -7,6 +7,13 @@ function log(msg, obj) {
   const t = new Date().toLocaleTimeString();
   const line = obj === undefined ? msg : msg + ' ' + JSON.stringify(obj, null, 2);
   logEl.textContent = `[${t}] ${line}\n` + logEl.textContent;
+  saveLog();
+}
+
+// Mirror the log to panel/panel-log.txt (newest first) so it can be read without copy/paste.
+const logPath = cs.getSystemPath(SystemPath.EXTENSION) + '/panel-log.txt';
+function saveLog() {
+  try { window.cep.fs.writeFile(logPath, logEl.textContent); } catch (e) { /* no-op */ }
 }
 
 // ---------- ExtendScript bridge ----------
@@ -89,7 +96,7 @@ $('disconnect').onclick = () => { if (ws) ws.close(); };
 $('pingRelay').onclick = () => send({ type: 'ping', t: Date.now() });
 
 // ---------- Misc ----------
-$('clear').onclick = () => { logEl.textContent = ''; };
+$('clear').onclick = () => { logEl.textContent = ''; saveLog(); };
 $('reload').onclick = () => location.reload();
 
 loadBridge();
