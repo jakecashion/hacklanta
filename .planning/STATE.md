@@ -57,7 +57,7 @@ Recent decisions affecting current work:
 - [Roadmap]: Relay on the host laptop is the sequencer (assigns `rev`, keeps the op log); host panel supplies the snapshot
 - [Roadmap]: Clip ID = position (`v{track}:{clip}`) for core; `nodeId` only if stretch move lands
 - [Roadmap]: Change feed promoted to core (PRES-03); demo script is core-only (DEMO-01) with one clean rehearsal
-- [Roadmap]: No `--enable-nodejs`; firewall rule is TCP 8080 with `profile=any`; hotspot is the default network; panel folder is copied by hand
+- [Roadmap]: No `--enable-nodejs`; firewall rule is TCP 8080 with `profile=any`; Tailscale (same account on both laptops) is the default network, phone hotspot with the direct IP is the fallback, cloudflared dropped (2026-10-10); panel folder is copied by hand
 - [Roadmap]: All v2 items (including Resync SYNC-08 and EDIT-*/RES-*) stay behind the stretch gate after Phase 3, worked in the priority order listed in ROADMAP.md
 
 ### Pending Todos
@@ -68,7 +68,7 @@ None yet.
 
 - [Phase 1]: Kill gate PASSED 2026-10-10 (see premiere-collab/KILL-TEST.md)
 - [Phase 1]: Unknowns to note during the kill test: Rotation above 360, Uniform Scale behavior, scan cost for 4 clips, whether a changed `.jsx` needs a Premiere restart. Skipped for now (v2): Position units, `nodeId`/move/trim probes, event coverage (sync relies on the 1 s poll)
-- [Phase 1]: Venue Wi-Fi may isolate clients; `cloudflared` WebSocket pass-through is unconfirmed (plan C only)
+- [Phase 1]: Tailscale needs internet on the venue network or hotspot; untested between the two laptops until Task 4
 - [Phase 2]: Echo loops and Premiere rounding the written value (shadow from read-back plus epsilon compare)
 - [Phase 3]: `displayName` is localized, so both laptops need an English UI; keyframed params can't be read or written
 
@@ -83,5 +83,5 @@ Items acknowledged and deferred at milestone close, most recent first:
 ## Session Continuity
 
 Last session: 2026-10-10 17:45 (resumed)
-Stopped at: Kill gate PASSED on dev laptop (Scale/Rotation/Opacity move the Program monitor, exact read-back, 3-6 ms per write; Reload panel picks up .jsx edits). See premiere-collab/KILL-TEST.md. Next: Task 4 (firewall + guest relay ping over hotspot), Task 5 (demo project to 4 clips, copy to laptop 2), then Phase 2
+Stopped at: Kill gate PASSED on dev laptop (Scale/Rotation/Opacity move the Program monitor, exact read-back, 3-6 ms per write; Reload panel picks up .jsx edits). See premiere-collab/KILL-TEST.md. Next: Task 4 (firewall + guest relay ping over Tailscale, plus hotspot fallback once), Task 5 (demo project to 4 clips, copy to laptop 2), then Phase 2
 Resume file: .planning/phases/01-panel-kill-test/.continue-here.md
