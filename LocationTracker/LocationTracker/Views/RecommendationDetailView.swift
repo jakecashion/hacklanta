@@ -3,11 +3,14 @@ import SwiftUI
 struct RecommendationDetailView: View {
     @EnvironmentObject var store: RecommendationStore
     @EnvironmentObject var matchStore: MatchStore
+    @EnvironmentObject var blockStore: BlockStore
+    @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
 
     let id: Recommendation.ID
 
     @State private var queued = false
+    @State private var confirmBlock = false
 
     private var item: Recommendation? { store.items.first { $0.id == id } }
 
@@ -28,6 +31,38 @@ struct RecommendationDetailView: View {
         .pageBackground()
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { store.markRead(id) }
+        .toolbar {
+            // Songs the user sent to themselves have no one to block.
+            if let item, item.senderId != Recommendation.selfId {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu {
+                        Button("block \(item.senderName)", systemImage: "hand.raised", role: .destructive) {
+                            confirmBlock = true
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis").fontWeight(.bold)
+                    }
+                    .accessibilityLabel("More")
+                }
+            }
+        }
+        .confirmationDialog(
+            "block \(item?.senderName ?? "this person")?",
+            isPresented: $confirmBlock, titleVisibility: .visible
+        ) {
+            Button("block", role: .destructive) { block() }
+            Button("cancel", role: .cancel) {}
+        } message: {
+            Text("they leave your map, you get no alerts from them, and their songs are removed.")
+        }
+    }
+
+    private func block() {
+        guard let item else { return }
+        let senderId = item.senderId
+        blockStore.block(id: senderId, name: item.senderName)
+        dismiss()
+        store.removeAll(from: senderId)
     }
 
     private func content(_ item: Recommendation) -> some View {
@@ -115,5 +150,6 @@ struct RecommendationDetailView: View {
     return NavigationStack { RecommendationDetailView(id: store.items[0].id) }
         .environmentObject(store)
         .environmentObject(MatchStore())
+        .environmentObject(BlockStore())
         .brutScreen()
 }

@@ -47,6 +47,19 @@ struct Recommendation: Identifiable, Codable, Hashable {
     }
 }
 
+/// A person the user blocked. Saved in Documents/blocked.json.
+struct BlockedUser: Identifiable, Codable, Hashable {
+    let id: String
+    let name: String
+    var blockedAt = Date()
+
+    /// For example "just now" or "2 days ago".
+    var timeText: String {
+        if Date().timeIntervalSince(blockedAt) < 60 { return "just now" }
+        return blockedAt.formatted(.relative(presentation: .numeric))
+    }
+}
+
 enum OutgoingMessage {
     case song(Song, line: String)
     case meetup(text: String)

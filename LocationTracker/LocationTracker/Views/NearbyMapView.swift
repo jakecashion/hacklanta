@@ -4,6 +4,7 @@ import SwiftUI
 struct NearbyMapView: View {
     @EnvironmentObject var tracker: LocationTracker
     @EnvironmentObject var matchStore: MatchStore
+    @EnvironmentObject var blockStore: BlockStore
 
     @State private var camera: MapCameraPosition = .userLocation(
         fallback: .region(MKCoordinateRegion(
@@ -18,7 +19,7 @@ struct NearbyMapView: View {
     var body: some View {
         Map(position: $camera) {
             UserAnnotation()
-            ForEach(users) { user in
+            ForEach(visibleUsers) { user in
                 Annotation(user.name, coordinate: user.coordinate, anchor: .bottom) {
                     SongPin(user: user, isSelected: selected?.id == user.id)
                         .onTapGesture { tapHaptic(); selected = user }
@@ -72,14 +73,20 @@ struct NearbyMapView: View {
         }
         // Tell the store when a sheet is up, and close it when the store asks.
         .onChange(of: selected != nil || showDevMenu) { _, up in matchStore.isSheetUp = up }
+        .onChange(of: blockStore.blocked) { _, _ in
+            if let id = selected?.id, blockStore.isBlocked(id) { selected = nil }
+        }
         .onChange(of: matchStore.closeSheetsToken) { _, _ in
             selected = nil
             showDevMenu = false
         }
     }
 
+    /// People who are not blocked.
+    private var visibleUsers: [NearbyUser] { users.filter { !blockStore.isBlocked($0.id) } }
+
     private var pillText: String {
-        switch users.count {
+        switch visibleUsers.count {
         case 0: "no one near you yet"
         case 1: "1 person near you"
         default: "\(users.count) people near you"
@@ -96,5 +103,6 @@ struct NearbyMapView: View {
     NearbyMapView()
         .environmentObject(LocationTracker.shared)
         .environmentObject(MatchStore())
+        .environmentObject(BlockStore())
         .brutScreen()
 }

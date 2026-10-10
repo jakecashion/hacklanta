@@ -18,12 +18,14 @@
 		72A80B56BB0B3CE1A3C80960 /* LocationTrackerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFC4D42D2F57F845733EAE72 /* LocationTrackerApp.swift */; };
 		7B06D54799821EFA67A74076 /* SentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F12AA7734EDD1942A2F9272B /* SentView.swift */; };
 		7CDA80C2F9D7E76576424867 /* MatchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 602F8A2B00D09BF537E247D3 /* MatchView.swift */; };
+		847D92EA3DC25E12C3C796C9 /* BlockedPeopleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0C1CE3820A1BD4BCE55A430 /* BlockedPeopleView.swift */; };
 		92DAF259C7FD9BEFFEC75E49 /* SongSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5AEA0E811B16D8FE56D0295 /* SongSearchView.swift */; };
 		96D032BBCC13535F14EA6C1A /* NearbyUserCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = E71BA69F0DAC97C4EAF3648A /* NearbyUserCard.swift */; };
 		BAE81249D0A93834D1AC7CFE /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49403FAD9E8A1898582580C3 /* Theme.swift */; };
 		BDFC5FD26F6A0A0102B4432B /* DevMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D854A5ECE83F4959A5F90345 /* DevMenuView.swift */; };
 		DF64023EC8EEC9F3567E765C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73CC9CCE77A0DBC742D2596C /* ContentView.swift */; };
 		EDF6A15B661BC6CF7FAE7EC3 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 964FA0F3293BB457C365BE37 /* NotificationManager.swift */; };
+		FB521F3CDE43017CC07D6D24 /* BlockStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F9720310266D9C91039C989 /* BlockStore.swift */; };
 		FF0240174F85C2D471441196 /* MeetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDF531D85BFA6FF7B7A3100F /* MeetupView.swift */; };
 /* End PBXBuildFile section */
 
@@ -36,7 +38,9 @@
 		73CC9CCE77A0DBC742D2596C /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		8E95BB01FF8A5116A5204A95 /* RecommendationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecommendationsView.swift; sourceTree = "<group>"; };
 		964FA0F3293BB457C365BE37 /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
+		9F9720310266D9C91039C989 /* BlockStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockStore.swift; sourceTree = "<group>"; };
 		AFC4D42D2F57F845733EAE72 /* LocationTrackerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationTrackerApp.swift; sourceTree = "<group>"; };
+		B0C1CE3820A1BD4BCE55A430 /* BlockedPeopleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockedPeopleView.swift; sourceTree = "<group>"; };
 		B496E3CC4B378F60A670C126 /* RecommendationDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecommendationDetailView.swift; sourceTree = "<group>"; };
 		CB5CAD374834AF12341C8136 /* SongPin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongPin.swift; sourceTree = "<group>"; };
 		D5AEA0E811B16D8FE56D0295 /* SongSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongSearchView.swift; sourceTree = "<group>"; };
@@ -44,7 +48,7 @@
 		D854A5ECE83F4959A5F90345 /* DevMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevMenuView.swift; sourceTree = "<group>"; };
 		E71BA69F0DAC97C4EAF3648A /* NearbyUserCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NearbyUserCard.swift; sourceTree = "<group>"; };
 		ECEC9BB3AD3D580B51E1B784 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		F0568C431A1F07747F1E06D4 /* LocationTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LocationTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F0568C431A1F07747F1E06D4 /* LocationTracker.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = LocationTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F12AA7734EDD1942A2F9272B /* SentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SentView.swift; sourceTree = "<group>"; };
 		F51AFA19CB7055F63D6F0F6E /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		FDF531D85BFA6FF7B7A3100F /* MeetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetupView.swift; sourceTree = "<group>"; };
@@ -54,6 +58,7 @@
 		0C8F6A668EB4F5FE1F9DBD0E /* LocationTracker */ = {
 			isa = PBXGroup;
 			children = (
+				9F9720310266D9C91039C989 /* BlockStore.swift */,
 				73CC9CCE77A0DBC742D2596C /* ContentView.swift */,
 				ECEC9BB3AD3D580B51E1B784 /* Info.plist */,
 				0128FC332DAFB7B51A0C5BB1 /* LocationTracker.swift */,
@@ -87,6 +92,7 @@
 		C3B887C5D364282408E23BF3 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				B0C1CE3820A1BD4BCE55A430 /* BlockedPeopleView.swift */,
 				D854A5ECE83F4959A5F90345 /* DevMenuView.swift */,
 				602F8A2B00D09BF537E247D3 /* MatchView.swift */,
 				FDF531D85BFA6FF7B7A3100F /* MeetupView.swift */,
@@ -129,6 +135,8 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+				};
 			};
 			buildConfigurationList = 696D7FB9FE097978C8EE81CB /* Build configuration list for PBXProject "LocationTracker" */;
 			developmentRegion = en;
@@ -154,6 +162,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FB521F3CDE43017CC07D6D24 /* BlockStore.swift in Sources */,
+				847D92EA3DC25E12C3C796C9 /* BlockedPeopleView.swift in Sources */,
 				DF64023EC8EEC9F3567E765C /* ContentView.swift in Sources */,
 				BDFC5FD26F6A0A0102B4432B /* DevMenuView.swift in Sources */,
 				66DC20246B0B148C33F65943 /* LocationTracker.swift in Sources */,

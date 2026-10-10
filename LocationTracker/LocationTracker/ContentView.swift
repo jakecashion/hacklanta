@@ -32,6 +32,7 @@ private enum AppTab: String, CaseIterable {
 struct ContentView: View {
     @EnvironmentObject var matchStore: MatchStore
     @EnvironmentObject var recommendations: RecommendationStore
+    @EnvironmentObject var blockStore: BlockStore
     @State private var tab: AppTab = .map
 
     var body: some View {
@@ -52,9 +53,11 @@ struct ContentView: View {
         }
         .brutScreen()
         .onAppear {
-            NotificationManager.shared.onOpenMatch = { id in
+            NotificationManager.shared.onOpenMatch = { [blockStore] id in
+                guard !blockStore.isBlocked(id) else { return }   // a tap on an old alert from a blocked person
                 matchStore.whenReady { matchStore.openMatch(userId: id) }
             }
+            recommendations.isBlocked = { [blockStore] in blockStore.isBlocked($0) }
             // No backend yet: optionally put the songs the user sends into the user's own playlist.
             matchStore.onSongSent = { [recommendations] song, line, user in
                 guard recommendations.loopbackSentSongs else { return }
@@ -119,6 +122,7 @@ private struct BrutTabBar: View {
 struct TrackerView: View {
     @EnvironmentObject var tracker: LocationTracker
     @EnvironmentObject var matchStore: MatchStore
+    @EnvironmentObject var blockStore: BlockStore
 
     var body: some View {
         NavigationStack {
@@ -136,6 +140,21 @@ struct TrackerView: View {
                         .buttonStyle(BrutButtonStyle(fill: tracker.isTracking ? .surface : .cubeRed,
                                                      textColor: tracker.isTracking ? .ink : .white))
                     }
+
+                    NavigationLink {
+                        BlockedPeopleView()
+                    } label: {
+                        HStack(spacing: 12) {
+                            IconBox(systemName: "hand.raised.fill", fill: .cubeOrange, size: 40)
+                            Text("blocked people").font(.headline)
+                            Spacer()
+                            GenreChip(text: "\(blockStore.blocked.count)", fill: .surface)
+                            Image(systemName: "chevron.right").font(.footnote.weight(.bold))
+                        }
+                        .padding(12)
+                        .brutCard(shadow: 0)
+                    }
+                    .buttonStyle(.plain)
 
                     Text("recent").font(.title3.weight(.bold))
                     if tracker.fixes.isEmpty {

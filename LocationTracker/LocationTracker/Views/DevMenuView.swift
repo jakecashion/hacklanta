@@ -5,6 +5,7 @@ import UserNotifications
 struct DevMenuView: View {
     @EnvironmentObject var matchStore: MatchStore
     @EnvironmentObject var recommendations: RecommendationStore
+    @EnvironmentObject var blockStore: BlockStore
     @Environment(\.dismiss) private var dismiss
 
     @State private var status: UNAuthorizationStatus = .notDetermined
@@ -21,6 +22,14 @@ struct DevMenuView: View {
                 Section("Test person") {
                     Picker("Person", selection: $personId) {
                         ForEach(people) { Text($0.name).tag($0.id) }
+                    }
+                    Button(blockStore.isBlocked(person.id) ? "Unblock \(person.name)" : "Block \(person.name)") {
+                        if blockStore.isBlocked(person.id) {
+                            blockStore.unblock(person.id)
+                        } else {
+                            blockStore.block(id: person.id, name: person.name)
+                            recommendations.removeAll(from: person.id)
+                        }
                     }
                 }
 
@@ -52,6 +61,7 @@ struct DevMenuView: View {
 
                 Section("Match flow") {
                     Button("Open match screen now") {
+                        guard !blockStore.isBlocked(personId) else { message = "\(person.name) is blocked."; return }
                         let id = personId
                         matchStore.whenReady { matchStore.openMatch(userId: id) }
                     }
@@ -85,6 +95,7 @@ struct DevMenuView: View {
     }
 
     private func receiveSong() {
+        guard !blockStore.isBlocked(person.id) else { message = "\(person.name) is blocked. The song was dropped."; return }
         let notes = ["You will love this one", "Reminded me of you", "On repeat all week", ""]
         recommendations.receive(
             song: MockData.songs.randomElement()!,
@@ -94,6 +105,7 @@ struct DevMenuView: View {
     }
 
     private func send(after seconds: TimeInterval) {
+        guard !blockStore.isBlocked(person.id) else { message = "\(person.name) is blocked. No alert sent."; return }
         Task {
             do {
                 try await NotificationManager.shared.scheduleTestMatch(for: person, after: seconds)
@@ -110,5 +122,6 @@ struct DevMenuView: View {
     DevMenuView()
         .environmentObject(MatchStore())
         .environmentObject(RecommendationStore())
+        .environmentObject(BlockStore())
         .brutScreen()
 }

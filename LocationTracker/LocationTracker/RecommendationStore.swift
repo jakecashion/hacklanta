@@ -11,6 +11,9 @@ final class RecommendationStore: ObservableObject {
         didSet { UserDefaults.standard.set(loopbackSentSongs, forKey: Self.loopbackKey) }
     }
 
+    /// Set by the app. Songs from a blocked sender are dropped. Not set in previews, so nobody is blocked there.
+    var isBlocked: (String) -> Bool = { _ in false }
+
     var newCount: Int { items.filter(\.isNew).count }
 
     private static let loopbackKey = "loopbackSentSongs"
@@ -26,6 +29,7 @@ final class RecommendationStore: ObservableObject {
 
     func receive(song: Song, senderId: String, senderName: String,
                  note: String = "", sharedGenres: [String] = [], at date: Date = Date()) {
+        guard senderId == Recommendation.selfId || !isBlocked(senderId) else { return }
         let item = Recommendation(song: song, senderId: senderId, senderName: senderName,
                                   note: note.trimmingCharacters(in: .whitespacesAndNewlines),
                                   sharedGenres: sharedGenres, receivedAt: date)
@@ -46,6 +50,11 @@ final class RecommendationStore: ObservableObject {
 
     func delete(_ id: Recommendation.ID) {
         items.removeAll { $0.id == id }
+        save()
+    }
+
+    func removeAll(from senderId: String) {
+        items.removeAll { $0.senderId == senderId }
         save()
     }
 
