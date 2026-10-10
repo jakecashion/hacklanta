@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A Premiere Pro panel that lets two editors on two Windows machines join one live session and edit the same timeline together, like Google Docs for Premiere. One editor hosts the session and runs a small relay. The other connects by typing the host's IP. Each editor sees the other's edits, selection and a live change feed. Built for the Hacklanta Creative track (sponsored by Adobe). The After Effects version comes later.
+A Premiere Pro panel that lets two editors on two Windows machines join one live session and edit the same timeline together, like Google Docs for Premiere. One editor hosts the session and runs a small relay. The other connects by typing the host's IP. Each editor sees the other's edits, their live mouse pointer over Premiere, and a live change feed. Built for the Hacklanta Creative track (sponsored by Adobe). The After Effects version comes later.
 
 ## Core Value
 
@@ -86,7 +86,7 @@ Scope cut on 2026-10-10 to a 6–8 hour build. Detail and IDs are in `REQUIREMEN
 | Relay on the host laptop is the sequencer (assigns `rev`, keeps the op log); host panel approves and supplies the snapshot | All clients run the same code path; no cloud server needed (research 2026-10-10) | — Pending |
 | Clip ID = position (`v{track}:{clip}`) for core; switch to `nodeId` only if stretch move lands | Core never adds or moves clips; removes the unverified `nodeId` dependency (research 2026-10-10) | — Pending |
 | Last-writer-wins per field, no locks | Simplest conflict rule that converges | — Pending |
-| Core = connect by IP + snapshot join + Scale/Rotation/Opacity sync + selection + change feed; everything else stretch | Scope cut to a 6–8 hour budget (2026-10-10); feed is cheap and makes edits readable on stage | — Pending |
+| Core = connect by IP + snapshot join + Scale/Rotation/Opacity sync + live cursor + change feed; everything else stretch | Scope cut to a 6–8 hour budget (2026-10-10); feed is cheap and makes edits readable on stage. Live mouse cursor over Premiere replaced selection presence (2026-10-10): more visible on stage; drawn by a per-laptop overlay helper because the panel can't draw outside itself | — Pending |
 | Run the API checks (`08` §12) before building | Several of the API behaviours the plan depends on are unverified | — Pending |
 | Pitch under the Creative (Adobe) track to remote editor pairs | It's an Adobe tool, and "Google Docs for Premiere" is a clear story | — Pending |
 

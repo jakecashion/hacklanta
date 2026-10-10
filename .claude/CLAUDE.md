@@ -4,7 +4,7 @@
 
 **Premiere Live Collab**
 
-A Premiere Pro panel that lets two editors on two Windows machines join one live session and edit the same timeline together, like Google Docs for Premiere. One editor hosts the session and runs a small relay. The other connects by typing the host's IP. Each editor sees the other's edits, selection and a live change feed. Built for the Hacklanta Creative track (sponsored by Adobe). The After Effects version comes later.
+A Premiere Pro panel that lets two editors on two Windows machines join one live session and edit the same timeline together, like Google Docs for Premiere. One editor hosts the session and runs a small relay. The other connects by typing the host's IP. Each editor sees the other's edits, their live mouse pointer over Premiere, and a live change feed. Built for the Hacklanta Creative track (sponsored by Adobe). The After Effects version comes later.
 
 **Core Value:** Two editors change the same Premiere timeline at the same time, and each sees the other's change in their own Premiere within 1–2 seconds, live on stage at judging.
 

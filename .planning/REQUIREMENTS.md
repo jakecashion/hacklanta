@@ -33,12 +33,12 @@ Requirements for the 9am 2026-10-11 demo. Each one maps to a roadmap phase.
 
 ### Presence & Feed
 
-- [ ] **PRES-01**: Each panel shows which clips the other editor has selected
+- [ ] **PRES-04**: Each editor sees the other's live mouse pointer, with their name, over their own Premiere window (per-laptop overlay helper; both Premieres maximized with the same workspace)
 - [ ] **PRES-03**: Each panel shows a change feed with author names, e.g. `Sam set Hero Scale to 150 (rev 12)`
 
 ### Demo
 
-- [ ] **DEMO-01**: A core-only demo script, rewritten from `08` §11 around big Scale/Rotation/Opacity jump edits, selection and the feed, has been run once end to end, clean, on two laptops over the hotspot
+- [ ] **DEMO-01**: A core-only demo script, rewritten from `08` §11 around big Scale/Rotation/Opacity jump edits, the live cursor and the feed, has been run once end to end, clean, on two laptops over the hotspot
 
 ## v2 Requirements
 
@@ -54,6 +54,7 @@ Stretch goals. Only start these after v1 is demo-solid.
 - **SYNC-02**: Motion Position sync. Its units are unverified (normalized or pixels).
 - **SYNC-08**: Resync button
 - **SYNC-09**: Join refuses a mismatched project
+- **PRES-01**: Each panel shows which clips the other editor has selected (replaced in Phase 3 by PRES-04 live cursor, 2026-10-10)
 - **PRES-02**: The other editor's playhead time
 - **DEMO-02**: 3 clean rehearsal runs in a row
 
@@ -81,7 +82,6 @@ Stretch goals. Only start these after v1 is demo-solid.
 | Multiple sequences, more than 2 users | The demo is one sequence on two machines |
 | Locks | Last-writer-wins per field is enough |
 | Shared undo, one undo step per remote edit | Premiere undo integration is unknown; don't press Ctrl+Z on stage |
-| Real mouse cursors in the timeline | No API; presence stays in the panel only |
 | Screen streaming, cloud server, accounts | Wrong problem; the relay runs on the LAN |
 | Project-file merge, Frame.io-style comments, AI features | Not the core value |
 | Render badge | Cosmetic |
@@ -107,7 +107,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SYNC-05 | Phase 2 | Pending |
 | SYNC-06 | Phase 2 | Pending |
 | SYNC-07 | Phase 2 | Pending |
-| PRES-01 | Phase 3 | Pending |
+| PRES-04 | Phase 3 | Pending |
 | PRES-03 | Phase 3 | Pending |
 | DEMO-01 | Phase 3 | Pending |
 

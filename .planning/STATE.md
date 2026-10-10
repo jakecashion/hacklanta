@@ -1,6 +1,13 @@
 ---
-gsd_state_version: '1.0'
+gsd_state_version: "1.0"
+current_phase: 2
+current_phase_name: Live Param Sync
 status: planning
+stopped_at: "Phase 2 verified on one laptop with fake-peer.js (89 remote edits applied, own edits sent, no echo, 0 apply errors). Next: two-laptop test (Phase 1 Tasks 4-5: Tailscale, firewall, guest install), then Phase 3"
+last_updated: "2026-10-10T23:36:47.084Z"
+last_activity: 2026-10-10
+last_activity_desc: Roadmap revised for a 6-8 h build (3 phases, 16/16 v1 requirements mapped)
+state_head: de1a9ff668669006d0fd9fb21089fadc10c1c3a8
 progress:
   total_phases: 4
   completed_phases: 0
@@ -63,6 +70,7 @@ Recent decisions affecting current work:
 ### Roadmap Evolution
 
 - Phase 4 added (2026-10-10): Timeline Integration (ENV-06 probes, EDIT-01 rename, EDIT-02 move, EDIT-03 trim), pulled out of the stretch list; runs after Phase 3, not on the demo path
+- Phase 3 edited: PRES-01 selection presence replaced by PRES-04 live mouse cursor over Premiere (per-laptop PowerShell overlay helper, probed first); PRES-01 moved to v2; Phase 3 budget ~3 h
 
 ### Pending Todos
 
