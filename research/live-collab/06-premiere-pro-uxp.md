@@ -2,6 +2,8 @@
 
 Date: 2026-10-10. Written in ASD-STE100 Simplified Technical English.
 
+> **Do not use this file for the hackathon build.** We have Premiere Pro 22.3.1. UXP needs 25.6 or later. Use `07-premiere-pro-22-cep.md`. Keep this file for a later UXP port.
+
 ## 1. Decision
 
 - We start with Premiere Pro. We do After Effects (AE) after.

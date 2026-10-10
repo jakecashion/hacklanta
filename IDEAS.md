@@ -83,3 +83,4 @@ Notes:
 - Examples to learn from: Google Docs, Microsoft Word online (collaborative)
 - Decision (2026-10-10): Start with the Premiere Pro version. Do the After Effects version after.
 - Premiere Pro plugin research: [research/live-collab/06-premiere-pro-uxp.md](research/live-collab/06-premiere-pro-uxp.md)
+- We have Premiere Pro v22.3.1.2 on both machines. UXP needs 25.6, so we use CEP + ExtendScript: [research/live-collab/07-premiere-pro-22-cep.md](research/live-collab/07-premiere-pro-22-cep.md)
