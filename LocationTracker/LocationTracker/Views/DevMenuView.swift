@@ -4,6 +4,7 @@ import UserNotifications
 /// Developer tools. Open it with the wrench button on the map.
 struct DevMenuView: View {
     @EnvironmentObject var matchStore: MatchStore
+    @EnvironmentObject var recommendations: RecommendationStore
     @Environment(\.dismiss) private var dismiss
 
     @State private var status: UNAuthorizationStatus = .notDetermined
@@ -36,6 +37,17 @@ struct DevMenuView: View {
                     Text("Notifications")
                 } footer: {
                     Text("To test a tap from the lock screen, tap the button, then lock the phone. Tap the notification to open the match screen.")
+                }
+
+                Section {
+                    Toggle("Also add songs I send to my own playlist", isOn: $recommendations.loopbackSentSongs)
+                    Button("Receive a song from \(person.name)") { receiveSong() }
+                    Button("Add 3 sample songs") { recommendations.addSamples() }
+                    Button("Clear playlist", role: .destructive) { recommendations.clear() }
+                } header: {
+                    Text("Playlist")
+                } footer: {
+                    Text("There is no server yet. Use these buttons to fill the Playlist tab.")
                 }
 
                 Section("Match flow") {
@@ -72,6 +84,15 @@ struct DevMenuView: View {
         status = await NotificationManager.shared.authorizationStatus()
     }
 
+    private func receiveSong() {
+        let notes = ["You will love this one", "Reminded me of you", "On repeat all week", ""]
+        recommendations.receive(
+            song: MockData.songs.randomElement()!,
+            senderId: person.id, senderName: person.name,
+            note: notes.randomElement()!, sharedGenres: person.sharedGenres)
+        message = "Added a song from \(person.name)."
+    }
+
     private func send(after seconds: TimeInterval) {
         Task {
             do {
@@ -86,5 +107,7 @@ struct DevMenuView: View {
 }
 
 #Preview {
-    DevMenuView().environmentObject(MatchStore())
+    DevMenuView()
+        .environmentObject(MatchStore())
+        .environmentObject(RecommendationStore())
 }

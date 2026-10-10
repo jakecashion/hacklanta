@@ -1,7 +1,7 @@
 import CoreLocation
 import Foundation
 
-struct Song: Identifiable, Hashable {
+struct Song: Identifiable, Hashable, Codable {
     let id: String
     let title: String
     let artist: String
@@ -25,6 +25,26 @@ struct NearbyUser: Identifiable, Hashable {
 struct Match: Identifiable, Hashable {
     let id: String
     let user: NearbyUser
+}
+
+/// A song someone sent to the user. Shown in the Playlist tab.
+struct Recommendation: Identifiable, Codable, Hashable {
+    var id = UUID()
+    let song: Song
+    let senderId: String
+    let senderName: String
+    var note: String = ""
+    var sharedGenres: [String] = []
+    var receivedAt = Date()
+    var isNew = true
+
+    static let selfId = "me"
+
+    /// For example "just now" or "5 minutes ago".
+    var timeText: String {
+        if Date().timeIntervalSince(receivedAt) < 60 { return "just now" }
+        return receivedAt.formatted(.relative(presentation: .numeric))
+    }
 }
 
 enum OutgoingMessage {

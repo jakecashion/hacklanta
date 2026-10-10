@@ -7,7 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		329A8BE73D731AEC523E4C5E /* RecommendationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E95BB01FF8A5116A5204A95 /* RecommendationsView.swift */; };
 		3321BCB53B429260482D3E43 /* SongPin.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB5CAD374834AF12341C8136 /* SongPin.swift */; };
+		391EDA7BA48F2519B9B8329F /* RecommendationDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B496E3CC4B378F60A670C126 /* RecommendationDetailView.swift */; };
+		51D6EB4BC70CED2EB0E0BC95 /* RecommendationStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05C0E05ED4D120B7B657E5BF /* RecommendationStore.swift */; };
 		62D5EE17103B5A29ECEC29BB /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = F51AFA19CB7055F63D6F0F6E /* Models.swift */; };
 		66DC20246B0B148C33F65943 /* LocationTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0128FC332DAFB7B51A0C5BB1 /* LocationTracker.swift */; };
 		6A037AED58D35235B6B14E64 /* MatchStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42DBC2DC50050216BE186194 /* MatchStore.swift */; };
@@ -26,12 +29,15 @@
 
 /* Begin PBXFileReference section */
 		0128FC332DAFB7B51A0C5BB1 /* LocationTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationTracker.swift; sourceTree = "<group>"; };
+		05C0E05ED4D120B7B657E5BF /* RecommendationStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecommendationStore.swift; sourceTree = "<group>"; };
 		42DBC2DC50050216BE186194 /* MatchStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchStore.swift; sourceTree = "<group>"; };
 		49403FAD9E8A1898582580C3 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		602F8A2B00D09BF537E247D3 /* MatchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchView.swift; sourceTree = "<group>"; };
 		73CC9CCE77A0DBC742D2596C /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		8E95BB01FF8A5116A5204A95 /* RecommendationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecommendationsView.swift; sourceTree = "<group>"; };
 		964FA0F3293BB457C365BE37 /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
 		AFC4D42D2F57F845733EAE72 /* LocationTrackerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationTrackerApp.swift; sourceTree = "<group>"; };
+		B496E3CC4B378F60A670C126 /* RecommendationDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecommendationDetailView.swift; sourceTree = "<group>"; };
 		CB5CAD374834AF12341C8136 /* SongPin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongPin.swift; sourceTree = "<group>"; };
 		D5AEA0E811B16D8FE56D0295 /* SongSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongSearchView.swift; sourceTree = "<group>"; };
 		D5F4293063446DD7B0491F9B /* NearbyMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NearbyMapView.swift; sourceTree = "<group>"; };
@@ -55,6 +61,7 @@
 				42DBC2DC50050216BE186194 /* MatchStore.swift */,
 				F51AFA19CB7055F63D6F0F6E /* Models.swift */,
 				964FA0F3293BB457C365BE37 /* NotificationManager.swift */,
+				05C0E05ED4D120B7B657E5BF /* RecommendationStore.swift */,
 				49403FAD9E8A1898582580C3 /* Theme.swift */,
 				C3B887C5D364282408E23BF3 /* Views */,
 			);
@@ -85,6 +92,8 @@
 				FDF531D85BFA6FF7B7A3100F /* MeetupView.swift */,
 				D5F4293063446DD7B0491F9B /* NearbyMapView.swift */,
 				E71BA69F0DAC97C4EAF3648A /* NearbyUserCard.swift */,
+				B496E3CC4B378F60A670C126 /* RecommendationDetailView.swift */,
+				8E95BB01FF8A5116A5204A95 /* RecommendationsView.swift */,
 				F12AA7734EDD1942A2F9272B /* SentView.swift */,
 				CB5CAD374834AF12341C8136 /* SongPin.swift */,
 				D5AEA0E811B16D8FE56D0295 /* SongSearchView.swift */,
@@ -156,6 +165,9 @@
 				7065A325B5243B381A5CFF46 /* NearbyMapView.swift in Sources */,
 				96D032BBCC13535F14EA6C1A /* NearbyUserCard.swift in Sources */,
 				EDF6A15B661BC6CF7FAE7EC3 /* NotificationManager.swift in Sources */,
+				391EDA7BA48F2519B9B8329F /* RecommendationDetailView.swift in Sources */,
+				51D6EB4BC70CED2EB0E0BC95 /* RecommendationStore.swift in Sources */,
+				329A8BE73D731AEC523E4C5E /* RecommendationsView.swift in Sources */,
 				7B06D54799821EFA67A74076 /* SentView.swift in Sources */,
 				3321BCB53B429260482D3E43 /* SongPin.swift in Sources */,
 				92DAF259C7FD9BEFFEC75E49 /* SongSearchView.swift in Sources */,

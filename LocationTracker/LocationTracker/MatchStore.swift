@@ -6,6 +6,9 @@ final class MatchStore: ObservableObject {
     @Published var match: Match?
     @Published var path: [MatchRoute] = []
 
+    /// Called when the user sends a song: (song, short line, receiver).
+    var onSongSent: ((Song, String, NearbyUser) -> Void)?
+
     func simulateMatch() {
         path = []
         match = MockData.match
@@ -30,7 +33,8 @@ final class MatchStore: ObservableObject {
         let name = match.user.name
         print("SEND to \(name):", message)
         switch message {
-        case .song(let song, _):
+        case .song(let song, let line):
+            onSongSent?(song, line, match.user)
             path = [.sent("\(name) will see \(song.title) in their playlist.")]
         case .meetup:
             path = [.sent("\(name) will get your message.")]
