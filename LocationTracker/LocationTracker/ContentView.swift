@@ -3,17 +3,29 @@ import CoreLocation
 
 struct ContentView: View {
     @EnvironmentObject var matchStore: MatchStore
+    @EnvironmentObject var recommendations: RecommendationStore
 
     var body: some View {
         TabView {
             NearbyMapView()
                 .tabItem { Label("Map", systemImage: "map") }
+            RecommendationsView()
+                .tabItem { Label("Playlist", systemImage: "music.note.list") }
+                .badge(recommendations.newCount)
             TrackerView()
                 .tabItem { Label("Tracker", systemImage: "location") }
         }
         .preferredColorScheme(.dark)
         .onAppear {
-            NotificationManager.shared.onOpenMatch = { matchStore.openMatch(userId: $0) }
+            NotificationManager.shared.onOpenMatch = { id in
+                matchStore.whenReady { matchStore.openMatch(userId: id) }
+            }
+            // No backend yet: optionally put the songs the user sends into the user's own playlist.
+            matchStore.onSongSent = { [recommendations] song, line, user in
+                guard recommendations.loopbackSentSongs else { return }
+                recommendations.receive(song: song, senderId: Recommendation.selfId, senderName: "You",
+                                        note: line, sharedGenres: user.sharedGenres)
+            }
         }
         .fullScreenCover(item: $matchStore.match) { match in
             MatchFlowView(match: match)

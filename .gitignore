@@ -5,3 +5,6 @@ __pycache__/
 .pytest_cache/
 .coverage
 .docker/
+# Editor and OS files
+*.swp
+.DS_Store

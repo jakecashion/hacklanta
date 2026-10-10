@@ -1,7 +1,7 @@
 import CoreLocation
 import Foundation
 
-struct Song: Identifiable, Hashable {
+struct Song: Identifiable, Hashable, Codable {
     let id: String
     let title: String
     let artist: String
@@ -27,6 +27,26 @@ struct Match: Identifiable, Hashable {
     let user: NearbyUser
 }
 
+/// A song someone sent to the user. Shown in the Playlist tab.
+struct Recommendation: Identifiable, Codable, Hashable {
+    var id = UUID()
+    let song: Song
+    let senderId: String
+    let senderName: String
+    var note: String = ""
+    var sharedGenres: [String] = []
+    var receivedAt = Date()
+    var isNew = true
+
+    static let selfId = "me"
+
+    /// For example "just now" or "5 minutes ago".
+    var timeText: String {
+        if Date().timeIntervalSince(receivedAt) < 60 { return "just now" }
+        return receivedAt.formatted(.relative(presentation: .numeric))
+    }
+}
+
 enum OutgoingMessage {
     case song(Song, line: String)
     case meetup(text: String)
@@ -41,6 +61,12 @@ enum MatchRoute: Hashable {
 enum MockData {
     /// Default map center (Atlanta) when the tracker has no fix yet.
     static let defaultCenter = CLLocationCoordinate2D(latitude: 33.7490, longitude: -84.3880)
+
+    /// Where the mock people are placed. The map moves it to the real position after the first fix.
+    /// Use `currentUsers()` everywhere (not `defaultCenter`) so a person has the same coordinates on every screen.
+    static var center = defaultCenter
+
+    static func currentUsers() -> [NearbyUser] { nearbyUsers(around: center) }
 
     static let match = Match(id: "match-1", user: nearbyUsers(around: defaultCenter)[0])
 

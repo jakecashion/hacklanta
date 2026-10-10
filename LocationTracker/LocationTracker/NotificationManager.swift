@@ -1,5 +1,13 @@
 import UserNotifications
 
+enum NotificationError: LocalizedError {
+    case notAllowed
+
+    var errorDescription: String? {
+        "Notifications are off for this app. Turn them on in Settings."
+    }
+}
+
 /// Local notifications for the match flow. The test notification uses mock data.
 /// Replace with real push (APNs) later. The tap handling can stay the same.
 final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
@@ -30,6 +38,10 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
 
     func scheduleTestMatch(for user: NearbyUser, after seconds: TimeInterval) async throws {
         if await authorizationStatus() == .notDetermined { await requestPermission() }
+        switch await authorizationStatus() {
+        case .authorized, .provisional, .ephemeral: break
+        default: throw NotificationError.notAllowed
+        }
 
         let content = UNMutableNotificationContent()
         content.title = "Someone near you"
