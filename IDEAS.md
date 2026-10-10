@@ -69,3 +69,15 @@ AI meta analysis - on how users interact with the AI agents. Detecting behaviora
 Transcription of therapy conversations to help therapy be more personalized via user & therapist conversations. Ie workbooks, etc.
 
 Notes:
+
+### Live collaborative After Effects session
+We are moving towards an idea like this: https://www.tiktok.com/t/ZPLrspCAT/
+
+Start a session, friend joins. (editor's fastest gpu's fastest ram's, uses editor's machines, hosting their project). One person hosts the session locally.
+
+This will be in Adobe After Effects.
+
+Notes:
+- Decision: Server based? or hosting?
+- What are the components needed to connect to a netowkr, live on a server, or a computer?
+- Examples to learn from: Google Docs, Microsoft Word online (collaborative)
