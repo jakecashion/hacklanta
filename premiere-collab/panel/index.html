@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Live Collab probes</title>
+<style>
+  body { background:#232323; color:#ddd; font:12px Segoe UI, sans-serif; margin:8px; }
+  h3 { margin:12px 0 4px; font-size:12px; color:#9cf; }
+  button { background:#444; color:#eee; border:1px solid #666; padding:3px 8px; margin:2px 2px 2px 0; cursor:pointer; }
+  button:hover { background:#555; }
+  input { background:#111; color:#eee; border:1px solid #555; padding:2px 4px; width:150px; }
+  #log { background:#111; border:1px solid #444; height:230px; overflow:auto; white-space:pre-wrap; font:11px Consolas, monospace; padding:4px; }
+  table { width:100%; border-collapse:collapse; } td { border-bottom:1px solid #333; padding:2px 4px; }
+  .PASS { color:#6d6; } .FAIL { color:#f66; } .TODO { color:#aa8; }
+  textarea { width:100%; height:70px; background:#111; color:#eee; font:11px Consolas; }
+</style>
+</head>
+<body>
+<b>Phase 1 probes</b> <span id="env"></span>
+<h3>Checks</h3>
+<table id="checks"></table>
+
+<h3>1. Environment and API (this machine)</h3>
+<button id="bEnv">Env + bridge</button>
+<button id="bDump">Dump components</button>
+<button id="bRound">setValue round trip (4 fields, clip V1:0)</button>
+<button id="bVisYes">Monitor changed: YES</button><button id="bVisNo">Monitor changed: NO</button>
+<button id="bMove">Move/trim test (check 4)</button>
+<button id="bScan">Scan timing</button>
+
+<h3>2. nodeId stability (check 3)</h3>
+<button id="bIdRec">Record IDs</button> then edit clips (move, trim, save/reopen) <button id="bIdCmp">Compare IDs</button>
+
+<h3>3. Events (check 5)</h3>
+<button id="bBind">Bind events</button>
+<button id="bEvMove">Read counts: I moved a clip</button>
+<button id="bEvTrim">...I trimmed a clip</button>
+<button id="bEvParam">...I changed Scale/Opacity</button>
+<button id="bEvSel">...I changed selection</button>
+
+<h3>4. Two machines via relay (check 2 + remote apply)</h3>
+<input id="relayUrl" value="ws://localhost:8080"> <input id="room" value="TEST01" style="width:70px">
+<input id="who" value="" style="width:70px" placeholder="name">
+<button id="bConn">Connect</button>
+<button id="bSend">Send Opacity to peer</button>
+<span id="peerState"></span>
+
+<h3>Results</h3>
+<button id="bExport">Export results</button><button id="bPresence">Read selection/playhead</button>
+<textarea id="out" readonly></textarea>
+<h3>Log</h3>
+<div id="log"></div>
+<script src="js/cep.js"></script>
+<script src="js/probe.js"></script>
+</body>
+</html>
