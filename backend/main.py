@@ -1,9 +1,11 @@
 import os
-from typing import List, Optional
+from typing import List, Literal, Optional
 
+import httpx
 import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI, Header, HTTPException
+from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel
 
 from spotify_service import (
@@ -20,8 +22,8 @@ app = FastAPI(title="Hacklanta Music Service", version="1.0.0")
 class SyncRequest(BaseModel):
     user_id: str
     spotify_access_token: str
-    mode: Optional[str] = "artists"  # "artists" or "tracks"
-    time_range: Optional[str] = (
+    mode: Optional[Literal["artists", "tracks"]] = "artists"  # "artists" or "tracks"
+    time_range: Optional[Literal["short_term", "medium_term", "long_term"]] = (
         "medium_term"  # "short_term", "medium_term", "long_term"
     )
 
@@ -56,7 +58,9 @@ async def sync_music_taste(payload: SyncRequest):
                 top_n_genres=5,
             )
 
-        await sync_music_taste_to_supabase(
+        # supabase-py client is synchronous; run it off the event loop.
+        await run_in_threadpool(
+            sync_music_taste_to_supabase,
             user_id=payload.user_id,
             top_genres=top_genres,
         )
@@ -66,6 +70,16 @@ async def sync_music_taste(payload: SyncRequest):
             music_taste=top_genres,
             success=True,
         )
+    except httpx.HTTPStatusError as e:
+        # Surface Spotify's status (e.g. 401 expired token) instead of a generic 500.
+        raise HTTPException(
+            status_code=e.response.status_code,
+            detail=f"Spotify API error: {e.response.text}",
+        )
+    except httpx.RequestError as e:
+        raise HTTPException(status_code=502, detail=f"Could not reach Spotify: {e}")
+    except LookupError as e:
+        raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
