@@ -13,7 +13,7 @@
 
   <section>
     <h2>Connection</h2>
-    <label>Relay <input id="url" value="ws://localhost:8080"></label>
+    <label>Host IP <input id="url" value="localhost" title="IP (e.g. 100.x.y.z), host:port, or a full ws:// URL"></label>
     <label>Name <input id="name" value="Editor"></label>
     <div class="row">
       <button id="connect">Connect</button>
@@ -21,6 +21,11 @@
       <button id="pingRelay">Ping relay</button>
     </div>
     <div id="peers" class="muted">No peers</div>
+  </section>
+
+  <section>
+    <h2>Changes <span id="syncStatus" class="muted">Sync off</span></h2>
+    <ul id="feed"></ul>
   </section>
 
   <section>
@@ -52,6 +57,7 @@
   </section>
 
   <script src="js/CSInterface.js"></script>
+  <script src="js/sync.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>

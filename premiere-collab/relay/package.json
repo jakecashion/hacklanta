@@ -6,7 +6,8 @@
   "main": "relay.js",
   "scripts": {
     "start": "node relay.js",
-    "ping": "node ping.js"
+    "ping": "node ping.js",
+    "test": "node --test test/*.test.js"
   },
   "dependencies": {
     "ws": "8.22.0"

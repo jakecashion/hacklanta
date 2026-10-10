@@ -148,4 +148,42 @@ function pc_scanCost(trackIndex) {
     } catch (e) { return pc_err(e); }
 }
 
+// ---------- Phase 2: sync ----------
+
+// Light scan for the 1 s poll: clip IDs and the three synced fields only.
+function pc_scan(trackIndex) {
+    try {
+        trackIndex = trackIndex || 0;
+        var track = pc_seq().videoTracks[trackIndex];
+        var clips = [];
+        for (var j = 0; j < track.clips.numItems; j++) {
+            var clip = track.clips[j];
+            clips.push({ id: "v" + trackIndex + ":" + j, name: clip.name, p: pc_readFields(clip) });
+        }
+        return pc_ok({ clips: clips });
+    } catch (e) { return pc_err(e); }
+}
+
+// Apply ops [{clipId:"v0:2", field, value}, ...]. Returns each op's read-back value.
+function pc_applyOps(opsJson) {
+    try {
+        var ops = JSON.parse(opsJson);
+        var results = [];
+        for (var i = 0; i < ops.length; i++) {
+            var op = ops[i];
+            var m = /^v(\d+):(\d+)$/.exec(op.clipId);
+            try {
+                if (!m) { throw new Error("Bad clipId " + op.clipId); }
+                var clip = pc_clip(parseInt(m[1], 10), parseInt(m[2], 10));
+                var param = pc_findParam(clip, op.field);
+                param.setValue(op.value, true);
+                results.push({ clipId: op.clipId, field: op.field, after: param.getValue(), ok: true });
+            } catch (e1) {
+                results.push({ clipId: op.clipId, field: op.field, ok: false, err: String(e1) });
+            }
+        }
+        return pc_ok({ results: results });
+    } catch (e) { return pc_err(e); }
+}
+
 "bridge loaded";

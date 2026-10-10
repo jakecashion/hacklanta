@@ -1,4 +1,5 @@
-// Panel JS (Chromium 88). Phase 1: load bridge, kill test buttons, relay connect + ping.
+// Panel JS (Chromium 88). Phase 1: bridge + kill test buttons. Phase 2: live sync of
+// Scale, Rotation and Opacity through the relay (see sync.js for the rules).
 const cs = new CSInterface();
 const $ = (id) => document.getElementById(id);
 const logEl = $('log');
@@ -46,6 +47,103 @@ $('set').onclick = async () => {
   log('pc_setParam', await jsx(`pc_setParam(0, ${clipIdx()}, "${field}", ${value})`));
 };
 
+// ---------- Sync ----------
+// All Premiere work (scan, apply) runs through one queue, so a scan never interleaves
+// with an apply and reads a half-updated timeline.
+let chain = Promise.resolve();
+const enqueue = (fn) => (chain = chain.then(fn).catch((e) => log('Sync error: ' + e)));
+
+let sync = null;          // PCSync instance while connected
+let clipNames = {};       // clipId -> clip name, from the last scan
+let polling = false;      // a poll is queued or running
+let lastScanErr = '';
+
+const FIELD_LABEL = { 'Motion.Scale': 'Scale', 'Motion.Rotation': 'Rotation', 'Opacity.Opacity': 'Opacity' };
+const fmt = (v) => Math.round(v * 100) / 100;
+
+function feed(text) {
+  const li = document.createElement('li');
+  li.textContent = text;
+  const ul = $('feed');
+  ul.insertBefore(li, ul.firstChild);
+  while (ul.children.length > 30) ul.removeChild(ul.lastChild);
+  log(text);
+}
+
+function showSyncStatus() {
+  $('syncStatus').textContent = sync
+    ? `Syncing: rev ${sync.lastRev}, ${sync.pendingCount} pending`
+    : 'Sync off';
+}
+
+async function scan() {
+  const res = await jsx('pc_scan(0)');
+  if (!res.ok) {
+    const err = res.err || res.raw || 'scan failed';
+    if (err !== lastScanErr) log('Scan error: ' + err);
+    lastScanErr = err;
+    return null;
+  }
+  lastScanErr = '';
+  clipNames = {};
+  for (const c of res.clips) clipNames[c.id] = c.name;
+  return res.clips;
+}
+
+// Called once per connection: the current timeline is the baseline, nothing is sent.
+function startSync(author) {
+  enqueue(async () => {
+    const clips = await scan();
+    sync = PCSync.createSync({ author });
+    sync.reset(clips || []);
+    log(`Sync started: ${clips ? clips.length : 0} clips on V1`);
+    showSyncStatus();
+  });
+}
+
+function stopSync() {
+  sync = null;
+  showSyncStatus();
+}
+
+function pollOnce() {
+  if (!sync || polling) return;
+  polling = true;
+  enqueue(async () => {
+    try {
+      if (!sync) return;
+      const clips = await scan();
+      if (!clips) return;
+      for (const op of sync.diff(clips)) send({ type: 'op', ...op });
+      showSyncStatus();
+    } finally {
+      polling = false;
+    }
+  });
+}
+
+function onCommit(msg) {
+  enqueue(async () => {
+    if (!sync) return;
+    const { op } = msg;
+    const who = sync.ownsOp(op.opId) ? 'You' : op.author;
+    const clip = clipNames[op.clipId] || op.clipId;
+    feed(`${who} set ${clip} ${FIELD_LABEL[op.field] || op.field} to ${fmt(op.value)} (rev ${msg.rev})`);
+    const toApply = sync.receiveCommit(msg);
+    if (toApply) {
+      const res = await jsx(`pc_applyOps(${JSON.stringify(JSON.stringify([toApply]))})`);
+      if (!res.ok) log('Apply error', res);
+      for (const r of res.results || []) {
+        if (r.ok) sync.afterApply(r.clipId, r.field, r.after);
+        else log('Apply failed', r);
+      }
+    }
+    showSyncStatus();
+  });
+}
+
+setInterval(pollOnce, 1000);
+
 // ---------- Relay ----------
 let ws = null;
 
@@ -60,32 +158,46 @@ function send(msg) {
   else log('Not connected');
 }
 
+// Accept a bare IP ("100.101.102.103") or a full ws:// / wss:// URL.
+function relayUrl(text) {
+  if (/^wss?:\/\//.test(text)) return text;
+  return `ws://${text}${/:\d+$/.test(text) ? '' : ':8080'}`;
+}
+
 $('connect').onclick = () => {
   if (ws) ws.close();
-  const url = $('url').value.trim();
+  const url = relayUrl($('url').value.trim());
   const name = $('name').value.trim() || 'Editor';
   setBadge('wait', 'Connecting…');
   log('Connecting to ' + url);
-  ws = new WebSocket(url);
-  ws.onopen = () => {
-    setBadge('on', 'Connected');
+  const sock = new WebSocket(url);
+  ws = sock;
+  sock.onopen = () => {
+    setBadge('on', 'Connected as ' + name);
     send({ type: 'hello', name });
+    startSync(name);
   };
-  ws.onclose = (e) => {
+  sock.onclose = (e) => {
+    if (ws !== sock) return; // an older socket closing after a reconnect
+    stopSync();
     setBadge('off', 'Not connected');
     $('peers').textContent = 'No peers';
     log(`Socket closed (code ${e.code})`);
   };
-  ws.onerror = () => log('Socket error (check IP, relay running, firewall)');
-  ws.onmessage = (e) => {
+  sock.onerror = () => log('Socket error (check IP, relay running, firewall)');
+  sock.onmessage = (e) => {
     let msg;
     try { msg = JSON.parse(e.data); } catch (_) { return log('Bad message: ' + e.data); }
-    if (msg.type === 'pong') {
+    if (msg.type === 'commit') {
+      onCommit(msg);
+    } else if (msg.type === 'pong') {
       log(`Pong from relay: round trip ${Date.now() - msg.t} ms`);
     } else if (msg.type === 'welcome') {
-      log('Relay says hi. Host IPs:', msg.ips);
+      log(`Relay says hi (rev ${msg.rev}). Host IPs:`, msg.ips);
     } else if (msg.type === 'peers') {
       $('peers').textContent = msg.names.length ? 'Here: ' + msg.names.join(', ') : 'No peers';
+    } else if (msg.type === 'error') {
+      log('Relay error', msg);
     } else {
       log('Message', msg);
     }
@@ -100,3 +212,4 @@ $('clear').onclick = () => { logEl.textContent = ''; saveLog(); };
 $('reload').onclick = () => location.reload();
 
 loadBridge();
+showSyncStatus();

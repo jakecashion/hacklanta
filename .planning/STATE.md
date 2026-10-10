@@ -20,7 +20,7 @@ See: .planning/PROJECT.md (updated 2026-10-10)
 
 ## Current Position
 
-Phase: 1 of 3 (Panel + Kill Test)
+Phase: 2 of 3 (Live Param Sync) - code built, untested in Premiere
 Plan: 0 of TBD in current phase
 Status: In progress (Phase 1 code built, awaiting manual kill test in Premiere)
 Last activity: 2026-10-10 — Roadmap revised for a 6-8 h build (3 phases, 16/16 v1 requirements mapped)
@@ -83,5 +83,5 @@ Items acknowledged and deferred at milestone close, most recent first:
 ## Session Continuity
 
 Last session: 2026-10-10 17:45 (resumed)
-Stopped at: Kill gate PASSED on dev laptop (Scale/Rotation/Opacity move the Program monitor, exact read-back, 3-6 ms per write; Reload panel picks up .jsx edits). See premiere-collab/KILL-TEST.md. Next: Task 4 (firewall + guest relay ping over Tailscale, plus hotspot fallback once), Task 5 (demo project to 4 clips, copy to laptop 2), then Phase 2
+Stopped at: Phase 2 code built inline (sync.js engine, relay rev sequencing, pc_scan/pc_applyOps, 1 s poll, Changes feed); 12 node tests pass. Glenn's sync.js/test replaced by user decision. Next: two-laptop test of Phase 2 in Premiere (and Phase 1 Tasks 4-5)
 Resume file: .planning/phases/01-panel-kill-test/.continue-here.md
