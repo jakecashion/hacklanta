@@ -31,6 +31,7 @@ ie: you're in the IDE, and you see your friends you are connected to via GitHub,
 Daily, weekly challenges. Achievements for devs
 
 Notes:
+- Paper: CADament, a gamified multiplayer tutorial system for AutoCAD: https://www.research.autodesk.com/app/uploads/2023/03/cadament-a-gamified-multiplayer.pdf_reclMVng33xlsn9VX.pdf
 
 ### Detecting autism / ADHD / neurodivergence
 detecting autism/ ADHD/ neurodivergence
