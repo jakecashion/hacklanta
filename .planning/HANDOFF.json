@@ -1,112 +1,46 @@
 {
   "version": "1.0",
-  "timestamp": "2026-10-11T02:20:06.956Z",
-  "phase": "4",
-  "phase_name": "Join, Live Cursor & Demo (renumbered from Phase 3; now the final phase, after Phase 3 Timeline Integration)",
-  "phase_dir": ".planning/phases/01-panel-kill-test",
+  "timestamp": "2026-10-11T03:19:33.000Z",
+  "phase": "3",
+  "phase_name": "Timeline Integration (renumbered from Phase 4 on 2026-10-10)",
+  "phase_dir": ".planning/phases/03-timeline-integration",
   "plan": null,
-  "task": 2,
-  "total_tasks": 5,
+  "task": 1,
+  "total_tasks": 6,
   "status": "paused",
   "completed_tasks": [
-    {
-      "id": "3.join",
-      "name": "SYNC-01 snapshot join: relay sends one catchup (latest commit per clip+field) after welcome; panel applies via sync.receiveCatchup, one 'Caught up to rev N' feed line. Verified on one laptop with fake-peer.js",
-      "status": "done",
-      "commit": "c8c017e"
-    },
-    {
-      "id": "rename",
-      "name": "Project renamed Live Collab -> Tandem (display name only; extension ID, folders, firewall rule name unchanged)",
-      "status": "done",
-      "commit": "8b2ee75"
-    },
-    {
-      "id": "2.1",
-      "name": "Phase 2.1 Position & Anchor Point sync (SYNC-02, SYNC-10) as 4 scalar axis fields, epsilon 0.0005; confirmed both directions on two laptops",
-      "status": "done",
-      "commit": "0f7ff95"
-    },
-    {
-      "id": "2.1.docs",
-      "name": "Roadmap/requirements: Phase 2.1 inserted and marked complete",
-      "status": "done",
-      "commit": "59cb025"
-    }
+    {"id": "swap", "name": "Roadmap: Phases 3 and 4 swapped (Timeline Integration now Phase 3, Join/Cursor/Demo now Phase 4, final)", "status": "done", "commit": "c2d34e0"},
+    {"id": "tag", "name": "demo-safe tag on c2d34e0 (last commit before Phase 3), pushed", "status": "done", "commit": "c2d34e0"},
+    {"id": "1.probes", "name": "Step 1 ENV-06 probes on host: nodeId, move, trim/in/out (frame-exact via exportFramePNG), validation, rename, events, save/reopen. Written in premiere-collab/TIMELINE-PROBES.md", "status": "in_progress", "progress": "All host probes done; guest-laptop nodeId probe open", "commit": "7e568b9"}
   ],
   "remaining_tasks": [
-    {
-      "id": 5,
-      "name": "ENV-05: 4-clip demo sequence on host (A1), commit demo.prproj; guest copy + relink (B4)",
-      "status": "not_started"
-    },
-    {
-      "id": "3.probe2",
-      "name": "Cursor two-laptop check: cursor.ps1 on both, pointers land on same UI element, lag < 0.5 s",
-      "status": "not_started"
-    },
-    {
-      "id": "2.v",
-      "name": "TEST-PLAN-TWO-LAPTOPS.md Tier 1 (+3.9) on two laptops; 4.1 late join now expected to catch up",
-      "status": "not_started"
-    },
-    {
-      "id": "3.demo",
-      "name": "Demo script (big Scale/Rotation/Opacity jumps, a Position move, live cursor, feed) + cursor.ps1 steps in SETUP; via /gsd-fast",
-      "status": "not_started"
-    },
-    {
-      "id": "3.rehearse",
-      "name": "One clean rehearsal on two laptops from a pristine demo project",
-      "status": "not_started"
-    }
+    {"id": "1.guest", "name": "Step 1.2 guest probe: open demo.prproj on guest, read V1 clip 0 nodeId (pc_listClips). 000f4242 = nodeId can be shared ID", "status": "not_started"},
+    {"id": "0.cutoff", "name": "Step 0: pick the Phase 3 cutoff time (Phase 4 wrap-up needs ~2-3 h on two laptops before the 9am demo)", "status": "not_started"},
+    {"id": "2", "name": "Step 2: decide clip identity from probe results; record in ROADMAP or phase notes", "status": "not_started"},
+    {"id": "3", "name": "Step 3 EDIT-01 rename: bridge get/set name, relay FIELDS + string values, sync.js string compare, feed line, tests, two-laptop check", "status": "not_started"},
+    {"id": "4", "name": "Step 4 EDIT-02 move: identity change in relay CLIP_ID, bridge parser, collapseLog, tests; move(delta) in ticks; neighbour/overlap check; re-test snapshot join", "status": "not_started"},
+    {"id": "5", "name": "Step 5 EDIT-03 trim: one timing op {start,end,inPoint} in ticks, set outPoint = in + length; head trim = inPoint+=d, move(+d), restore end; validate before apply", "status": "not_started"},
+    {"id": "6", "name": "Step 6 close phase: update ROADMAP/STATE, tag stable result; then Phase 4 wrap-up (see .planning/phases/01-panel-kill-test/.continue-here.md)", "status": "not_started"}
   ],
   "blockers": [],
   "async_jobs": [],
   "human_actions_pending": [
-    {
-      "action": "Build the 4-clip demo sequence (A1) and copy/relink on guest (B4)",
-      "context": "Tests and the demo need more than the current 1 clip",
-      "blocking": false
-    },
-    {
-      "action": "Two-laptop cursor check and Tier 1 tests",
-      "context": "Needs both laptops",
-      "blocking": false
-    },
-    {
-      "action": "Guest laptop: git pull + rerun install-panel.ps1 + restart Premiere (menu is now Window > Extensions > Tandem)",
-      "context": "Guest needs the Tandem rename, catch-up and Position/Anchor code",
-      "blocking": false
-    }
+    {"action": "Delete the 'PROBE (delete me)' sequence in the Project panel of C:\\collab-demo\\demo.prproj, then save", "context": "It was saved into the local working project; closing its tab does not delete it", "blocking": false},
+    {"action": "Guest laptop: git pull, rerun install-panel.ps1, restart Premiere, open demo.prproj, read V1 clip 0 nodeId", "context": "Last open Step 1 probe; also needed for Phase 4", "blocking": false},
+    {"action": "Pick the Phase 3 cutoff time", "context": "Phase 3 has no estimate; at the cutoff stop and start Phase 4", "blocking": false}
   ],
   "decisions": [
-    {
-      "decision": "Snapshot join = relay replays collapsed opLog on connect (no host scan)",
-      "rationale": "Smallest change; known limit: edits made before a panel connected, or before a relay restart, are not in the log",
-      "phase": "4"
-    },
-    {
-      "decision": "Position/Anchor Point as four scalar fields mapped in bridge.jsx onto one [x, y] setValue",
-      "rationale": "Premiere 22.3.1 returns normalized [x, y] (checked live, exact read-back); keeps op format and sync.js unchanged",
-      "phase": "2.1"
-    },
-    {
-      "decision": "Rename to Tandem is display-only",
-      "rationale": "Changing extension ID/folder/firewall rule the night before the demo would force reinstalls on both laptops",
-      "phase": "-"
-    },
-    {
-      "decision": "Abandoned /gsd-quick plan extras (relay drops client-sent relay-only types, more hardening tests, docs) not built",
-      "rationale": "User cancelled the executor; finished minimal scope with /gsd-fast. Plan kept untracked in .planning/quick/261010-tsr-*",
-      "phase": "4"
-    }
+    {"decision": "Swap Phases 3 and 4 by renumbering (Option B)", "rationale": "User sees Join/Cursor/Demo as the conclusion and Timeline Integration as the feature; rehearsal should test final code. demo-safe tag is the fallback", "phase": "3"},
+    {"decision": "Keep the 1 s scan for edit detection; events only optional triggers", "rationale": "onActiveSequenceStructureChanged never fires; onActiveSequenceChanged fires for every edit but carries no detail", "phase": "3"},
+    {"decision": "Timing op = {start, end, inPoint} in ticks; outPoint set to in + length", "rationale": "Probes: picture comes only from start/end/inPoint; outPoint does not affect playback; start setter is a no-op; move() does not snap to frames", "phase": "3"},
+    {"decision": "Validate every move/trim before apply (in >= 0, in + length <= media, no overlap with neighbours)", "rationale": "Premiere accepts in > out, clips past media (black frames) and overlapping clips with no error", "phase": "3"},
+    {"decision": "Do not sync added clips by nodeId", "rationale": "nodeId is stored in .prproj, but new clips on each laptop come from the same counter and can collide", "phase": "3"}
   ],
   "uncommitted_files": [
     "?? .planning/phases/02.1-position-anchor-point-sync/",
     "?? .planning/quick/",
     "?? premiere-collab/docs/"
   ],
-  "next_action": "Phases swapped 2026-10-10: do Phase 3 Timeline Integration first (tag demo-safe, set a cutoff, probes ENV-06, then rename/move/trim). The remaining tasks below are Phase 4 wrap-up and run after it.",
-  "context_notes": "Demo is 9am 2026-10-11. All code work for Phase 4 (was Phase 3) except docs is done; remaining items are mostly manual two-laptop checks, the demo script, and a rehearsal. Feed shows Position/Anchor values as frame fractions (0.5 = center); converting to pixels is an optional polish. CEP remote debug on localhost:8088 works for running ExtendScript in Premiere from Node via CDP Runtime.evaluate (only while the Tandem panel is open)."
+  "next_action": "git fetch && git status -sb. Ask the user for the Phase 3 cutoff time and whether the guest nodeId probe is done; then Step 2 (identity decision) and Step 3 (rename) via /gsd-fast.",
+  "context_notes": "Demo is 9am 2026-10-11. Sequence is 23.976 fps (10,594,584,000 ticks/frame); demo clip is 8 frames. ExtendScript can be run from Node via CDP Runtime.evaluate on localhost:8088 calling window.__adobe_cep__.evalScript (Tandem panel must be open). qe exportFramePNG(qe CTI timecode, Windows backslash path) writes a PNG async and returns false; sequence.CTI does not exist in 22.3.1, use qe.project.getActiveSequence().CTI.timecode. PNGs are never byte-identical, compare pixels. Event bindings (app.bind) are lost on Premiere restart. Probe scripts were in the session scratchpad and are gone; the method is in TIMELINE-PROBES.md."
 }
