@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "timestamp": "2026-10-11T06:26:49.000Z",
+  "timestamp": "2026-10-11T06:38:10.000Z",
   "phase": "4",
   "phase_name": "Join, Live Cursor & Demo",
   "phase_dir": ".planning/phases/01-panel-kill-test",
@@ -33,7 +33,7 @@
       "id": 4,
       "name": "Demo script (DEMO-01) + pre-demo checklist + cursor.ps1 steps in SETUP-TWO-LAPTOPS.md, via /gsd-fast",
       "status": "in_progress",
-      "progress": "Context read (08-mvp.md section 11 old script, SETUP A6/C1-C3, judging = 3 min pitch). No file written yet."
+      "progress": "premiere-collab/DEMO-SCRIPT.md written (uncommitted): 14-step pre-demo checklist, 3:00 run order (hook, problem/audience with sources, join, movement controls Position/Scale/Rotation/Anchor/Opacity + conflict, timeline rename/trim/move, cursor + feed, how it works, close), on-stage failure table, sources. NOT done: user review, commit, cursor.ps1 section in SETUP-TWO-LAPTOPS.md"
     },
     {
       "id": 5,
@@ -63,6 +63,11 @@
       "action": "Host cursor helper is not running; restart with cursor.ps1 -Relay localhost -Name Jake when needed",
       "context": "Its window was closed earlier",
       "blocking": false
+    },
+    {
+      "action": "Decide: recorded video or live 3-min pitch (user said demo video; handoff said live at 9am). Script covers both",
+      "context": "Changes whether move/trim can be a recorded good take",
+      "blocking": false
     }
   ],
   "decisions": [
@@ -80,9 +85,21 @@
       "decision": "Lead pitch line: 'Premiere Pro, now multiplayer: edit one timeline together and watch each other's changes land live.'",
       "rationale": "Recommended opener; alt 'Real-time multiplayer for one Premiere timeline. See each other's edits and cursor live, within seconds.'",
       "phase": "4"
+    },
+    {
+      "decision": "Audience is all film editors; frame as a long-wanted feature",
+      "rationale": "User: this has been asked for for years. Evidence: 2017 Adobe staff quote (not possible on same sequence), Team Projects sequence locking 2022, Productions project locking, Avid bin locking, Resolve bin/timeline locking",
+      "phase": "4"
+    },
+    {
+      "decision": "Core of the demo is movement controls (Position, Scale, Rotation, Anchor Point, Opacity) and timeline (rename, trim, move)",
+      "rationale": "User direction",
+      "phase": "4"
     }
   ],
-  "uncommitted_files": [],
-  "next_action": "Write the demo script (task 4) via /gsd-fast: new premiere-collab/DEMO-SCRIPT.md (pre-demo checklist + 3-minute run order on Hero/Logo/Card/BG) and add a cursor.ps1 section to SETUP-TWO-LAPTOPS.md. Then Bradley guest checks, tag stable, rehearsal.",
-  "context_notes": "Paused 02:26 EDT, demo 9am. Live cursor done with Bradley (guest, Tailscale 100.120.196.123). Host Tailscale 100.122.228.122. Relay PID 27076 started 02:03. Host panel connected as jake, rev 18. CDP helpers in %LOCALAPPDATA%/Temp/tandem-cdp (build.jsx, restore.jsx, restore-audio.jsx added)."
+  "uncommitted_files": [
+    "?? premiere-collab/DEMO-SCRIPT.md"
+  ],
+  "next_action": "User reviews premiere-collab/DEMO-SCRIPT.md, then commit it. Add cursor.ps1 section to SETUP-TWO-LAPTOPS.md. Then task 5 (Bradley guest checks on new demo.prproj, tag stable) and task 6 (rehearsal following the DEMO-SCRIPT checklist).",
+  "context_notes": "Paused 02:38 EDT, demo 9am. Live cursor done with Bradley (guest, Tailscale 100.120.196.123). Host Tailscale 100.122.228.122. Relay PID 27076 started 02:03. Host panel connected as jake, rev 18. CDP helpers in %LOCALAPPDATA%/Temp/tandem-cdp (build.jsx, restore.jsx, restore-audio.jsx added). No reddit threads or high-vote Adobe feature request found; do not quote vote counts."
 }
