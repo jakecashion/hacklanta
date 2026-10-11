@@ -73,13 +73,27 @@
       return op; // caller applies it, then calls afterApply with the read-back
     }
 
+    // Join snapshot from the relay: latest commit per field. Same rules as live commits, in rev
+    // order; values the timeline already holds are skipped. Returns the ops to apply.
+    function receiveCatchup(commits) {
+      const ops = [];
+      for (const c of [...commits].sort((x, y) => x.rev - y.rev)) {
+        const op = receiveCommit(c);
+        if (!op) continue;
+        const cur = shadow.get(key(op.clipId, op.field));
+        if (cur !== undefined && Math.abs(cur - op.value) <= epsilon) continue;
+        ops.push(op);
+      }
+      return ops;
+    }
+
     // After applyOps: store what Premiere actually holds so the next scan matches.
     function afterApply(clipId, field, readBack) {
       if (typeof readBack === 'number') shadow.set(key(clipId, field), readBack);
     }
 
     return {
-      reset, diff, receiveCommit, afterApply,
+      reset, diff, receiveCommit, receiveCatchup, afterApply,
       get lastRev() { return lastRev; },
       get pendingCount() { return pending.size; },
       shadowValue: (clipId, field) => shadow.get(key(clipId, field)),

@@ -130,15 +130,31 @@ function onCommit(msg) {
     const clip = clipNames[op.clipId] || op.clipId;
     feed(`${who} set ${clip} ${FIELD_LABEL[op.field] || op.field} to ${fmt(op.value)} (rev ${msg.rev})`);
     const toApply = sync.receiveCommit(msg);
-    if (toApply) {
-      const res = await jsx(`pc_applyOps(${JSON.stringify(JSON.stringify([toApply]))})`);
-      if (!res.ok) log('Apply error', res);
-      if (!sync) return; // disconnected while applying
-      for (const r of res.results || []) {
-        if (r.ok) sync.afterApply(r.clipId, r.field, r.after);
-        else log('Apply failed', r);
-      }
+    if (toApply) await applyOps([toApply]);
+    showSyncStatus();
+  });
+}
+
+async function applyOps(ops) {
+  const res = await jsx(`pc_applyOps(${JSON.stringify(JSON.stringify(ops))})`);
+  if (!res.ok) log('Apply error', res);
+  if (!sync) return; // disconnected while applying
+  for (const r of res.results || []) {
+    if (r.ok) sync.afterApply(r.clipId, r.field, r.after);
+    else log('Apply failed', r);
+  }
+}
+
+// Join snapshot: runs after startSync's baseline (same queue). One feed line, details to the log.
+function onCatchup(msg) {
+  enqueue(async () => {
+    if (!sync) return;
+    const ops = sync.receiveCatchup(msg.commits || []);
+    for (const op of ops) {
+      log(`Catch-up: ${op.author} ${clipNames[op.clipId] || op.clipId} ${FIELD_LABEL[op.field] || op.field} = ${fmt(op.value)}`);
     }
+    if (ops.length) await applyOps(ops);
+    feed(`Caught up to rev ${msg.rev} (${ops.length} change${ops.length === 1 ? '' : 's'} applied)`);
     showSyncStatus();
   });
 }
@@ -196,6 +212,8 @@ $('connect').onclick = () => {
     try { msg = JSON.parse(e.data); } catch (_) { return log('Bad message: ' + e.data); }
     if (msg.type === 'commit') {
       onCommit(msg);
+    } else if (msg.type === 'catchup') {
+      onCatchup(msg);
     } else if (msg.type === 'cursor') {
       // 20 Hz pointer traffic from cursor.ps1; the helper draws it, the panel ignores it.
     } else if (msg.type === 'pong') {

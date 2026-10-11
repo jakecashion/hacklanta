@@ -9,38 +9,54 @@ const { createSync } = require('../../panel/js/sync.js');
 const round = (v) => Math.round(v * 10) / 10;
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
-function fakeEditor(url, name) {
-  const timeline = { 'v0:0': { 'Motion.Scale': 100, 'Motion.Rotation': 0, 'Opacity.Opacity': 100 } };
+const pristine = () => ({ 'v0:0': { 'Motion.Scale': 100, 'Motion.Rotation': 0, 'Opacity.Opacity': 100 } });
+
+// Optional third arg: a starting timeline (stands in for the same Premiere after a reconnect).
+function fakeEditor(url, name, timeline = pristine()) {
   const scan = () => Object.entries(timeline).map(([id, p]) => ({ id, p: { ...p } }));
   const sync = createSync({ author: name });
   sync.reset(scan());
   const ws = new WebSocket(url);
+  let gotCatchup;
   const ed = {
-    name, timeline, sync, ws,
+    name, timeline, sync, ws, msgs: [], applied: 0,
     edit(field, value) { timeline['v0:0'][field] = round(value); },
     poll() { for (const op of sync.diff(scan())) ws.send(JSON.stringify({ type: 'op', ...op })); },
     ready: new Promise((res) => ws.on('open', () => { ws.send(JSON.stringify({ type: 'hello', name })); res(); })),
+    caughtUp: new Promise((res) => { gotCatchup = res; }),
+  };
+  const write = (op) => {
+    timeline[op.clipId][op.field] = round(op.value);
+    sync.afterApply(op.clipId, op.field, timeline[op.clipId][op.field]);
+    ed.applied += 1;
   };
   ws.on('message', (raw) => {
     const msg = JSON.parse(raw);
-    if (msg.type !== 'commit') return;
-    const op = sync.receiveCommit(msg);
-    if (op) {
-      timeline[op.clipId][op.field] = round(op.value);
-      sync.afterApply(op.clipId, op.field, timeline[op.clipId][op.field]);
+    ed.msgs.push(msg);
+    if (msg.type === 'catchup') {
+      for (const op of sync.receiveCatchup(msg.commits)) write(op);
+      gotCatchup(msg);
+    } else if (msg.type === 'commit') {
+      const op = sync.receiveCommit(msg);
+      if (op) write(op);
     }
   });
   return ed;
 }
 
-async function setup(t) {
+async function startRelay(t) {
   const relay = start(0, { quiet: true });
   await new Promise((r) => relay.wss.on('listening', r));
-  const url = `ws://localhost:${relay.wss.address().port}`;
+  t.after(() => relay.wss.close());
+  return { relay, url: `ws://localhost:${relay.wss.address().port}` };
+}
+
+async function setup(t) {
+  const { relay, url } = await startRelay(t);
   const a = fakeEditor(url, 'Host');
   const b = fakeEditor(url, 'Guest');
   await Promise.all([a.ready, b.ready]);
-  t.after(() => { a.ws.close(); b.ws.close(); relay.wss.close(); });
+  t.after(() => { a.ws.close(); b.ws.close(); });
   return { relay, a, b };
 }
 
@@ -99,4 +115,34 @@ test('relay rejects bad ops and sends commits to the sender too', async (t) => {
   assert.equal(commits[0].rev, 1);
   assert.equal(commits[0].op.author, 'Host');
   assert.equal(relay.rev, 1);
+});
+
+test("a late joiner catches up to the host's edits and nothing echoes", async (t) => {
+  const { relay, url } = await startRelay(t);
+  const host = fakeEditor(url, 'Host');
+  await host.ready;
+  t.after(() => host.ws.close());
+
+  host.edit('Motion.Scale', 150);
+  host.poll();
+  await wait(50);
+  host.edit('Motion.Scale', 160);
+  host.edit('Motion.Rotation', 45);
+  host.poll();
+  await wait(50);
+  assert.equal(relay.rev, 3);
+
+  const guest = fakeEditor(url, 'Guest');
+  t.after(() => guest.ws.close());
+  const cu = await guest.caughtUp;
+  assert.equal(cu.rev, relay.rev);
+  assert.equal(cu.commits.length, 2);
+  assert.deepEqual(cu.commits.map((c) => c.rev), [2, 3]);
+  assert.deepEqual(guest.timeline['v0:0'], host.timeline['v0:0']);
+  assert.equal(guest.timeline['v0:0']['Motion.Scale'], 160);
+  assert.equal(guest.sync.lastRev, 3);
+
+  for (let i = 0; i < 5; i++) { host.poll(); guest.poll(); await wait(10); }
+  assert.equal(relay.rev, 3, 'rev must not climb after the join (no echo)');
+  assert.equal(guest.sync.pendingCount, 0);
 });

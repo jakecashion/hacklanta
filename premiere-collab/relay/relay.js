@@ -23,6 +23,13 @@ function validOp(msg) {
     typeof msg.value === 'number' && Number.isFinite(msg.value);
 }
 
+// Latest committed entry per (clipId, field), ascending by rev. Keeps the { rev, op } shape.
+function collapseLog(log) {
+  const latest = new Map();
+  for (const e of log) latest.set(e.op.clipId + '|' + e.op.field, e);
+  return [...latest.values()].sort((x, y) => x.rev - y.rev);
+}
+
 function start(port, { quiet = false } = {}) {
   const say = quiet ? () => {} : console.log;
   const wss = new WebSocketServer({ port });
@@ -47,6 +54,11 @@ function start(port, { quiet = false } = {}) {
     const from = req.socket.remoteAddress;
     say(`+ connection from ${from}`);
     ws.send(JSON.stringify({ type: 'welcome', ips: lanIps().map((i) => i.address), rev }));
+    // Join snapshot: latest committed value per (clip, field). Single-threaded, so every later
+    // op gets a higher rev and reaches this socket after the catch-up.
+    const commits = collapseLog(opLog);
+    ws.send(JSON.stringify({ type: 'catchup', rev, commits }));
+    say(`  catch-up: ${commits.length} change(s) at rev ${rev}`);
 
     ws.on('message', (raw) => {
       let msg;
@@ -97,7 +109,7 @@ function start(port, { quiet = false } = {}) {
   return { wss, get rev() { return rev; }, opLog };
 }
 
-module.exports = { start };
+module.exports = { start, collapseLog };
 
 if (require.main === module) {
   start(parseInt(process.argv[2] || process.env.PORT || '8080', 10));
