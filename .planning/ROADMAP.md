@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [ ] **Phase 1: Panel + Kill Test** - Panel loads on both laptops, `setValue` kill test on Scale/Rotation/Opacity, guest reaches the host relay over Tailscale, demo project in place (~1 h)
 - [ ] **Phase 2: Live Param Sync** - Relay, sync engine and Premiere bridge; Scale, Rotation and Opacity sync both ways in 1-2 s, last write wins, no echo loops, connect by typed IP with names on the badge (~3 h)
-- [ ] **Phase 2.1: Position & Anchor Point Sync** (INSERTED) - Motion Position and Anchor Point sync like Scale/Rotation/Opacity (SYNC-02, SYNC-10); next work, via `/gsd-fast`
+- [x] **Phase 2.1: Position & Anchor Point Sync** (INSERTED) - Motion Position and Anchor Point sync like Scale/Rotation/Opacity (SYNC-02, SYNC-10); next work, via `/gsd-fast`
 - [ ] **Phase 3: Join, Live Cursor & Demo** - Snapshot join from the host, other editor's live mouse pointer over Premiere, change feed, demo script and one clean rehearsal (~3 h)
 - [ ] **Phase 4: Timeline Integration** - After Phase 3: probe Premiere's timing API, then sync clip rename, move on the same track, and trim between editors (future; not on the demo path)
 
@@ -65,7 +65,8 @@ Decimal phases appear between their surrounding integers in numeric order.
   5. A guest who connects after the host changed Position or Anchor Point catches up to it (SYNC-01 catch-up covers the new fields)
   6. `npm test` covers the new fields; the relay accepts them (its `FIELDS` whitelist is updated) and still rejects unknown fields
 **Notes:** Each value is 2D, while ops carry one finite number. Simplest fit: four scalar fields (`Motion.Position.x`, `.y`, `Motion.AnchorPoint.x`, `.y`) mapped in `bridge.jsx` onto one `[x, y]` `setValue`, so `sync.js` and the op format stay unchanged.
-**Plans:** none (inline via `/gsd-fast`)
+**Plans:** none (inline via `/gsd-fast`, commit 0f7ff95)
+**Status:** Complete 2026-10-10. Units confirmed live (normalized [x, y], exact read-back); both directions confirmed on two laptops.
 
 ### Phase 3: Join, Live Cursor & Demo
 
@@ -124,6 +125,6 @@ Phases execute in numeric order: 1 -> 2 -> 2.1 -> 3 -> 4. Phase 4 starts only af
 |-------|----------------|--------|-----------|
 | 1. Panel + Kill Test | 0/TBD | Not started | - |
 | 2. Live Param Sync | 0/TBD | Not started | - |
-| 2.1. Position & Anchor Point Sync | inline | Not started | - |
+| 2.1. Position & Anchor Point Sync | inline | Complete | 2026-10-10 |
 | 3. Join, Presence & Demo | 0/TBD | Not started | - |
 | 4. Timeline Integration | 0/TBD | Not started | - |

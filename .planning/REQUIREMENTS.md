@@ -29,8 +29,8 @@ Requirements for the 9am 2026-10-11 demo. Each one maps to a roadmap phase.
 - [ ] **SYNC-04**: Either editor can change Motion Rotation on a clip, and the other's Premiere shows it within 1–2 s
 - [ ] **SYNC-05**: Either editor can change Opacity on a clip, and the other's Premiere shows it within 1–2 s
 - [ ] **SYNC-06**: When both editors change the same field, both machines end up with the same value. The last edit in relay order wins; the relay assigns `rev` numbers.
-- [ ] **SYNC-02**: Either editor can change Motion Position (X or Y) on a clip, and the other's Premiere shows it within 1–2 s. Check the units first (normalized or pixels). Moved from v2 on 2026-10-10
-- [ ] **SYNC-10**: Either editor can change Motion Anchor Point (X or Y) on a clip, and the other's Premiere shows it within 1–2 s. Added 2026-10-10
+- [x] **SYNC-02**: Either editor can change Motion Position (X or Y) on a clip, and the other's Premiere shows it within 1–2 s. Check the units first (normalized or pixels). Moved from v2 on 2026-10-10
+- [x] **SYNC-10**: Either editor can change Motion Anchor Point (X or Y) on a clip, and the other's Premiere shows it within 1–2 s. Added 2026-10-10
 - [ ] **SYNC-07**: A remote edit is never sent back as a new edit (no echo loops). This holds even when Premiere rounds the value that was written.
 
 ### Presence & Feed
@@ -108,8 +108,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SYNC-05 | Phase 2 | Pending |
 | SYNC-06 | Phase 2 | Pending |
 | SYNC-07 | Phase 2 | Pending |
-| SYNC-02 | Phase 2.1 | Pending |
-| SYNC-10 | Phase 2.1 | Pending |
+| SYNC-02 | Phase 2.1 | Complete |
+| SYNC-10 | Phase 2.1 | Complete |
 | PRES-04 | Phase 3 | Pending |
 | PRES-03 | Phase 3 | Pending |
 | DEMO-01 | Phase 3 | Pending |

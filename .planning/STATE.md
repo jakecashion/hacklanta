@@ -1,13 +1,13 @@
 ---
 gsd_state_version: "1.0"
-current_phase: "2.1"
-current_phase_name: Position & Anchor Point Sync
+current_phase: 3
+current_phase_name: Join, Live Cursor & Demo
 status: planning
 stopped_at: "Phase 2 verified on one laptop with fake-peer.js (89 remote edits applied, own edits sent, no echo, 0 apply errors). Next: two-laptop test (Phase 1 Tasks 4-5: Tailscale, firewall, guest install), then Phase 3"
-last_updated: "2026-10-11T02:06:11.122Z"
+last_updated: "2026-10-11T02:18:27.061Z"
 last_activity: 2026-10-10
 last_activity_desc: Roadmap revised for a 6-8 h build (3 phases, 16/16 v1 requirements mapped)
-state_head: 8b2ee7557aada3b7d3afb393e8313d9dccf4ab69
+state_head: 0f7ff959c32468f66ba5b95beb32e837553e3c40
 progress:
   total_phases: 5
   completed_phases: 0
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-10-10)
 
 ## Current Position
 
-Phase: 2.1 of 5 (Position & Anchor Point Sync) - next, via /gsd-fast
+Phase: 3 of 5 (Join, Live Cursor & Demo) - Phase 2.1 Position & Anchor Point Sync complete (0f7ff95, both directions confirmed)
 Plan: 0 of TBD in current phase
 Status: In progress (Phase 1 code built, awaiting manual kill test in Premiere)
 Last activity: 2026-10-10 — Roadmap revised for a 6-8 h build (3 phases, 16/16 v1 requirements mapped)
