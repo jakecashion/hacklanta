@@ -5,7 +5,7 @@
   "phase_name": "Timeline Integration",
   "phase_dir": ".planning/phases/03-timeline-integration",
   "plan": null,
-  "task": 3,
+  "task": 4,
   "total_tasks": 6,
   "status": "paused",
   "completed_tasks": [
@@ -44,14 +44,15 @@
       "name": "Step 0: Phase 3 cutoff set to 4:30 AM EDT 2026-10-11. At cutoff stop feature work, tag stable, start Phase 4 wrap-up",
       "status": "done",
       "commit": null
+    },
+    {
+      "id": "2",
+      "name": "Step 2: clip identity decision written to ROADMAP Phase 3 (Clip identity, 6 rules). Host V1 clip 0 nodeId re-read = 000f4242",
+      "status": "done",
+      "commit": null
     }
   ],
   "remaining_tasks": [
-    {
-      "id": "2",
-      "name": "Step 2: record clip identity decision (nodeId for existing clips) in ROADMAP or phase notes",
-      "status": "not_started"
-    },
     {
       "id": "4",
       "name": "Step 4 EDIT-02 move: identity -> nodeId in relay CLIP_ID, bridge parser, collapseLog, tests; move(delta) in ticks; overlap check; re-test snapshot join",
@@ -124,6 +125,6 @@
     "?? .planning/quick/",
     "?? premiere-collab/docs/"
   ],
-  "next_action": "git fetch && git status -sb. Check the clock against the 4:30 AM cutoff. Step 2 (write nodeId identity decision), then Step 4 move (EDIT-02). At 4:30 AM stop features and start Phase 4.",
+  "next_action": "git fetch && git status -sb. Check the clock against the 4:30 AM cutoff. Get the real-guest pc_listClips(0) check (expect V1 clip 0 nodeId 000f4242), then Step 4 move (EDIT-02) per ROADMAP Phase 3 Clip identity rules.",
   "context_notes": "Demo 9am 2026-10-11. Paused 23:42 EDT. 23.976 fps (10,594,584,000 ticks/frame). Run ExtendScript from Node via CDP on localhost:8088 (Node 24 global WebSocket + fetch; Runtime.evaluate of a Promise wrapping window.__adobe_cep__.evalScript, awaitPromise). Write JSX to files, never shell-quote. To inspect a project without Premiere: node premiere-collab/tools/prproj-nodeids.js <file>. app.openDocument opens a 2nd project without closing the active one; proj.closeDocument(0,0) closes without save. Relay restart resets rev to 0 and drops catch-up history. Panel CDP helper: scratchpad cdp.mjs pattern (fetch localhost:8088/json, Runtime.evaluate with awaitPromise, call jsx(...)). Panel log: premiere-collab/panel/panel-log.txt (newest first)."
 }

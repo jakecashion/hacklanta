@@ -77,10 +77,18 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Success Criteria** (what must be TRUE):
   1. Probe results (ENV-06) are recorded in the repo before any edit sync is built: whether `nodeId` stays the same across a move, save and reopen; how `start`/`end`/`move()` and `inPoint`/`outPoint` read and write in ticks; and which `onActiveSequence*` events fire for a rename, a move and a trim
   2. Renaming a clip in one editor renames it in the other (EDIT-01)
-  3. Moving a clip along the same track in one editor moves it in the other, and the clip keeps its identity, so Phase 2 param sync and the snapshot join catch-up (relay `collapseLog`, keyed by clip ID) still target the right clip afterwards (EDIT-02; clip identity switches from position `v{track}:{clip}` to `nodeId` if the probes show it is stable)
+  3. Moving a clip along the same track in one editor moves it in the other, and the clip keeps its identity, so Phase 2 param sync and the snapshot join catch-up (relay `collapseLog`, keyed by clip ID) still target the right clip afterwards (EDIT-02; clip identity switches from position `v{track}:{clip}` to `nodeId`, see Clip identity below)
   4. Trimming a clip's in or out point in one editor trims it in the other, sent as one combined timing op, so the other side never shows a half-applied trim (EDIT-03)
   5. None of these edits echo back: after one edit, the rev counter stays still
 **Order:** probes, then rename (no change to clip identity, safest), then move, then trim. Move is where clip identity changes; if clip IDs switch to `nodeId`, update the relay `CLIP_ID` check, the bridge parser, `collapseLog` and the tests together, and re-test the snapshot join
+**Cutoff:** 4:30 AM EDT 2026-10-11. At the cutoff, stop feature work, tag `stable`, and start Phase 4.
+**Clip identity (decided 2026-10-11, Step 2):** Source: `premiere-collab/TIMELINE-PROBES.md` section 1.
+  1. Use the clip `nodeId` as the shared clip ID for clips that are in `demo.prproj`. The `nodeId` does not change for a move, trim, rename, restart, or save and reopen.
+  2. Both laptops get the same `nodeId` for the same clip, because Premiere reads it from the file or gives the next number after the highest ID in the file. Simulated guest load: V1 clip 0 = `000f4242`, same as the host.
+  3. Do not sync clips that an editor adds in the session. Each laptop gives new clips the next number from the same counter, so two different clips can get the same `nodeId`. Ignore clips that are not in the starting scan.
+  4. Before Step 4, confirm on the real guest: run `pc_listClips(0)` and read V1 clip 0 `nodeId`. Expect `000f4242`.
+  5. If the guest value is different, keep `v{track}:{clip}` on the wire for move and map it to `nodeId` on each laptop at connect.
+  6. Rename (EDIT-01, f32667d) still uses `v{track}:{clip}`. Step 4 changes all ops to the new ID at the same time: relay `CLIP_ID`, bridge `pc_applyOps` parser, `pc_scan`, `collapseLog`, and the tests.
 
 **Plans**: TBD
 
