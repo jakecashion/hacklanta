@@ -6,7 +6,7 @@ Machine: dev laptop (host)  Premiere: 22.3.1  Date: 2026-10-10
 
 Sequence: 23.976 fps. One frame is 10,594,584,000 ticks (`sequence.timebase`). The demo clip is 8 frames long.
 
-**Status: partly done.** One probe is still open (guest laptop). See "Open probes".
+**Status: done (guest probe simulated on the host).** Do a one-line check on the real guest later. See "Open probes".
 
 ## How the probes ran
 
@@ -32,13 +32,22 @@ The project was not saved during these probes. The save and reopen probe ran aft
 | Cloned sequence | The cloned clip gets a new `nodeId` |
 | Save, then reopen Premiere | All 12 clips keep the same `nodeId`, also clips added in the session and clips out of order on the track (`000f4250` after `000f4254`) |
 
-`nodeId` is stored in the project file. It is the `<TrackItem><Node><ID>` value in `demo.prproj` (gzip XML), written in hex. Example: `<ID>1000002</ID>` is `000f4242`. Premiere does not set it again at load.
+`nodeId` is stored in the project file. It is the `<TrackItem><Node><ID>` value in `demo.prproj` (gzip XML), written in hex. Example: `<ID>1000002</ID>` is `000f4242`. If a clip has a stored ID, Premiere does not change it at load.
 
-Thus a copy of the same `.prproj` file will probably give the same `nodeId` values on the guest. The guest probe must confirm this.
+A clip can have no stored ID. In the repo copy `premiere-collab/demo/demo.prproj`, the V1 clip has no `<Node><ID>` (A1 has `1000001`). Premiere gives that clip an ID at load. The host saved it into `C:\collab-demo\demo.prproj` as `1000002`. To read the IDs in a file, run `node premiere-collab/tools/prproj-nodeids.js <file.prproj>`.
+
+Guest test (simulated on the host, 2026-10-10 23:40):
+
+1. A script copied the repo `demo.prproj` to a new folder.
+2. The script opened the copy as a second project (`app.openDocument`) in the running Premiere.
+3. It read the copy: V1 clip 0 `nodeId` = `000f4242`, A1 clip 0 = `000f4241`.
+4. It closed the copy with no save. The file did not change.
+
+The host session had already given IDs up to `000f4254`. The copy still got `000f4242`. Thus Premiere gives the next ID from the highest ID in the file, not from a counter for each session. The guest runs the same Premiere (22.3.1) on the same file, so it will get `000f4242`.
+
+Decision: `nodeId` can be the shared clip ID for clips that are in `demo.prproj`. Confirm with `pc_listClips` on the guest when it is available (one-line check in Phase 4).
 
 Risk: each laptop gives new clips the next number from the same counter. If both editors add a clip, two different clips can get the same `nodeId`. This does not affect rename, move or trim of clips that are in the file. Do not sync added clips by `nodeId`.
-
-Do not use `nodeId` as the shared clip ID until the guest probe is done.
 
 ### 2. Move
 
@@ -126,7 +135,7 @@ Decision: keep the 1 s scan to find edits. You can also start a scan when `onAct
 
 ## Open probes
 
-1. **Guest laptop.** Open the same `demo.prproj` on the guest. Read the `nodeId` of V1 clip 0 (`pc_listClips`). If it is `000f4242`, `nodeId` can be the shared clip ID. If it is different, keep `v{track}:{clip}` on the wire and map it to `nodeId` on each laptop.
+1. **Guest laptop (simulated: passed, see section 1).** On the real guest, open the repo `demo.prproj` and read the `nodeId` of V1 clip 0 (`pc_listClips`). Expect `000f4242`. If it is different, keep `v{track}:{clip}` on the wire and map it to `nodeId` on each laptop.
 
 ## Clean up
 
