@@ -3,10 +3,10 @@ gsd_state_version: "1.0"
 current_phase: 3
 current_phase_name: Timeline Integration
 status: planning
-stopped_at: "Phases 3 and 4 swapped: Timeline Integration is now Phase 3, Join, Live Cursor & Demo is now Phase 4 (final). Next: tag demo-safe, set a cutoff time, then Phase 3 probes (ENV-06)"
-last_updated: "2026-10-11T02:18:27.061Z"
-last_activity: 2026-10-10
-last_activity_desc: Roadmap revised for a 6-8 h build (3 phases, 16/16 v1 requirements mapped)
+stopped_at: "Phase 3 Step 3 rename (EDIT-01) done and verified on two laptops (f32667d). Next: pick cutoff, Step 2 identity note, Step 4 move (EDIT-02)"
+last_updated: "2026-10-11T04:20:00.000Z"
+last_activity: 2026-10-11
+last_activity_desc: EDIT-01 rename sync built and verified both directions on two real laptops; all 7 effect fields confirmed both directions with the real guest
 state_head: 0f7ff959c32468f66ba5b95beb32e837553e3c40
 progress:
   total_phases: 5
@@ -27,10 +27,10 @@ See: .planning/PROJECT.md (updated 2026-10-10)
 
 ## Current Position
 
-Phase: 3 of 5 (Timeline Integration) - Phase 2.1 Position & Anchor Point Sync complete (0f7ff95, both directions confirmed). Phase 4 (Join, Live Cursor & Demo) code mostly done (snapshot join c8c017e); its manual checks, demo script and rehearsal run last
+Phase: 3 of 5 (Timeline Integration) - Steps 1 (probes) and 3 (rename EDIT-01, f32667d) done; rename and all 7 effect fields verified both directions on two real laptops over Tailscale (2026-10-11 ~12:16 AM). Next: Step 2 identity note, Step 4 move. Phase 2.1 Position & Anchor Point Sync complete (0f7ff95, both directions confirmed). Phase 4 (Join, Live Cursor & Demo) code mostly done (snapshot join c8c017e); its manual checks, demo script and rehearsal run last
 Plan: 0 of TBD in current phase
 Status: In progress (Phase 1 code built, awaiting manual kill test in Premiere)
-Last activity: 2026-10-10 — Roadmap revised for a 6-8 h build (3 phases, 16/16 v1 requirements mapped)
+Last activity: 2026-10-11 — EDIT-01 rename sync verified on two laptops
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -96,6 +96,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-10-10 17:45 (resumed)
-Stopped at: Phases 3 and 4 swapped (Timeline Integration now Phase 3, Join, Live Cursor & Demo now Phase 4). Next: tag demo-safe, set a cutoff time, then Phase 3 probes (ENV-06)
-Resume file: .planning/phases/01-panel-kill-test/.continue-here.md
+Last session: 2026-10-11 00:20 (resumed)
+Stopped at: Phase 3 Step 3 rename (EDIT-01) done, verified host<->guest on two laptops (f32667d). Lesson: guest must rerun install-panel.ps1 and reopen the panel after every pull (copy install, not junction). Next: pick cutoff, Step 2 identity note, Step 4 move (EDIT-02)
+Resume file: .planning/phases/03-timeline-integration/.continue-here.md
