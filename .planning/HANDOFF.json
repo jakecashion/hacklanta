@@ -1,46 +1,46 @@
 {
   "version": "1.0",
-  "timestamp": "2026-10-11T03:19:33.000Z",
+  "timestamp": "2026-10-11T03:42:09.000Z",
   "phase": "3",
-  "phase_name": "Timeline Integration (renumbered from Phase 4 on 2026-10-10)",
+  "phase_name": "Timeline Integration",
   "phase_dir": ".planning/phases/03-timeline-integration",
   "plan": null,
-  "task": 1,
+  "task": 2,
   "total_tasks": 6,
   "status": "paused",
   "completed_tasks": [
-    {"id": "swap", "name": "Roadmap: Phases 3 and 4 swapped (Timeline Integration now Phase 3, Join/Cursor/Demo now Phase 4, final)", "status": "done", "commit": "c2d34e0"},
-    {"id": "tag", "name": "demo-safe tag on c2d34e0 (last commit before Phase 3), pushed", "status": "done", "commit": "c2d34e0"},
-    {"id": "1.probes", "name": "Step 1 ENV-06 probes on host: nodeId, move, trim/in/out (frame-exact via exportFramePNG), validation, rename, events, save/reopen. Written in premiere-collab/TIMELINE-PROBES.md", "status": "in_progress", "progress": "All host probes done; guest-laptop nodeId probe open", "commit": "7e568b9"}
+    {"id": "swap", "name": "Roadmap: Phases 3 and 4 swapped", "status": "done", "commit": "c2d34e0"},
+    {"id": "tag", "name": "demo-safe tag on c2d34e0, pushed", "status": "done", "commit": "c2d34e0"},
+    {"id": "1.probes", "name": "Step 1 ENV-06 host probes (TIMELINE-PROBES.md)", "status": "done", "commit": "7e568b9"},
+    {"id": "1.guest", "name": "Step 1.2 guest nodeId probe, SIMULATED on host: fresh copy of repo demo.prproj opened as 2nd project via app.openDocument -> V1 clip 0 = 000f4242. Repo file stores no ID for V1 clip; Premiere assigns next-after-max-in-file at load (session counter was at 000f4254, copy still got 000f4242). Added premiere-collab/tools/prproj-nodeids.js", "status": "done", "commit": "9f35570"}
   ],
   "remaining_tasks": [
-    {"id": "1.guest", "name": "Step 1.2 guest probe: open demo.prproj on guest, read V1 clip 0 nodeId (pc_listClips). 000f4242 = nodeId can be shared ID", "status": "not_started"},
-    {"id": "0.cutoff", "name": "Step 0: pick the Phase 3 cutoff time (Phase 4 wrap-up needs ~2-3 h on two laptops before the 9am demo)", "status": "not_started"},
-    {"id": "2", "name": "Step 2: decide clip identity from probe results; record in ROADMAP or phase notes", "status": "not_started"},
-    {"id": "3", "name": "Step 3 EDIT-01 rename: bridge get/set name, relay FIELDS + string values, sync.js string compare, feed line, tests, two-laptop check", "status": "not_started"},
-    {"id": "4", "name": "Step 4 EDIT-02 move: identity change in relay CLIP_ID, bridge parser, collapseLog, tests; move(delta) in ticks; neighbour/overlap check; re-test snapshot join", "status": "not_started"},
-    {"id": "5", "name": "Step 5 EDIT-03 trim: one timing op {start,end,inPoint} in ticks, set outPoint = in + length; head trim = inPoint+=d, move(+d), restore end; validate before apply", "status": "not_started"},
-    {"id": "6", "name": "Step 6 close phase: update ROADMAP/STATE, tag stable result; then Phase 4 wrap-up (see .planning/phases/01-panel-kill-test/.continue-here.md)", "status": "not_started"}
+    {"id": "0.cutoff", "name": "Step 0: pick Phase 3 cutoff time (suggested 4:00-4:30 AM; Phase 4 needs ~2-3 h on two laptops before 9am)", "status": "not_started"},
+    {"id": "2", "name": "Step 2: record clip identity decision (nodeId for existing clips) in ROADMAP or phase notes", "status": "not_started"},
+    {"id": "3", "name": "Step 3 EDIT-01 rename: bridge get/set name, relay FIELDS + string values, sync.js exact string compare, feed line, node --test, check host + fake-peer.js (guest unavailable). Est 30-45 min. User asked what rename is; explained; awaiting go", "status": "not_started"},
+    {"id": "4", "name": "Step 4 EDIT-02 move: identity -> nodeId in relay CLIP_ID, bridge parser, collapseLog, tests; move(delta) in ticks; overlap check; re-test snapshot join", "status": "not_started"},
+    {"id": "5", "name": "Step 5 EDIT-03 trim: timing op {start,end,inPoint} in ticks, outPoint = in + length; head trim recipe; validate before apply", "status": "not_started"},
+    {"id": "6", "name": "Step 6 close phase, tag stable; then Phase 4 wrap-up (.planning/phases/01-panel-kill-test/.continue-here.md)", "status": "not_started"}
   ],
   "blockers": [],
   "async_jobs": [],
   "human_actions_pending": [
-    {"action": "Delete the 'PROBE (delete me)' sequence in the Project panel of C:\\collab-demo\\demo.prproj, then save", "context": "It was saved into the local working project; closing its tab does not delete it", "blocking": false},
-    {"action": "Guest laptop: git pull, rerun install-panel.ps1, restart Premiere, open demo.prproj, read V1 clip 0 nodeId", "context": "Last open Step 1 probe; also needed for Phase 4", "blocking": false},
-    {"action": "Pick the Phase 3 cutoff time", "context": "Phase 3 has no estimate; at the cutoff stop and start Phase 4", "blocking": false}
+    {"action": "Pick the Phase 3 cutoff time", "context": "At cutoff stop features and start Phase 4", "blocking": false},
+    {"action": "Say go for rename (Step 3)", "context": "Explained to user; no code started", "blocking": false},
+    {"action": "Real guest laptop: git pull, rerun install-panel.ps1, restart Premiere, open demo.prproj, pc_listClips -> expect V1 clip 0 nodeId 000f4242", "context": "Guest not available now; one-line confirm, add to Phase 4 checklist", "blocking": false},
+    {"action": "Delete 'PROBE (delete me)' sequence from C:/collab-demo/demo.prproj, then save", "context": "Leftover from probes", "blocking": false}
   ],
   "decisions": [
-    {"decision": "Swap Phases 3 and 4 by renumbering (Option B)", "rationale": "User sees Join/Cursor/Demo as the conclusion and Timeline Integration as the feature; rehearsal should test final code. demo-safe tag is the fallback", "phase": "3"},
-    {"decision": "Keep the 1 s scan for edit detection; events only optional triggers", "rationale": "onActiveSequenceStructureChanged never fires; onActiveSequenceChanged fires for every edit but carries no detail", "phase": "3"},
-    {"decision": "Timing op = {start, end, inPoint} in ticks; outPoint set to in + length", "rationale": "Probes: picture comes only from start/end/inPoint; outPoint does not affect playback; start setter is a no-op; move() does not snap to frames", "phase": "3"},
-    {"decision": "Validate every move/trim before apply (in >= 0, in + length <= media, no overlap with neighbours)", "rationale": "Premiere accepts in > out, clips past media (black frames) and overlapping clips with no error", "phase": "3"},
-    {"decision": "Do not sync added clips by nodeId", "rationale": "nodeId is stored in .prproj, but new clips on each laptop come from the same counter and can collide", "phase": "3"}
+    {"decision": "nodeId is the shared clip ID for clips already in demo.prproj", "rationale": "Simulated guest load gives 000f4242, same as host; IDs come from the file, not a session counter", "phase": "3"},
+    {"decision": "Do not sync added clips by nodeId", "rationale": "Both laptops assign new IDs from the same file max and can collide", "phase": "3"},
+    {"decision": "Keep the 1 s scan for edit detection; events optional", "rationale": "StructureChanged never fires; onActiveSequenceChanged has no detail", "phase": "3"},
+    {"decision": "Timing op = {start, end, inPoint} in ticks; validate before apply", "rationale": "Probe results; Premiere has no validation", "phase": "3"}
   ],
   "uncommitted_files": [
     "?? .planning/phases/02.1-position-anchor-point-sync/",
     "?? .planning/quick/",
     "?? premiere-collab/docs/"
   ],
-  "next_action": "git fetch && git status -sb. Ask the user for the Phase 3 cutoff time and whether the guest nodeId probe is done; then Step 2 (identity decision) and Step 3 (rename) via /gsd-fast.",
-  "context_notes": "Demo is 9am 2026-10-11. Sequence is 23.976 fps (10,594,584,000 ticks/frame); demo clip is 8 frames. ExtendScript can be run from Node via CDP Runtime.evaluate on localhost:8088 calling window.__adobe_cep__.evalScript (Tandem panel must be open). qe exportFramePNG(qe CTI timecode, Windows backslash path) writes a PNG async and returns false; sequence.CTI does not exist in 22.3.1, use qe.project.getActiveSequence().CTI.timecode. PNGs are never byte-identical, compare pixels. Event bindings (app.bind) are lost on Premiere restart. Probe scripts were in the session scratchpad and are gone; the method is in TIMELINE-PROBES.md."
+  "next_action": "git fetch && git status -sb. Ask user for the cutoff time and go for rename; then Step 2 note + Step 3 rename via /gsd-fast.",
+  "context_notes": "Demo 9am 2026-10-11. Paused 23:42 EDT. 23.976 fps (10,594,584,000 ticks/frame). Run ExtendScript from Node via CDP on localhost:8088 (Node 24 global WebSocket + fetch; Runtime.evaluate of a Promise wrapping window.__adobe_cep__.evalScript, awaitPromise). Write JSX to files, never shell-quote. To inspect a project without Premiere: node premiere-collab/tools/prproj-nodeids.js <file>. app.openDocument opens a 2nd project without closing the active one; proj.closeDocument(0,0) closes without save."
 }
