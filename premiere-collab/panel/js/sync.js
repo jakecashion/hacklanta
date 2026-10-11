@@ -12,13 +12,14 @@
 //     sequence, keyframed param), the shadow keeps Premiere's real value, so the next scan
 //     doesn't mistake the unapplied value for a local edit and send the old value back.
 // Clip.name is a string field: exact compare, no epsilon.
+// Clip.start is the clip start in ticks (a move); whole ticks, so the default epsilon is exact.
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();
   else root.PCSync = factory();
 })(typeof self !== 'undefined' ? self : this, function () {
   const FIELDS = ['Motion.Scale', 'Motion.Rotation', 'Opacity.Opacity',
     'Motion.Position.x', 'Motion.Position.y', 'Motion.AnchorPoint.x', 'Motion.AnchorPoint.y',
-    'Clip.name'];
+    'Clip.name', 'Clip.start'];
   // Position and Anchor Point are fractions of the frame (0..1): 0.0005 is about a third of a
   // pixel at 640 wide. The other fields use the default epsilon.
   const AXIS_EPSILON = 0.0005;

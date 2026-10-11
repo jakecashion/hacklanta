@@ -70,10 +70,15 @@ function pc_findParam(clip, field) {
 
 // Clip.name is not an effect param: it is trackItem.name, read and written directly.
 var PC_NAME = "Clip.name";
+// Clip.start is a move: the clip start in ticks (a number). Applied with move(delta), since the start setter is a no-op.
+var PC_START = "Clip.start";
+
+function pc_ticks(time) { return Number(time.ticks); }
 
 function pc_readFields(clip) {
     var out = {};
     out[PC_NAME] = clip.name;
+    out[PC_START] = pc_ticks(clip.start);
     for (var f in PC_FIELDS) {
         if (PC_FIELDS.hasOwnProperty(f)) {
             try { out[f] = pc_getField(pc_findParam(clip, f), f); }
@@ -202,6 +207,34 @@ function pc_clipByNodeId(nodeId) {
     throw new Error("No clip with nodeId " + nodeId);
 }
 
+// Move a clip so it starts at target ticks. Same track only. Refuses a move that overlaps
+// another clip on that track (Premiere itself accepts overlaps with no error).
+function pc_moveClip(clip, target) {
+    var start = pc_ticks(clip.start);
+    var d = target - start;
+    if (d === 0) { return; }
+    if (target < 0) { throw new Error("Move before 0"); }
+    var newEnd = pc_ticks(clip.end) + d;
+    var tracks = pc_seq().videoTracks;
+    for (var t = 0; t < tracks.numTracks; t++) {
+        var clips = tracks[t].clips;
+        var mine = false;
+        for (var j = 0; j < clips.numItems; j++) { if (clips[j].nodeId === clip.nodeId) { mine = true; } }
+        if (!mine) { continue; }
+        for (var k = 0; k < clips.numItems; k++) {
+            var o = clips[k];
+            if (o.nodeId === clip.nodeId) { continue; }
+            if (pc_ticks(o.start) < newEnd && pc_ticks(o.end) > target) {
+                throw new Error("Move refused: overlaps " + o.name);
+            }
+        }
+        break;
+    }
+    var delta = new Time();
+    delta.ticks = String(d);
+    clip.move(delta);
+}
+
 // Apply ops [{clipId:"000f4242", field, value}, ...] (clipId = nodeId). Returns each op's read-back value.
 function pc_applyOps(opsJson) {
     try {
@@ -214,6 +247,11 @@ function pc_applyOps(opsJson) {
                 if (op.field === PC_NAME) {
                     clip.name = String(op.value);
                     results.push({ clipId: op.clipId, field: op.field, after: clip.name, ok: true });
+                    continue;
+                }
+                if (op.field === PC_START) {
+                    pc_moveClip(clip, Number(op.value));
+                    results.push({ clipId: op.clipId, field: op.field, after: pc_ticks(clip.start), ok: true });
                     continue;
                 }
                 var param = pc_findParam(clip, op.field);

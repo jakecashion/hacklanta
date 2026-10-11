@@ -62,9 +62,10 @@ const FIELD_LABEL = {
   'Motion.Scale': 'Scale', 'Motion.Rotation': 'Rotation', 'Opacity.Opacity': 'Opacity',
   'Motion.Position.x': 'Position X', 'Motion.Position.y': 'Position Y',
   'Motion.AnchorPoint.x': 'Anchor Point X', 'Motion.AnchorPoint.y': 'Anchor Point Y',
-  'Clip.name': 'Name',
+  'Clip.name': 'Name', 'Clip.start': 'Start',
 };
 // Position/Anchor Point values are fractions of the frame, so keep 3 decimals for those.
+const TICKS_PER_SECOND = 254016000000; // Premiere ticks
 const fmt = (v) => (typeof v === 'string' ? `"${v}"`
   : Math.abs(v) < 2 ? Math.round(v * 1000) / 1000 : Math.round(v * 100) / 100);
 
@@ -139,6 +140,8 @@ function onCommit(msg) {
       // Own rename: the last scan already holds the new name, so name the clip by its ID.
       const from = clip !== op.value ? clip : op.clipId;
       feed(`${who} renamed ${from} to ${fmt(op.value)} (rev ${msg.rev})`);
+    } else if (op.field === 'Clip.start') {
+      feed(`${who} moved ${clip} to ${fmt(op.value / TICKS_PER_SECOND)} s (rev ${msg.rev})`);
     } else {
       feed(`${who} set ${clip} ${FIELD_LABEL[op.field] || op.field} to ${fmt(op.value)} (rev ${msg.rev})`);
     }

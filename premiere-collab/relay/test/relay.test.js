@@ -109,11 +109,12 @@ test('relay rejects bad ops and sends commits to the sender too', async (t) => {
   a.ws.send(JSON.stringify({ type: 'op', opId: 'x', clipId: '000f4242', field: 'Clip.name', value: 5 }));
   a.ws.send(JSON.stringify({ type: 'op', opId: 'x', clipId: '000f4242', field: 'Clip.name', value: '' }));
   a.ws.send(JSON.stringify({ type: 'op', opId: 'x', clipId: '000f4242', field: 'Motion.Scale', value: '120' }));
+  a.ws.send(JSON.stringify({ type: 'op', opId: 'x', clipId: '000f4242', field: 'Clip.start', value: -1 }));
   a.ws.send(JSON.stringify({ type: 'op', opId: 'y', clipId: '000f4242', field: 'Motion.Scale', value: 120 }));
   a.ws.send(JSON.stringify({ type: 'op', opId: 'z', clipId: '000f4242', field: 'Clip.name', value: 'Opening' }));
   await wait(50);
 
-  assert.equal(got.filter((m) => m.type === 'error').length, 5);
+  assert.equal(got.filter((m) => m.type === 'error').length, 6);
   const commits = got.filter((m) => m.type === 'commit');
   assert.equal(commits.length, 2);
   assert.equal(commits[1].op.value, 'Opening');
