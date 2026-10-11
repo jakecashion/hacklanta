@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ExtensionManifest Version="7.0" ExtensionBundleId="com.hacklanta.premierecollab" ExtensionBundleVersion="0.1.0"
-  ExtensionBundleName="Live Collab" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  ExtensionBundleName="Tandem" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <ExtensionList>
     <Extension Id="com.hacklanta.premierecollab.panel" Version="0.1.0" />
   </ExtensionList>
@@ -26,7 +26,7 @@
         </Lifecycle>
         <UI>
           <Type>Panel</Type>
-          <Menu>Live Collab</Menu>
+          <Menu>Tandem</Menu>
           <Geometry>
             <Size>
               <Height>600</Height>

@@ -1,51 +1,118 @@
-// Pure sync engine: no Premiere, no sockets. Loads in the panel (global) and in node (module).
-// Model: every edit goes through one sequencer that assigns rev. Last commit in rev order wins per field.
-(function (root) {
-  var EPS = 1e-3;
-  function same(a, b) {
-    if (Array.isArray(a) && Array.isArray(b)) return a.length === b.length && a.every(function (x, i) { return same(x, b[i]); });
-    if (typeof a === 'number' && typeof b === 'number') return Math.abs(a - b) <= EPS;
-    return a === b;
-  }
-  var clone = function (v) { return Array.isArray(v) ? v.slice() : v; };
+// sync.js - sync engine (pure logic, no Premiere or socket code).
+// UMD: module.exports under Node (node --test), global PCSync in the panel.
+//
+// Shadow = last known value of each (clipId, field). A scan that differs from the shadow
+// by more than epsilon is a local edit: it becomes an op, the shadow takes the new value
+// and the field is marked pending until the relay commits that op.
+// Commits arrive in relay (rev) order. Rules:
+//   - own op: clear the pending mark (shadow already has the value)
+//   - field pending with a newer local op: skip; our op comes later in relay order and wins
+//   - otherwise: apply, then set the shadow from Premiere's read-back (kills rounding echoes).
+//     The shadow changes only after a successful apply: if the apply fails (no active
+//     sequence, keyframed param), the shadow keeps Premiere's real value, so the next scan
+//     doesn't mistake the unapplied value for a local edit and send the old value back.
+// Clip.name is a string field: exact compare, no epsilon.
+// Clip.timing is "start:end:inPoint" in ticks, also a string: a move or trim is one op.
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.PCSync = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  const FIELDS = ['Motion.Scale', 'Motion.Rotation', 'Opacity.Opacity',
+    'Motion.Position.x', 'Motion.Position.y', 'Motion.AnchorPoint.x', 'Motion.AnchorPoint.y',
+    'Clip.name', 'Clip.timing'];
+  // Position and Anchor Point are fractions of the frame (0..1): 0.0005 is about a third of a
+  // pixel at 640 wide. The other fields use the default epsilon.
+  const AXIS_EPSILON = 0.0005;
+  const isAxis = (f) => f.endsWith('.x') || f.endsWith('.y');
+  const key = (clipId, field) => clipId + '|' + field;
+  const isValue = (v) => typeof v === 'string' || (typeof v === 'number' && Number.isFinite(v));
 
-  // bridge: { apply(field, value) -> readBack }   send(op): ship an op to the sequencer
-  function Engine(opts) {
-    this.me = opts.author; this.bridge = opts.bridge; this.send = opts.send;
-    this.shadow = {};   // field -> last value we believe the timeline has
-    this.pending = {};  // field -> id of my newest uncommitted op
-    this.epoch = 0;     // bumps on every remote apply; invalidates scans started before it
-    this.feed = []; this.n = 0;
-  }
-  Engine.prototype.load = function (snap) { // join / resync: adopt a full state without emitting ops
-    this.shadow = {}; this.pending = {};
-    for (var f in snap) this.shadow[f] = clone(snap[f]);
-    this.epoch++;
-  };
-  Engine.prototype.scanToken = function () { return this.epoch; };
-  // snap = timeline read by bridge; token from scanToken() taken BEFORE the read started
-  Engine.prototype.tick = function (snap, token) {
-    if (token !== this.epoch) return false; // stale: a remote apply landed while the read was in flight
-    for (var f in snap) {
-      if (f in this.shadow && same(snap[f], this.shadow[f])) continue;
-      var op = { id: this.me + ':' + (++this.n), author: this.me, field: f, value: clone(snap[f]) };
-      this.shadow[f] = clone(snap[f]); this.pending[f] = op.id;
-      this.send(op);
+  function createSync(opts = {}) {
+    const epsilon = opts.epsilon ?? 0.05;
+    const eps = (f) => (isAxis(f) ? AXIS_EPSILON : epsilon);
+    // Same value for this field? Strings compare exactly, numbers within epsilon.
+    const same = (f, a, b) => (typeof a === 'number' && typeof b === 'number'
+      ? Math.abs(a - b) <= eps(f) : a === b);
+    const author = opts.author || 'Editor';
+    let opCounter = 0;
+    const idPrefix = opts.idPrefix || Math.random().toString(36).slice(2, 8);
+
+    const shadow = new Map();   // key -> number (or string for Clip.name)
+    const pending = new Map();  // key -> opId of our newest unsent-or-uncommitted op
+    let lastRev = 0;
+
+    // Set the baseline from a scan without producing ops (on connect).
+    function reset(clips) {
+      shadow.clear();
+      pending.clear();
+      for (const c of clips) {
+        for (const f of FIELDS) {
+          if (isValue(c.p[f])) shadow.set(key(c.id, f), c.p[f]);
+        }
+      }
     }
-    return true;
-  };
-  Engine.prototype.onCommit = function (c) {
-    var op = c.op, f = op.field;
-    this.feed.push(op.author + ' set ' + f + ' to ' + JSON.stringify(op.value) + ' (rev ' + c.rev + ')');
-    if (op.author === this.me) { if (this.pending[f] === op.id) delete this.pending[f]; return; }
-    if (this.pending[f]) return; // my newer op is later in rev order, so it wins; skip this one
-    this.shadow[f] = clone(this.bridge.apply(f, op.value)); // shadow = read-back, so rounding can't echo
-    this.epoch++;
-  };
 
-  function Sequencer(onCommit) { this.rev = 0; this.onCommit = onCommit; }
-  Sequencer.prototype.submit = function (op) { this.onCommit({ rev: ++this.rev, op: op }); };
+    // Compare a scan to the shadow. Returns ops for every field that moved.
+    function diff(clips) {
+      const ops = [];
+      for (const c of clips) {
+        for (const f of FIELDS) {
+          const v = c.p[f];
+          if (!isValue(v)) continue;
+          const k = key(c.id, f);
+          const old = shadow.get(k);
+          if (old === undefined) { shadow.set(k, v); continue; } // new clip: baseline only
+          if (same(f, v, old)) continue;
+          const opId = idPrefix + '-' + (++opCounter);
+          shadow.set(k, v);
+          pending.set(k, opId);
+          ops.push({ opId, author, clipId: c.id, field: f, value: v });
+        }
+      }
+      return ops;
+    }
 
-  var api = { Engine: Engine, Sequencer: Sequencer, same: same };
-  if (typeof module !== 'undefined') module.exports = api; else root.CollabSync = api;
-})(this);
+    // Handle one commit from the relay. Returns the op to apply in Premiere, or null.
+    function receiveCommit(commit) {
+      if (commit.rev <= lastRev) return null; // duplicate or stale
+      lastRev = commit.rev;
+      const op = commit.op;
+      const k = key(op.clipId, op.field);
+      const mine = pending.get(k);
+      if (mine !== undefined) {
+        if (mine === op.opId) pending.delete(k);
+        return null; // own op, or a remote op that our pending op will override
+      }
+      return op; // caller applies it, then calls afterApply with the read-back
+    }
+
+    // Join snapshot from the relay: latest commit per field. Same rules as live commits, in rev
+    // order; values the timeline already holds are skipped. Returns the ops to apply.
+    function receiveCatchup(commits) {
+      const ops = [];
+      for (const c of [...commits].sort((x, y) => x.rev - y.rev)) {
+        const op = receiveCommit(c);
+        if (!op) continue;
+        const cur = shadow.get(key(op.clipId, op.field));
+        if (cur !== undefined && same(op.field, cur, op.value)) continue;
+        ops.push(op);
+      }
+      return ops;
+    }
+
+    // After applyOps: store what Premiere actually holds so the next scan matches.
+    function afterApply(clipId, field, readBack) {
+      if (isValue(readBack)) shadow.set(key(clipId, field), readBack);
+    }
+
+    return {
+      reset, diff, receiveCommit, receiveCatchup, afterApply,
+      get lastRev() { return lastRev; },
+      get pendingCount() { return pending.size; },
+      shadowValue: (clipId, field) => shadow.get(key(clipId, field)),
+      ownsOp: (opId) => typeof opId === 'string' && opId.startsWith(idPrefix + '-'),
+    };
+  }
+
+  return { createSync, FIELDS };
+});

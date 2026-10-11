@@ -26,4 +26,4 @@ if ($Link) {
   Write-Host "Copied panel to $dst"
 }
 
-Write-Host 'Restart Premiere, then Window > Extensions > Live Collab'
+Write-Host 'Restart Premiere, then Window > Extensions > Tandem'

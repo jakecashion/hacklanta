@@ -1,0 +1,33 @@
+{
+  "contract": "1.0.0",
+  "flavor": "core",
+  "milestone": null,
+  "phases": [
+    {
+      "number": "1",
+      "name": "Panel + Kill Test",
+      "status": "pending"
+    },
+    {
+      "number": "2",
+      "name": "Live Param Sync",
+      "status": "pending"
+    },
+    {
+      "number": "3",
+      "name": "Timeline Integration",
+      "status": "pending"
+    },
+    {
+      "number": "4",
+      "name": "Join, Live Cursor & Demo",
+      "status": "pending"
+    }
+  ],
+  "next": {
+    "command": "/gsd:progress --next",
+    "label": "Advance to the next step (plan phase 2)",
+    "reason": "Phase 2 of 4 — needs a plan"
+  },
+  "updated_at": "2026-10-11T02:30:32.686Z"
+}

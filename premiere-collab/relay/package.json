@@ -2,11 +2,12 @@
   "name": "premiere-collab-relay",
   "version": "0.1.0",
   "private": true,
-  "description": "WebSocket relay for Premiere Live Collab",
+  "description": "WebSocket relay for Tandem",
   "main": "relay.js",
   "scripts": {
     "start": "node relay.js",
-    "ping": "node ping.js"
+    "ping": "node ping.js",
+    "test": "node --test test/*.test.js"
   },
   "dependencies": {
     "ws": "8.22.0"

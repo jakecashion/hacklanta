@@ -1,4 +1,4 @@
-# Premiere Live Collab
+# Tandem (live collaboration for Premiere Pro)
 
 Two editors, one Premiere 22.3.1 timeline, live. CEP 11 panel + Node `ws` relay.
 
@@ -17,7 +17,7 @@ powershell -ExecutionPolicy Bypass -File scripts\install-panel.ps1 -Link
 powershell -ExecutionPolicy Bypass -File scripts\install-panel.ps1
 ```
 
-Restart Premiere, then **Window > Extensions > Live Collab**. If the panel does not show up with `-Link`, run without it (CEP may not follow junctions).
+Restart Premiere, then **Window > Extensions > Tandem**. If the panel does not show up with `-Link`, run without it (CEP may not follow junctions).
 
 Debug the panel: open `http://localhost:8088` in Chrome.
 
@@ -32,7 +32,14 @@ cd relay; npm install; node relay.js
 
 The relay prints `Tell the guest: ws://<ip>:8080`. Check it from the guest without Premiere: `node relay\ping.js ws://<ip>:8080` (needs Node), or use **Ping relay** in the panel.
 
-Network order: phone hotspot first, venue Wi-Fi second, `cloudflared tunnel --url http://localhost:8080` (guest uses `wss://<random>.trycloudflare.com`) last.
+Two-laptop setup, step by step: see `SETUP-TWO-LAPTOPS.md`.
+
+Network order:
+
+1. **Tailscale (primary).** Install Tailscale on both laptops and sign both in to the same account. On the host, `tailscale ip -4` prints its `100.x.y.z` address. The guest connects to `ws://100.x.y.z:8080`; the relay's startup list includes that address too. Works on any network with internet, including venue Wi-Fi that blocks devices from reaching each other. Set it up before the venue.
+2. **Phone hotspot with the direct IP (fallback).** Both laptops on the hotspot; the guest uses the host's LAN IP from the relay's startup list. Use it if Tailscale can't sign in or there's no internet.
+
+Run `firewall.ps1` either way: Windows may class the Tailscale adapter as a Public network.
 
 ## Phase 1 kill test
 
@@ -41,3 +48,13 @@ Network order: phone hotspot first, venue Wi-Fi second, `cloudflared tunnel --ur
 3. Set Clip # and click **Run kill test**: Scale 150, Rotation 45, Opacity 50. Watch the Program monitor.
 4. Paste the log output into `KILL-TEST.md`, fill in what you saw, commit.
 5. **Reset clip** puts the defaults back.
+
+## Live sync (Phase 2)
+
+1. Host: start the relay (`node relay.js` in `relay/`), open the demo project and its sequence, then in the panel type `localhost` as Host IP, a name, and click **Connect**.
+2. Guest: same project open, type the host's IP (Tailscale `100.x.y.z`, or the LAN IP), a name, and click **Connect**. Both badges read "Connected as …" and the peers line lists both names.
+3. Change Scale, Rotation or Opacity of a V1 clip in the Effect Controls panel. Within about 1 s it shows on the other laptop and in both **Changes** feeds (`Sam set Hero Scale to 150 (rev 3)`).
+
+How it works: the panel scans V1 once a second (`pc_scan`), `panel/js/sync.js` turns differences from its shadow into ops, the relay numbers them (`rev`) and sends each commit to everyone, and other panels apply it with `pc_applyOps`. The shadow takes Premiere's read-back, so rounding never echoes. On a conflict, the later rev wins. Connecting does not copy the host's timeline yet (Phase 3); both laptops must start from the same project.
+
+Tests (no Premiere needed): `cd relay; npm test`. Covers the sync rules and an end-to-end run of the real relay with two simulated editors.

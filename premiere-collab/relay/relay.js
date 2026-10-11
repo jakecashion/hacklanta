@@ -1,9 +1,16 @@
-// relay.js - Phase 1 relay: ping/pong, presence of names, broadcast everything else.
+// relay.js - relay and sequencer: ping/pong, names, and ops -> numbered commits.
 // Run on the host laptop: node relay.js [port]
+// Clients send {type:'op', opId, clipId, field, value} (value is a string for Clip.name). The relay gives each op the next
+// rev, keeps it in the log and sends {type:'commit', rev, op} to every client, sender included.
 const os = require('os');
 const { WebSocketServer, WebSocket } = require('ws');
 
-const PORT = parseInt(process.argv[2] || process.env.PORT || '8080', 10);
+const FIELDS = new Set(['Motion.Scale', 'Motion.Rotation', 'Opacity.Opacity',
+  'Motion.Position.x', 'Motion.Position.y', 'Motion.AnchorPoint.x', 'Motion.AnchorPoint.y',
+  'Clip.name', 'Clip.timing']);
+const STRING_FIELDS = new Set(['Clip.name']);
+// Clip ID = Premiere trackItem nodeId (hex). Same on both laptops for clips in demo.prproj (ROADMAP Phase 3, Clip identity).
+const CLIP_ID = /^[0-9a-f]{1,16}$/i;
 
 function lanIps() {
   const out = [];
@@ -15,58 +22,106 @@ function lanIps() {
   return out;
 }
 
-const wss = new WebSocketServer({ port: PORT });
-
-function broadcast(msg, except) {
-  const data = JSON.stringify(msg);
-  for (const c of wss.clients) {
-    if (c !== except && c.readyState === WebSocket.OPEN) c.send(data);
+function validOp(msg) {
+  if (typeof msg.opId !== 'string' || !CLIP_ID.test(msg.clipId) || !FIELDS.has(msg.field)) return false;
+  if (STRING_FIELDS.has(msg.field)) {
+    return typeof msg.value === 'string' && msg.value.length > 0 && msg.value.length <= 255;
   }
+  if (msg.field === 'Clip.timing') { // "start:end:inPoint" in ticks, end after start
+    const m = typeof msg.value === 'string' && /^(\d{1,16}):(\d{1,16}):(\d{1,16})$/.exec(msg.value);
+    return !!m && Number(m[2]) > Number(m[1]);
+  }
+  return typeof msg.value === 'number' && Number.isFinite(msg.value);
 }
 
-function sendPeers() {
-  const names = [...wss.clients].map((c) => c.name).filter(Boolean);
-  broadcast({ type: 'peers', names });
+// Latest committed entry per (clipId, field), ascending by rev. Keeps the { rev, op } shape.
+function collapseLog(log) {
+  const latest = new Map();
+  for (const e of log) latest.set(e.op.clipId + '|' + e.op.field, e);
+  return [...latest.values()].sort((x, y) => x.rev - y.rev);
 }
 
-wss.on('connection', (ws, req) => {
-  ws.isAlive = true;
-  ws.on('pong', () => { ws.isAlive = true; });
-  const from = req.socket.remoteAddress;
-  console.log(`+ connection from ${from}`);
-  ws.send(JSON.stringify({ type: 'welcome', ips: lanIps().map((i) => i.address) }));
+function start(port, { quiet = false } = {}) {
+  const say = quiet ? () => {} : console.log;
+  const wss = new WebSocketServer({ port });
+  let rev = 0;
+  const opLog = []; // committed ops; Phase 3 snapshot join reads from here
 
-  ws.on('message', (raw) => {
-    let msg;
-    try { msg = JSON.parse(raw); } catch (_) { return; }
-    if (msg.type === 'ping') {
-      ws.send(JSON.stringify({ type: 'pong', t: msg.t }));
-    } else if (msg.type === 'hello') {
-      ws.name = String(msg.name || 'Editor').slice(0, 40);
-      console.log(`  ${from} is "${ws.name}"`);
-      sendPeers();
-    } else {
-      broadcast({ ...msg, from: ws.name }, ws);
+  function broadcast(msg, except) {
+    const data = JSON.stringify(msg);
+    for (const c of wss.clients) {
+      if (c !== except && c.readyState === WebSocket.OPEN) c.send(data);
     }
-  });
-
-  ws.on('close', () => {
-    console.log(`- ${ws.name || from} left`);
-    sendPeers();
-  });
-});
-
-// Heartbeat: browser WebSockets auto-reply to pings; drop dead sockets and keep tunnels warm.
-const hb = setInterval(() => {
-  for (const ws of wss.clients) {
-    if (!ws.isAlive) { ws.terminate(); continue; }
-    ws.isAlive = false;
-    ws.ping();
   }
-}, 20000);
-wss.on('close', () => clearInterval(hb));
 
-wss.on('listening', () => {
-  console.log(`Relay listening on port ${PORT}`);
-  for (const i of lanIps()) console.log(`  Tell the guest: ws://${i.address}:${PORT}   (${i.ifname})`);
-});
+  function sendPeers() {
+    const names = [...wss.clients].map((c) => c.name).filter(Boolean);
+    broadcast({ type: 'peers', names });
+  }
+
+  wss.on('connection', (ws, req) => {
+    ws.isAlive = true;
+    ws.on('pong', () => { ws.isAlive = true; });
+    const from = req.socket.remoteAddress;
+    say(`+ connection from ${from}`);
+    ws.send(JSON.stringify({ type: 'welcome', ips: lanIps().map((i) => i.address), rev }));
+    // Join snapshot: latest committed value per (clip, field). Single-threaded, so every later
+    // op gets a higher rev and reaches this socket after the catch-up.
+    const commits = collapseLog(opLog);
+    ws.send(JSON.stringify({ type: 'catchup', rev, commits }));
+    say(`  catch-up: ${commits.length} change(s) at rev ${rev}`);
+
+    ws.on('message', (raw) => {
+      let msg;
+      try { msg = JSON.parse(raw); } catch (_) { return; }
+      if (msg.type === 'ping') {
+        ws.send(JSON.stringify({ type: 'pong', t: msg.t }));
+      } else if (msg.type === 'hello') {
+        ws.name = String(msg.name || 'Editor').slice(0, 40);
+        say(`  ${from} is "${ws.name}"`);
+        sendPeers();
+      } else if (msg.type === 'op') {
+        if (!validOp(msg)) {
+          ws.send(JSON.stringify({ type: 'error', err: 'bad op', op: msg }));
+          return;
+        }
+        const op = { opId: msg.opId, author: ws.name || 'Editor', clipId: msg.clipId,
+                     field: msg.field, value: msg.value };
+        rev += 1;
+        opLog.push({ rev, op });
+        say(`  rev ${rev}: ${op.author} ${op.clipId} ${op.field} = ${op.value}`);
+        broadcast({ type: 'commit', rev, op });
+      } else {
+        broadcast({ ...msg, from: ws.name }, ws);
+      }
+    });
+
+    ws.on('close', () => {
+      say(`- ${ws.name || from} left`);
+      sendPeers();
+    });
+  });
+
+  // Heartbeat: browser WebSockets auto-reply to pings; drop dead sockets.
+  const hb = setInterval(() => {
+    for (const ws of wss.clients) {
+      if (!ws.isAlive) { ws.terminate(); continue; }
+      ws.isAlive = false;
+      ws.ping();
+    }
+  }, 20000);
+  wss.on('close', () => clearInterval(hb));
+
+  wss.on('listening', () => {
+    say(`Relay listening on port ${port}`);
+    for (const i of lanIps()) say(`  Tell the guest: ws://${i.address}:${port}   (${i.ifname})`);
+  });
+
+  return { wss, get rev() { return rev; }, opLog };
+}
+
+module.exports = { start, collapseLog };
+
+if (require.main === module) {
+  start(parseInt(process.argv[2] || process.env.PORT || '8080', 10));
+}

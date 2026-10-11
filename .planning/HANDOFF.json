@@ -1,39 +1,105 @@
 {
   "version": "1.0",
-  "timestamp": "2026-10-10T21:33:04.795Z",
-  "phase": "1",
-  "phase_name": "Panel + Kill Test",
+  "timestamp": "2026-10-11T06:38:10.000Z",
+  "phase": "4",
+  "phase_name": "Join, Live Cursor & Demo",
   "phase_dir": ".planning/phases/01-panel-kill-test",
   "plan": null,
-  "task": 2,
-  "total_tasks": 5,
+  "task": 4,
+  "total_tasks": 6,
   "status": "paused",
   "completed_tasks": [
-    {"id": 1, "name": "Build Phase 1 code: CEP panel, bridge.jsx kill-test functions, ws relay + ping.js, install/firewall scripts, README, KILL-TEST.md template", "status": "done", "commit": "8349281"},
-    {"id": 2, "name": "Install panel on dev machine (PlayerDebugMode=1 in CSXS.11, junction into %APPDATA%\\Adobe\\CEP\\extensions)", "status": "done", "commit": "8349281"}
+    {
+      "id": 1,
+      "name": "Phase 4: SYNC-01 snapshot join",
+      "status": "done",
+      "commit": "c8c017e"
+    },
+    {
+      "id": 2,
+      "name": "Live cursor PRES-04: loopback probe, fake-cursor via relay, and a live cursor session with Bradley over Tailscale (user: 'cursor good')",
+      "status": "done",
+      "commit": null
+    },
+    {
+      "id": 3,
+      "name": "ENV-05 demo project: Hero/Logo/Card/BG on V1 at 0/5/10/15 s, 5 s each, A1 aligned, fx reset; saved, committed, pushed",
+      "status": "done",
+      "commit": "874ce31"
+    }
   ],
   "remaining_tasks": [
-    {"id": 3, "name": "ENV-01/ENV-03: Restart Premiere, open panel, run Ping JSX / List V1 / Run kill test on C:\\collab-demo\\ project; fill and commit premiere-collab/KILL-TEST.md", "status": "not_started"},
-    {"id": 4, "name": "ENV-04: Host runs firewall.ps1 (elevated) + node relay.js; guest installs panel (install-panel.ps1, no -Link) and Pings relay over phone hotspot", "status": "not_started"},
-    {"id": 5, "name": "ENV-05: Confirm demo project at C:\\collab-demo\\ on both laptops (1 sequence, 4 clips on V1: Hero, Logo, Card, BG; no keyframes; Uniform Scale ON; English UI)", "status": "not_started"}
+    {
+      "id": 4,
+      "name": "Demo script (DEMO-01) + pre-demo checklist + cursor.ps1 steps in SETUP-TWO-LAPTOPS.md, via /gsd-fast",
+      "status": "in_progress",
+      "progress": "premiere-collab/DEMO-SCRIPT.md written (uncommitted): 14-step pre-demo checklist, 3:00 run order (hook, problem/audience with sources, join, movement controls Position/Scale/Rotation/Anchor/Opacity + conflict, timeline rename/trim/move, cursor + feed, how it works, close), on-stage failure table, sources. NOT done: user review, commit, cursor.ps1 section in SETUP-TWO-LAPTOPS.md"
+    },
+    {
+      "id": 5,
+      "name": "Phase 3 guest checks with Bradley on the new demo.prproj (List V1 shows 4 nodeIds; move/trim both ways; hand trim), then tag stable",
+      "status": "not_started"
+    },
+    {
+      "id": 6,
+      "name": "One clean rehearsal on two laptops from a pristine demo.prproj, relay restarted first",
+      "status": "not_started"
+    }
   ],
-  "blockers": [
-    {"description": "Kill gate: setValue must visibly update the Program monitor on Scale, Rotation, Opacity, or the core is re-planned before Phase 2", "type": "human_action", "workaround": "None; run the test"},
-    {"description": "Unverified whether CEP follows a directory junction", "type": "technical", "workaround": "Run scripts/install-panel.ps1 without -Link (robocopy)"}
-  ],
+  "blockers": [],
   "async_jobs": [],
   "human_actions_pending": [
-    {"action": "Run the kill test in Premiere 22.3.1 and paste results into premiere-collab/KILL-TEST.md", "context": "Phase 1 kill gate (ENV-03); Claude cannot drive Premiere", "blocking": true},
-    {"action": "Run scripts/firewall.ps1 in an elevated PowerShell on the host laptop", "context": "ENV-04, TCP 8080 profile=any", "blocking": true},
-    {"action": "Copy repo to the second laptop, run install-panel.ps1, test Ping relay over the hotspot", "context": "ENV-04, ENV-01 on laptop 2", "blocking": true}
+    {
+      "action": "Bradley: close project unsaved, git pull, Copy-Item premiere-collab\\demo\\demo.prproj C:\\collab-demo\\demo.prproj -Force, open it, relink 3 new clips if asked, List V1 must show 000f4242/000f4263/000f4264/000f4265",
+      "context": "New demo project 874ce31; nodeIds must match or edits land on the wrong clip",
+      "blocking": true
+    },
+    {
+      "action": "Restart the 8080 relay before the rehearsal and before the demo (clears the in-memory op log)",
+      "context": "Log holds ~18 timing revs from building the project; a join replays the whole log",
+      "blocking": false
+    },
+    {
+      "action": "Host cursor helper is not running; restart with cursor.ps1 -Relay localhost -Name Jake when needed",
+      "context": "Its window was closed earlier",
+      "blocking": false
+    },
+    {
+      "action": "Decide: recorded video or live 3-min pitch (user said demo video; handoff said live at 9am). Script covers both",
+      "context": "Changes whether move/trim can be a recorded good take",
+      "blocking": false
+    }
   ],
   "decisions": [
-    {"decision": "Skipped plan-phase; Phase 1 built inline via /gsd-fast at user request ('skip more and start building')", "rationale": "Time budget; no PLAN.md/SUMMARY.md for Phase 1", "phase": "1"},
-    {"decision": "Panel loads json2.js then bridge.jsx via $.evalFile on every panel load (no manifest ScriptPath)", "rationale": "Reload panel picks up .jsx edits", "phase": "1"},
-    {"decision": "Params found by component matchName (AE.ADBE Motion / AE.ADBE Opacity) + English param displayName, fallback to index (Scale 1, Rotation 4, Opacity 0)", "rationale": "displayName is localized", "phase": "1"},
-    {"decision": "Relay broadcasts all non-ping/hello messages to other clients, tagged with sender name; heartbeat ping every 20 s", "rationale": "Phase 1 minimum; Phase 2 adds rev sequencing in relay", "phase": "1"}
+    {
+      "decision": "Demo layout is 5 s per clip (0-20 s), Hero keeps nodeId 000f4242",
+      "rationale": "User chose to restore 5 s after an accidental undo chain; an 8-frame Hero is hard to see and click",
+      "phase": "4"
+    },
+    {
+      "decision": "No auto-start launcher for cursor.ps1",
+      "rationale": "User declined (nvm); start it by hand on each laptop",
+      "phase": "4"
+    },
+    {
+      "decision": "Lead pitch line: 'Premiere Pro, now multiplayer: edit one timeline together and watch each other's changes land live.'",
+      "rationale": "Recommended opener; alt 'Real-time multiplayer for one Premiere timeline. See each other's edits and cursor live, within seconds.'",
+      "phase": "4"
+    },
+    {
+      "decision": "Audience is all film editors; frame as a long-wanted feature",
+      "rationale": "User: this has been asked for for years. Evidence: 2017 Adobe staff quote (not possible on same sequence), Team Projects sequence locking 2022, Productions project locking, Avid bin locking, Resolve bin/timeline locking",
+      "phase": "4"
+    },
+    {
+      "decision": "Core of the demo is movement controls (Position, Scale, Rotation, Anchor Point, Opacity) and timeline (rename, trim, move)",
+      "rationale": "User direction",
+      "phase": "4"
+    }
   ],
-  "uncommitted_files": [],
-  "next_action": "Ask the user for kill-test output (KILL-TEST.md). If all three fields moved the Program monitor, start Phase 2 (sync engine sync.js + node --test, relay rev sequencing, 1 s poll diff, applyOps, echo suppression via shadow + epsilon).",
-  "context_notes": "Code exists but is untested inside Premiere. bridge.jsx functions: pc_ping, pc_listClips, pc_setParam, pc_killTest, pc_resetClip, pc_scanCost. Relay verified locally (3 ms round trip). Host LAN IP seen: 192.168.4.69 (Ethernet)."
+  "uncommitted_files": [
+    "?? premiere-collab/DEMO-SCRIPT.md"
+  ],
+  "next_action": "User reviews premiere-collab/DEMO-SCRIPT.md, then commit it. Add cursor.ps1 section to SETUP-TWO-LAPTOPS.md. Then task 5 (Bradley guest checks on new demo.prproj, tag stable) and task 6 (rehearsal following the DEMO-SCRIPT checklist).",
+  "context_notes": "Paused 02:38 EDT, demo 9am. Live cursor done with Bradley (guest, Tailscale 100.120.196.123). Host Tailscale 100.122.228.122. Relay PID 27076 started 02:03. Host panel connected as jake, rev 18. CDP helpers in %LOCALAPPDATA%/Temp/tandem-cdp (build.jsx, restore.jsx, restore-audio.jsx added). No reddit threads or high-vote Adobe feature request found; do not quote vote counts."
 }
