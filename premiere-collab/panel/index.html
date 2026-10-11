@@ -28,15 +28,20 @@
     <ul id="feed"></ul>
   </section>
 
+  <section class="grow">
+    <h2>Log <button id="clear" class="small">Clear</button> <button id="reload" class="small">Reload panel</button></h2>
+    <pre id="log"></pre>
+  </section>
+
   <section>
-    <h2>Kill test</h2>
+    <h2>Debug tools</h2>
     <div class="row">
       <label class="inline">Clip # (V1) <input id="clipIdx" type="number" value="0" min="0"></label>
     </div>
     <div class="row">
       <button id="jsxPing">Ping JSX</button>
       <button id="list">List V1</button>
-      <button id="kill">Run kill test</button>
+      <button id="kill">Run test</button>
       <button id="reset">Reset clip</button>
       <button id="scan">Scan cost</button>
     </div>
@@ -49,11 +54,6 @@
       <input id="value" type="number" value="200" class="short">
       <button id="set">Set</button>
     </div>
-  </section>
-
-  <section class="grow">
-    <h2>Log <button id="clear" class="small">Clear</button> <button id="reload" class="small">Reload panel</button></h2>
-    <pre id="log"></pre>
   </section>
 
   <script src="js/CSInterface.js"></script>
