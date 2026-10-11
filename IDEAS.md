@@ -71,7 +71,6 @@ Transcription of therapy conversations to help therapy be more personalized via 
 Notes:
 
 ### Live collaborative After Effects session
-We are moving towards an idea like this: https://www.tiktok.com/t/ZPLrspCAT/
 
 Start a session, friend joins. (editor's fastest gpu's fastest ram's, uses editor's machines, hosting their project). One person hosts the session locally.
 
