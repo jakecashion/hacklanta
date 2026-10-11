@@ -9,7 +9,7 @@ const { createSync } = require('../../panel/js/sync.js');
 const round = (v) => Math.round(v * 10) / 10;
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
-const pristine = () => ({ 'v0:0': { 'Motion.Scale': 100, 'Motion.Rotation': 0, 'Opacity.Opacity': 100 } });
+const pristine = () => ({ '000f4242': { 'Motion.Scale': 100, 'Motion.Rotation': 0, 'Opacity.Opacity': 100 } });
 
 // Optional third arg: a starting timeline (stands in for the same Premiere after a reconnect).
 function fakeEditor(url, name, timeline = pristine()) {
@@ -20,7 +20,7 @@ function fakeEditor(url, name, timeline = pristine()) {
   let gotCatchup;
   const ed = {
     name, timeline, sync, ws, msgs: [], applied: 0,
-    edit(field, value) { timeline['v0:0'][field] = round(value); },
+    edit(field, value) { timeline['000f4242'][field] = round(value); },
     poll() { for (const op of sync.diff(scan())) ws.send(JSON.stringify({ type: 'op', ...op })); },
     ready: new Promise((res) => ws.on('open', () => { ws.send(JSON.stringify({ type: 'hello', name })); res(); })),
     caughtUp: new Promise((res) => { gotCatchup = res; }),
@@ -66,12 +66,12 @@ test('edits sync both ways and nothing echoes', async (t) => {
   a.edit('Motion.Scale', 150.04);
   a.poll();
   await wait(50);
-  assert.equal(b.timeline['v0:0']['Motion.Scale'], 150);
+  assert.equal(b.timeline['000f4242']['Motion.Scale'], 150);
 
   b.edit('Motion.Rotation', 45);
   b.poll();
   await wait(50);
-  assert.equal(a.timeline['v0:0']['Motion.Rotation'], 45);
+  assert.equal(a.timeline['000f4242']['Motion.Rotation'], 45);
 
   const revAfterEdits = relay.rev;
   assert.equal(revAfterEdits, 2);
@@ -91,8 +91,8 @@ test('simultaneous edits to one field converge to the later rev', async (t) => {
   await wait(80);
 
   const last = relay.opLog[relay.opLog.length - 1].op.value;
-  assert.equal(a.timeline['v0:0']['Opacity.Opacity'], last);
-  assert.equal(b.timeline['v0:0']['Opacity.Opacity'], last);
+  assert.equal(a.timeline['000f4242']['Opacity.Opacity'], last);
+  assert.equal(b.timeline['000f4242']['Opacity.Opacity'], last);
 
   const rev = relay.rev;
   for (let i = 0; i < 5; i++) { a.poll(); b.poll(); await wait(10); }
@@ -105,12 +105,12 @@ test('relay rejects bad ops and sends commits to the sender too', async (t) => {
   a.ws.on('message', (raw) => got.push(JSON.parse(raw)));
 
   a.ws.send(JSON.stringify({ type: 'op', opId: 'x', clipId: 'nope', field: 'Motion.Scale', value: 1 }));
-  a.ws.send(JSON.stringify({ type: 'op', opId: 'x', clipId: 'v0:0', field: 'Position', value: 1 }));
-  a.ws.send(JSON.stringify({ type: 'op', opId: 'x', clipId: 'v0:0', field: 'Clip.name', value: 5 }));
-  a.ws.send(JSON.stringify({ type: 'op', opId: 'x', clipId: 'v0:0', field: 'Clip.name', value: '' }));
-  a.ws.send(JSON.stringify({ type: 'op', opId: 'x', clipId: 'v0:0', field: 'Motion.Scale', value: '120' }));
-  a.ws.send(JSON.stringify({ type: 'op', opId: 'y', clipId: 'v0:0', field: 'Motion.Scale', value: 120 }));
-  a.ws.send(JSON.stringify({ type: 'op', opId: 'z', clipId: 'v0:0', field: 'Clip.name', value: 'Opening' }));
+  a.ws.send(JSON.stringify({ type: 'op', opId: 'x', clipId: '000f4242', field: 'Position', value: 1 }));
+  a.ws.send(JSON.stringify({ type: 'op', opId: 'x', clipId: '000f4242', field: 'Clip.name', value: 5 }));
+  a.ws.send(JSON.stringify({ type: 'op', opId: 'x', clipId: '000f4242', field: 'Clip.name', value: '' }));
+  a.ws.send(JSON.stringify({ type: 'op', opId: 'x', clipId: '000f4242', field: 'Motion.Scale', value: '120' }));
+  a.ws.send(JSON.stringify({ type: 'op', opId: 'y', clipId: '000f4242', field: 'Motion.Scale', value: 120 }));
+  a.ws.send(JSON.stringify({ type: 'op', opId: 'z', clipId: '000f4242', field: 'Clip.name', value: 'Opening' }));
   await wait(50);
 
   assert.equal(got.filter((m) => m.type === 'error').length, 5);
@@ -143,8 +143,8 @@ test("a late joiner catches up to the host's edits and nothing echoes", async (t
   assert.equal(cu.rev, relay.rev);
   assert.equal(cu.commits.length, 2);
   assert.deepEqual(cu.commits.map((c) => c.rev), [2, 3]);
-  assert.deepEqual(guest.timeline['v0:0'], host.timeline['v0:0']);
-  assert.equal(guest.timeline['v0:0']['Motion.Scale'], 160);
+  assert.deepEqual(guest.timeline['000f4242'], host.timeline['000f4242']);
+  assert.equal(guest.timeline['000f4242']['Motion.Scale'], 160);
   assert.equal(guest.sync.lastRev, 3);
 
   for (let i = 0; i < 5; i++) { host.poll(); guest.poll(); await wait(10); }

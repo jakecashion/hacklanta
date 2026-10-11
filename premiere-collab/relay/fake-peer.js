@@ -1,12 +1,12 @@
 // fake-peer.js - a second "editor" for testing sync on one laptop.
 // node fake-peer.js [ws://host:8080] [clipId] [rename]
 // Prints every commit (your Premiere edits show up here), then every 4 s sends one edit
-// to the clip (default v0:0) so you can watch Premiere change by itself.
+// to the clip (default nodeId 000f4242, V1 clip 0 in demo.prproj) so you can watch Premiere change by itself.
 // With "rename" it renames the clip instead (two test names; rename it back by hand after).
 const { WebSocket } = require('ws');
 
 const url = process.argv[2] || 'ws://localhost:8080';
-const clipId = process.argv[3] || 'v0:0';
+const clipId = process.argv[3] || '000f4242';
 const steps = process.argv[4] === 'rename'
   ? [['Clip.name', 'Renamed by fake peer'], ['Clip.name', 'Fake peer rename 2']]
   : [

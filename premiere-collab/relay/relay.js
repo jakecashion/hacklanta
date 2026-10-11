@@ -9,7 +9,8 @@ const FIELDS = new Set(['Motion.Scale', 'Motion.Rotation', 'Opacity.Opacity',
   'Motion.Position.x', 'Motion.Position.y', 'Motion.AnchorPoint.x', 'Motion.AnchorPoint.y',
   'Clip.name']);
 const STRING_FIELDS = new Set(['Clip.name']);
-const CLIP_ID = /^v\d+:\d+$/;
+// Clip ID = Premiere trackItem nodeId (hex). Same on both laptops for clips in demo.prproj (ROADMAP Phase 3, Clip identity).
+const CLIP_ID = /^[0-9a-f]{1,16}$/i;
 
 function lanIps() {
   const out = [];

@@ -184,23 +184,33 @@ function pc_scan(trackIndex) {
         var clips = [];
         for (var j = 0; j < track.clips.numItems; j++) {
             var clip = track.clips[j];
-            clips.push({ id: "v" + trackIndex + ":" + j, name: clip.name, p: pc_readFields(clip) });
+            clips.push({ id: clip.nodeId, name: clip.name, p: pc_readFields(clip) });
         }
         return pc_ok({ clips: clips });
     } catch (e) { return pc_err(e); }
 }
 
-// Apply ops [{clipId:"v0:2", field, value}, ...]. Returns each op's read-back value.
+// Find a clip on any video track by its nodeId (the shared clip ID).
+function pc_clipByNodeId(nodeId) {
+    var tracks = pc_seq().videoTracks;
+    for (var t = 0; t < tracks.numTracks; t++) {
+        var clips = tracks[t].clips;
+        for (var j = 0; j < clips.numItems; j++) {
+            if (clips[j].nodeId === nodeId) { return clips[j]; }
+        }
+    }
+    throw new Error("No clip with nodeId " + nodeId);
+}
+
+// Apply ops [{clipId:"000f4242", field, value}, ...] (clipId = nodeId). Returns each op's read-back value.
 function pc_applyOps(opsJson) {
     try {
         var ops = JSON.parse(opsJson);
         var results = [];
         for (var i = 0; i < ops.length; i++) {
             var op = ops[i];
-            var m = /^v(\d+):(\d+)$/.exec(op.clipId);
             try {
-                if (!m) { throw new Error("Bad clipId " + op.clipId); }
-                var clip = pc_clip(parseInt(m[1], 10), parseInt(m[2], 10));
+                var clip = pc_clipByNodeId(String(op.clipId));
                 if (op.field === PC_NAME) {
                     clip.name = String(op.value);
                     results.push({ clipId: op.clipId, field: op.field, after: clip.name, ok: true });
