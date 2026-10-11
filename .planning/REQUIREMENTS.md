@@ -55,7 +55,7 @@ Stretch goals. Only start these after v1 is demo-solid.
 - **SESS-06**: User colors
 - **SYNC-08**: Resync button
 - **SYNC-09**: Join refuses a mismatched project
-- **PRES-01**: Each panel shows which clips the other editor has selected (replaced in Phase 3 by PRES-04 live cursor, 2026-10-10)
+- **PRES-01**: Each panel shows which clips the other editor has selected (replaced by PRES-04 live cursor, now in Phase 4, 2026-10-10)
 - **PRES-02**: The other editor's playhead time
 - **DEMO-02**: 3 clean rehearsal runs in a row
 
@@ -102,7 +102,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SESS-02 | Phase 2 | Pending |
 | SESS-04 | Phase 2 | Pending |
 | SESS-05 | Phase 2 | Pending |
-| SYNC-01 | Phase 3 | Pending |
+| SYNC-01 | Phase 4 | Pending |
 | SYNC-03 | Phase 2 | Pending |
 | SYNC-04 | Phase 2 | Pending |
 | SYNC-05 | Phase 2 | Pending |
@@ -110,9 +110,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SYNC-07 | Phase 2 | Pending |
 | SYNC-02 | Phase 2.1 | Complete |
 | SYNC-10 | Phase 2.1 | Complete |
-| PRES-04 | Phase 3 | Pending |
-| PRES-03 | Phase 3 | Pending |
-| DEMO-01 | Phase 3 | Pending |
+| PRES-04 | Phase 4 | Pending |
+| PRES-03 | Phase 4 | Pending |
+| DEMO-01 | Phase 4 | Pending |
 
 **Coverage:**
 - v1 requirements: 18 total (ENV 4, SESS 3, SYNC 8, PRES 2, DEMO 1)

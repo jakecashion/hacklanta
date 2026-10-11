@@ -15,12 +15,12 @@
     },
     {
       "number": "3",
-      "name": "Join, Presence & Demo",
+      "name": "Timeline Integration",
       "status": "pending"
     },
     {
       "number": "4",
-      "name": "Timeline Integration",
+      "name": "Join, Live Cursor & Demo",
       "status": "pending"
     }
   ],
@@ -29,5 +29,5 @@
     "label": "Advance to the next step (plan phase 2)",
     "reason": "Phase 2 of 4 — needs a plan"
   },
-  "updated_at": "2026-10-11T02:05:22.853Z"
+  "updated_at": "2026-10-11T02:30:32.686Z"
 }
