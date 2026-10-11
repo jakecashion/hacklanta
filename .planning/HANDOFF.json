@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "timestamp": "2026-10-11T04:20:00.000Z",
+  "timestamp": "2026-10-11T04:23:09.000Z",
   "phase": "3",
   "phase_name": "Timeline Integration",
   "phase_dir": ".planning/phases/03-timeline-integration",
@@ -73,9 +73,9 @@
   "async_jobs": [],
   "human_actions_pending": [
     {
-      "action": "Real guest laptop: git pull, rerun install-panel.ps1, restart Premiere, open demo.prproj, pc_listClips -> expect V1 clip 0 nodeId 000f4242",
-      "context": "Guest not available now; one-line confirm, add to Phase 4 checklist",
-      "blocking": false
+      "action": "Guest: click List clips in Tandem, read V1 clip 0 nodeId (expect 000f4242)",
+      "context": "Gates Step 4 identity choice (ROADMAP Phase 3 Clip identity rules 4-5)",
+      "blocking": true
     },
     {
       "action": "Delete 'PROBE (delete me)' sequence from C:/collab-demo/demo.prproj, then save",
@@ -85,6 +85,11 @@
     {
       "action": "Guest must type a name before Connect",
       "context": "Guest showed as \"Editor\" in every test",
+      "blocking": false
+    },
+    {
+      "action": "Rename host V1 clip back to A001_C037_0921FG_001.mp4 before the demo",
+      "context": "Left as host-rename.mp4 by rename tests",
       "blocking": false
     }
   ],
@@ -120,11 +125,7 @@
       "phase": "3"
     }
   ],
-  "uncommitted_files": [
-    "?? .planning/phases/02.1-position-anchor-point-sync/",
-    "?? .planning/quick/",
-    "?? premiere-collab/docs/"
-  ],
+  "uncommitted_files": [],
   "next_action": "git fetch && git status -sb. Check the clock against the 4:30 AM cutoff. Get the real-guest pc_listClips(0) check (expect V1 clip 0 nodeId 000f4242), then Step 4 move (EDIT-02) per ROADMAP Phase 3 Clip identity rules.",
-  "context_notes": "Demo 9am 2026-10-11. Paused 23:42 EDT. 23.976 fps (10,594,584,000 ticks/frame). Run ExtendScript from Node via CDP on localhost:8088 (Node 24 global WebSocket + fetch; Runtime.evaluate of a Promise wrapping window.__adobe_cep__.evalScript, awaitPromise). Write JSX to files, never shell-quote. To inspect a project without Premiere: node premiere-collab/tools/prproj-nodeids.js <file>. app.openDocument opens a 2nd project without closing the active one; proj.closeDocument(0,0) closes without save. Relay restart resets rev to 0 and drops catch-up history. Panel CDP helper: scratchpad cdp.mjs pattern (fetch localhost:8088/json, Runtime.evaluate with awaitPromise, call jsx(...)). Panel log: premiere-collab/panel/panel-log.txt (newest first)."
+  "context_notes": "Paused 00:23 EDT. Demo 9am 2026-10-11. 23.976 fps (10,594,584,000 ticks/frame). Run ExtendScript from Node via CDP on localhost:8088 (Node 24 global WebSocket + fetch; Runtime.evaluate of a Promise wrapping window.__adobe_cep__.evalScript, awaitPromise). Write JSX to files, never shell-quote. To inspect a project without Premiere: node premiere-collab/tools/prproj-nodeids.js <file>. app.openDocument opens a 2nd project without closing the active one; proj.closeDocument(0,0) closes without save. Relay restart resets rev to 0 and drops catch-up history. Panel CDP helper: scratchpad cdp.mjs pattern (fetch localhost:8088/json, Runtime.evaluate with awaitPromise, call jsx(...)). Panel log: premiere-collab/panel/panel-log.txt (newest first). Infra at pause: relay PID 27184 on 8080 (user started it in their own window); host panel CDP on 8088; host V1 clip 0 nodeId 000f4242, named host-rename.mp4 from tests (rename back before demo). Guest Bradley on Tailscale 100.120.196.123 with f32667d installed."
 }
