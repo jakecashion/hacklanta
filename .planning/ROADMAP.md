@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 1: Panel + Kill Test** - Panel loads on both laptops, `setValue` kill test on Scale/Rotation/Opacity, guest reaches the host relay over Tailscale, demo project in place (~1 h)
 - [ ] **Phase 2: Live Param Sync** - Relay, sync engine and Premiere bridge; Scale, Rotation and Opacity sync both ways in 1-2 s, last write wins, no echo loops, connect by typed IP with names on the badge (~3 h)
 - [x] **Phase 2.1: Position & Anchor Point Sync** (INSERTED) - Motion Position and Anchor Point sync like Scale/Rotation/Opacity (SYNC-02, SYNC-10); next work, via `/gsd-fast`
-- [ ] **Phase 3: Timeline Integration** - Probe Premiere's timing API, then sync clip rename, move on the same track, and trim between editors (runs until a cutoff time; not required for the demo)
+- [x] **Phase 3: Timeline Integration** - Probe Premiere's timing API, then sync clip rename, move on the same track, and trim between editors (runs until a cutoff time; not required for the demo). Closed 2026-10-11 before the cutoff; guest-side checks move to Phase 4
 - [ ] **Phase 4: Join, Live Cursor & Demo** - Final phase: snapshot join from the host, other editor's live mouse pointer over Premiere, change feed, demo script and one clean rehearsal (~3 h)
 
 ## Phase Details
@@ -90,7 +90,14 @@ Decimal phases appear between their surrounding integers in numeric order.
   5. If the guest value is different, keep `v{track}:{clip}` on the wire for move and map it to `nodeId` on each laptop at connect.
   6. Rename (EDIT-01, f32667d) still uses `v{track}:{clip}`. Step 4 changes all ops to the new ID at the same time: relay `CLIP_ID`, bridge `pc_applyOps` parser, `pc_scan`, `collapseLog`, and the tests.
 
-**Plans**: TBD
+**Result (closed 2026-10-11, about 1:15 AM EDT):**
+  1. Step 4a (f95c25b): every op uses `nodeId` as the clip ID. The bridge finds the clip by `nodeId` on any video track. `collapseLog` needed no change.
+  2. Step 4b (e31b7bc) and Step 5 (15b79a7): move and trim are one op, `Clip.timing` = `"start:end:inPoint"` in ticks. The bridge applies `move(delta)`, then `end`, then `inPoint`, then `outPoint` = `inPoint` + length. It refuses an empty clip, a span past the media end, and an overlap on the track.
+  3. Verified on the host only: bridge writes on a cloned sequence, a hand drag on Sequence 01, and a simulated guest (real `sync.js`, fake timeline) through the relay. Both directions, late-join catch-up, refusals, and no echo passed. 17/17 tests.
+  4. Not done: rule 3 (ignore clips added in the session). Not verified: rule 4 (real-guest `nodeId`), the guest-side bridge, and a hand trim. These checks move to Phase 4.
+  5. Tag `stable` is not set yet: set it after the Phase 4 two-laptop check passes.
+
+**Plans**: none (built with `/gsd-fast` steps)
 
 ### Phase 4: Join, Live Cursor & Demo
 
@@ -99,7 +106,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Depends on**: Phase 3 (or its cutoff time). Final phase: wrap-up checks, demo script and rehearsal on the final code
 **Requirements**: SYNC-01, PRES-04, PRES-03, DEMO-01
 **Success Criteria** (what must be TRUE):
-  1. After the host has changed a clip's Scale, Rotation or Opacity, a guest who clicks Connect sees their timeline set to match the host's, with no session code and no Approve step (clips matched by the clip ID in use: `v{track}:{clip}`, or `nodeId` if Phase 3 switched to it)
+  1. After the host has changed a clip's Scale, Rotation or Opacity, a guest who clicks Connect sees their timeline set to match the host's, with no session code and no Approve step (clips matched by `nodeId`, as Phase 3 switched to it; catch-up also covers rename, move and trim)
   2. Cursor probe first (~20 min, before any other Phase 4 work): a transparent, click-through, always-on-top overlay draws a test pointer over Premiere without blocking clicks or stealing focus, and a pointer position normalized to Premiere's main window lands on the same UI element on the other laptop (both Premieres maximized, same workspace). If it fails, re-plan the cursor before building it
   3. Each editor sees the other's mouse pointer with their name, drawn over their own Premiere window, following the other's mouse anywhere in the Premiere window with under 0.5 s lag (PRES-04). A per-laptop PowerShell helper (no Node on the guest) captures the pointer, sends it through the relay (which already forwards unknown message types) and draws the other's pointer; the CEP panel can't see or draw outside itself
   4. Each panel shows a change feed with author names, e.g. `Sam set Hero Scale to 150 (rev 12)` (already built in Phase 2)

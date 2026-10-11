@@ -113,12 +113,17 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PRES-04 | Phase 4 | Pending |
 | PRES-03 | Phase 4 | Pending |
 | DEMO-01 | Phase 4 | Pending |
+| ENV-06 | Phase 3 | Complete (TIMELINE-PROBES.md) |
+| EDIT-01 | Phase 3 | Complete (f32667d, two laptops) |
+| EDIT-02 | Phase 3 | Complete on host (e31b7bc, 15b79a7); guest check in Phase 4 |
+| EDIT-03 | Phase 3 | Complete on host (15b79a7); guest check in Phase 4 |
 
 **Coverage:**
 - v1 requirements: 18 total (ENV 4, SESS 3, SYNC 8, PRES 2, DEMO 1)
 - Mapped to phases: 18
 - Unmapped: 0 ✓
+- v2 items pulled into Phase 3: ENV-06, EDIT-01, EDIT-02, EDIT-03
 
 ---
 *Requirements defined: 2026-10-10*
-*Last updated: 2026-10-10 after scope cut to 6–8 hours*
+*Last updated: 2026-10-11 after Phase 3 close*
