@@ -68,8 +68,12 @@ function pc_findParam(clip, field) {
     throw new Error("Component " + spec[0] + " not found on clip " + clip.name);
 }
 
+// Clip.name is not an effect param: it is trackItem.name, read and written directly.
+var PC_NAME = "Clip.name";
+
 function pc_readFields(clip) {
     var out = {};
+    out[PC_NAME] = clip.name;
     for (var f in PC_FIELDS) {
         if (PC_FIELDS.hasOwnProperty(f)) {
             try { out[f] = pc_getField(pc_findParam(clip, f), f); }
@@ -197,6 +201,11 @@ function pc_applyOps(opsJson) {
             try {
                 if (!m) { throw new Error("Bad clipId " + op.clipId); }
                 var clip = pc_clip(parseInt(m[1], 10), parseInt(m[2], 10));
+                if (op.field === PC_NAME) {
+                    clip.name = String(op.value);
+                    results.push({ clipId: op.clipId, field: op.field, after: clip.name, ok: true });
+                    continue;
+                }
                 var param = pc_findParam(clip, op.field);
                 pc_setField(param, op.field, op.value);
                 results.push({ clipId: op.clipId, field: op.field, after: pc_getField(param, op.field), ok: true });

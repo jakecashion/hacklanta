@@ -1,12 +1,14 @@
 // relay.js - relay and sequencer: ping/pong, names, and ops -> numbered commits.
 // Run on the host laptop: node relay.js [port]
-// Clients send {type:'op', opId, clipId, field, value}. The relay gives each op the next
+// Clients send {type:'op', opId, clipId, field, value} (value is a string for Clip.name). The relay gives each op the next
 // rev, keeps it in the log and sends {type:'commit', rev, op} to every client, sender included.
 const os = require('os');
 const { WebSocketServer, WebSocket } = require('ws');
 
 const FIELDS = new Set(['Motion.Scale', 'Motion.Rotation', 'Opacity.Opacity',
-  'Motion.Position.x', 'Motion.Position.y', 'Motion.AnchorPoint.x', 'Motion.AnchorPoint.y']);
+  'Motion.Position.x', 'Motion.Position.y', 'Motion.AnchorPoint.x', 'Motion.AnchorPoint.y',
+  'Clip.name']);
+const STRING_FIELDS = new Set(['Clip.name']);
 const CLIP_ID = /^v\d+:\d+$/;
 
 function lanIps() {
@@ -20,8 +22,11 @@ function lanIps() {
 }
 
 function validOp(msg) {
-  return typeof msg.opId === 'string' && CLIP_ID.test(msg.clipId) && FIELDS.has(msg.field) &&
-    typeof msg.value === 'number' && Number.isFinite(msg.value);
+  if (typeof msg.opId !== 'string' || !CLIP_ID.test(msg.clipId) || !FIELDS.has(msg.field)) return false;
+  if (STRING_FIELDS.has(msg.field)) {
+    return typeof msg.value === 'string' && msg.value.length > 0 && msg.value.length <= 255;
+  }
+  return typeof msg.value === 'number' && Number.isFinite(msg.value);
 }
 
 // Latest committed entry per (clipId, field), ascending by rev. Keeps the { rev, op } shape.

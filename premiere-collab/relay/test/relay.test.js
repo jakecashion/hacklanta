@@ -106,15 +106,20 @@ test('relay rejects bad ops and sends commits to the sender too', async (t) => {
 
   a.ws.send(JSON.stringify({ type: 'op', opId: 'x', clipId: 'nope', field: 'Motion.Scale', value: 1 }));
   a.ws.send(JSON.stringify({ type: 'op', opId: 'x', clipId: 'v0:0', field: 'Position', value: 1 }));
+  a.ws.send(JSON.stringify({ type: 'op', opId: 'x', clipId: 'v0:0', field: 'Clip.name', value: 5 }));
+  a.ws.send(JSON.stringify({ type: 'op', opId: 'x', clipId: 'v0:0', field: 'Clip.name', value: '' }));
+  a.ws.send(JSON.stringify({ type: 'op', opId: 'x', clipId: 'v0:0', field: 'Motion.Scale', value: '120' }));
   a.ws.send(JSON.stringify({ type: 'op', opId: 'y', clipId: 'v0:0', field: 'Motion.Scale', value: 120 }));
+  a.ws.send(JSON.stringify({ type: 'op', opId: 'z', clipId: 'v0:0', field: 'Clip.name', value: 'Opening' }));
   await wait(50);
 
-  assert.equal(got.filter((m) => m.type === 'error').length, 2);
+  assert.equal(got.filter((m) => m.type === 'error').length, 5);
   const commits = got.filter((m) => m.type === 'commit');
-  assert.equal(commits.length, 1);
+  assert.equal(commits.length, 2);
+  assert.equal(commits[1].op.value, 'Opening');
   assert.equal(commits[0].rev, 1);
   assert.equal(commits[0].op.author, 'Host');
-  assert.equal(relay.rev, 1);
+  assert.equal(relay.rev, 2);
 });
 
 test("a late joiner catches up to the host's edits and nothing echoes", async (t) => {

@@ -107,3 +107,24 @@ test('Position and Anchor Point: a 1-pixel move is an op, float noise is not', (
   t.reset([clip('v0:0', 100, 0, 100)]);
   assert.deepEqual(t.diff([clip('v0:0', 100.01, 0, 100)]), []);
 });
+
+test('Clip.name: a rename is one op, exact string compare, remote rename applies once', () => {
+  const s = createSync();
+  const named = (n) => ({ id: 'v0:0', p: { 'Motion.Scale': 100, 'Clip.name': n } });
+  s.reset([named('Intro')]);
+  assert.deepEqual(s.diff([named('Intro')]), []);
+  const ops = s.diff([named('Intro ')]); // one trailing space is a real rename
+  assert.equal(ops.length, 1);
+  assert.equal(ops[0].field, 'Clip.name');
+  assert.equal(ops[0].value, 'Intro ');
+  assert.equal(s.receiveCommit({ rev: 1, op: ops[0] }), null);
+
+  const remote = { opId: 'other-1', author: 'Alex', clipId: 'v0:0', field: 'Clip.name', value: 'Opening' };
+  assert.deepEqual(s.receiveCommit({ rev: 2, op: remote }), remote);
+  s.afterApply('v0:0', 'Clip.name', 'Opening');
+  assert.deepEqual(s.diff([named('Opening')]), [], 'applied rename does not echo');
+  // Catch-up skips a name the timeline already has.
+  const t = createSync();
+  t.reset([named('Opening')]);
+  assert.deepEqual(t.receiveCatchup([{ rev: 2, op: remote }]), []);
+});

@@ -11,26 +11,32 @@
 //     The shadow changes only after a successful apply: if the apply fails (no active
 //     sequence, keyframed param), the shadow keeps Premiere's real value, so the next scan
 //     doesn't mistake the unapplied value for a local edit and send the old value back.
+// Clip.name is a string field: exact compare, no epsilon.
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();
   else root.PCSync = factory();
 })(typeof self !== 'undefined' ? self : this, function () {
   const FIELDS = ['Motion.Scale', 'Motion.Rotation', 'Opacity.Opacity',
-    'Motion.Position.x', 'Motion.Position.y', 'Motion.AnchorPoint.x', 'Motion.AnchorPoint.y'];
+    'Motion.Position.x', 'Motion.Position.y', 'Motion.AnchorPoint.x', 'Motion.AnchorPoint.y',
+    'Clip.name'];
   // Position and Anchor Point are fractions of the frame (0..1): 0.0005 is about a third of a
   // pixel at 640 wide. The other fields use the default epsilon.
   const AXIS_EPSILON = 0.0005;
   const isAxis = (f) => f.endsWith('.x') || f.endsWith('.y');
   const key = (clipId, field) => clipId + '|' + field;
+  const isValue = (v) => typeof v === 'string' || (typeof v === 'number' && Number.isFinite(v));
 
   function createSync(opts = {}) {
     const epsilon = opts.epsilon ?? 0.05;
     const eps = (f) => (isAxis(f) ? AXIS_EPSILON : epsilon);
+    // Same value for this field? Strings compare exactly, numbers within epsilon.
+    const same = (f, a, b) => (typeof a === 'number' && typeof b === 'number'
+      ? Math.abs(a - b) <= eps(f) : a === b);
     const author = opts.author || 'Editor';
     let opCounter = 0;
     const idPrefix = opts.idPrefix || Math.random().toString(36).slice(2, 8);
 
-    const shadow = new Map();   // key -> number
+    const shadow = new Map();   // key -> number (or string for Clip.name)
     const pending = new Map();  // key -> opId of our newest unsent-or-uncommitted op
     let lastRev = 0;
 
@@ -40,7 +46,7 @@
       pending.clear();
       for (const c of clips) {
         for (const f of FIELDS) {
-          if (typeof c.p[f] === 'number') shadow.set(key(c.id, f), c.p[f]);
+          if (isValue(c.p[f])) shadow.set(key(c.id, f), c.p[f]);
         }
       }
     }
@@ -51,11 +57,11 @@
       for (const c of clips) {
         for (const f of FIELDS) {
           const v = c.p[f];
-          if (typeof v !== 'number') continue;
+          if (!isValue(v)) continue;
           const k = key(c.id, f);
           const old = shadow.get(k);
           if (old === undefined) { shadow.set(k, v); continue; } // new clip: baseline only
-          if (Math.abs(v - old) <= eps(f)) continue;
+          if (same(f, v, old)) continue;
           const opId = idPrefix + '-' + (++opCounter);
           shadow.set(k, v);
           pending.set(k, opId);
@@ -87,7 +93,7 @@
         const op = receiveCommit(c);
         if (!op) continue;
         const cur = shadow.get(key(op.clipId, op.field));
-        if (cur !== undefined && Math.abs(cur - op.value) <= eps(op.field)) continue;
+        if (cur !== undefined && same(op.field, cur, op.value)) continue;
         ops.push(op);
       }
       return ops;
@@ -95,7 +101,7 @@
 
     // After applyOps: store what Premiere actually holds so the next scan matches.
     function afterApply(clipId, field, readBack) {
-      if (typeof readBack === 'number') shadow.set(key(clipId, field), readBack);
+      if (isValue(readBack)) shadow.set(key(clipId, field), readBack);
     }
 
     return {
