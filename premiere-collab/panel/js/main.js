@@ -62,12 +62,22 @@ const FIELD_LABEL = {
   'Motion.Scale': 'Scale', 'Motion.Rotation': 'Rotation', 'Opacity.Opacity': 'Opacity',
   'Motion.Position.x': 'Position X', 'Motion.Position.y': 'Position Y',
   'Motion.AnchorPoint.x': 'Anchor Point X', 'Motion.AnchorPoint.y': 'Anchor Point Y',
-  'Clip.name': 'Name', 'Clip.start': 'Start',
+  'Clip.name': 'Name', 'Clip.timing': 'Timing',
 };
 // Position/Anchor Point values are fractions of the frame, so keep 3 decimals for those.
 const TICKS_PER_SECOND = 254016000000; // Premiere ticks
 const fmt = (v) => (typeof v === 'string' ? `"${v}"`
   : Math.abs(v) < 2 ? Math.round(v * 1000) / 1000 : Math.round(v * 100) / 100);
+
+// Feed text for a Clip.timing op. prev is the shadow before the op (equal to next for our own op).
+function timingText(clip, prev, next) {
+  const [s, e, i] = next.split(':').map(Number);
+  const sec = (t) => fmt(t / TICKS_PER_SECOND);
+  const p = typeof prev === 'string' ? prev.split(':').map(Number) : null;
+  if (p && p[0] !== s && p[1] - p[0] === e - s && p[2] === i) return `moved ${clip} to ${sec(s)} s`;
+  if (p && p.join(':') !== next) return `trimmed ${clip} to ${sec(s)}-${sec(e)} s (in ${sec(i)} s)`;
+  return `set ${clip} to ${sec(s)}-${sec(e)} s (in ${sec(i)} s)`;
+}
 
 function feed(text) {
   const li = document.createElement('li');
@@ -140,8 +150,8 @@ function onCommit(msg) {
       // Own rename: the last scan already holds the new name, so name the clip by its ID.
       const from = clip !== op.value ? clip : op.clipId;
       feed(`${who} renamed ${from} to ${fmt(op.value)} (rev ${msg.rev})`);
-    } else if (op.field === 'Clip.start') {
-      feed(`${who} moved ${clip} to ${fmt(op.value / TICKS_PER_SECOND)} s (rev ${msg.rev})`);
+    } else if (op.field === 'Clip.timing') {
+      feed(`${who} ${timingText(clip, sync.shadowValue(op.clipId, op.field), op.value)} (rev ${msg.rev})`);
     } else {
       feed(`${who} set ${clip} ${FIELD_LABEL[op.field] || op.field} to ${fmt(op.value)} (rev ${msg.rev})`);
     }

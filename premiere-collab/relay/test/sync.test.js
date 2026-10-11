@@ -129,19 +129,19 @@ test('Clip.name: a rename is one op, exact string compare, remote rename applies
   assert.deepEqual(t.receiveCatchup([{ rev: 2, op: remote }]), []);
 });
 
-test('Clip.start: a move is one op in ticks, remote move applies once', () => {
-  const at = (ticks) => ({ id: '000f4242', p: { 'Clip.start': ticks } });
-  const FRAME = 10594584000; // 23.976 fps
+test('Clip.timing: a move or trim is one op, remote trim applies once, no echo', () => {
+  const F = 10594584000; // ticks per frame at 23.976 fps
+  const at = (s, e, i) => ({ id: '000f4242', p: { 'Clip.timing': `${s * F}:${e * F}:${i * F}` } });
   const s = createSync();
-  s.reset([at(0)]);
-  const ops = s.diff([at(48 * FRAME)]);
-  assert.equal(ops.length, 1);
-  assert.equal(ops[0].field, 'Clip.start');
-  assert.equal(ops[0].value, 48 * FRAME);
-  assert.equal(s.receiveCommit({ rev: 1, op: ops[0] }), null);
+  s.reset([at(0, 8, 0)]);
+  const head = s.diff([at(2, 8, 2)]); // head trim: start and inPoint change together
+  assert.equal(head.length, 1);
+  assert.equal(head[0].field, 'Clip.timing');
+  assert.equal(head[0].value, `${2 * F}:${8 * F}:${2 * F}`);
+  assert.equal(s.receiveCommit({ rev: 1, op: head[0] }), null);
 
-  const remote = { opId: 'other-1', author: 'Alex', clipId: '000f4242', field: 'Clip.start', value: 24 * FRAME };
+  const remote = { opId: 'other-1', author: 'Alex', clipId: '000f4242', field: 'Clip.timing', value: `${48 * F}:${54 * F}:${2 * F}` };
   assert.deepEqual(s.receiveCommit({ rev: 2, op: remote }), remote);
-  s.afterApply('000f4242', 'Clip.start', 24 * FRAME);
-  assert.deepEqual(s.diff([at(24 * FRAME)]), [], 'applied move does not echo');
+  s.afterApply('000f4242', 'Clip.timing', remote.value);
+  assert.deepEqual(s.diff([at(48, 54, 2)]), [], 'applied trim does not echo');
 });

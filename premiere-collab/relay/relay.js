@@ -7,7 +7,7 @@ const { WebSocketServer, WebSocket } = require('ws');
 
 const FIELDS = new Set(['Motion.Scale', 'Motion.Rotation', 'Opacity.Opacity',
   'Motion.Position.x', 'Motion.Position.y', 'Motion.AnchorPoint.x', 'Motion.AnchorPoint.y',
-  'Clip.name', 'Clip.start']);
+  'Clip.name', 'Clip.timing']);
 const STRING_FIELDS = new Set(['Clip.name']);
 // Clip ID = Premiere trackItem nodeId (hex). Same on both laptops for clips in demo.prproj (ROADMAP Phase 3, Clip identity).
 const CLIP_ID = /^[0-9a-f]{1,16}$/i;
@@ -27,7 +27,10 @@ function validOp(msg) {
   if (STRING_FIELDS.has(msg.field)) {
     return typeof msg.value === 'string' && msg.value.length > 0 && msg.value.length <= 255;
   }
-  if (msg.field === 'Clip.start' && !(msg.value >= 0)) return false; // ticks, never before 0
+  if (msg.field === 'Clip.timing') { // "start:end:inPoint" in ticks, end after start
+    const m = typeof msg.value === 'string' && /^(\d{1,16}):(\d{1,16}):(\d{1,16})$/.exec(msg.value);
+    return !!m && Number(m[2]) > Number(m[1]);
+  }
   return typeof msg.value === 'number' && Number.isFinite(msg.value);
 }
 
