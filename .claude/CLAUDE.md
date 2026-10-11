@@ -2,7 +2,7 @@
 
 ## Project
 
-**Premiere Live Collab**
+**Tandem** (live collaboration for Premiere Pro)
 
 A Premiere Pro panel that lets two editors on two Windows machines join one live session and edit the same timeline together, like Google Docs for Premiere. One editor hosts the session and runs a small relay. The other connects by typing the host's IP. Each editor sees the other's edits, their live mouse pointer over Premiere, and a live change feed. Built for the Hacklanta Creative track (sponsored by Adobe). The After Effects version comes later.
 
@@ -116,7 +116,7 @@ A Premiere Pro panel that lets two editors on two Windows machines join one live
 - The `.debug` file ships in `panel/` for the hackathon. Remove it for any real release.
 - Firewall rule for the relay (one time, elevated prompt, host machine):
 - Guest machine: copy the repo `panel/` folder (git clone, zip, or USB) and run `install.ps1`. No Node install needed on the guest. On the host, install Node 24 or drop a portable `node.exe` next to `relay.js` so either laptop can host.
-- After the first install, restart Premiere, then **Window > Extensions > Live Collab**.
+- After the first install, restart Premiere, then **Window > Extensions > Tandem**.
 
 ### 8. Relay (about 60 lines of real code)
 

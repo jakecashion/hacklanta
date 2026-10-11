@@ -1,4 +1,4 @@
-# Requirements: Premiere Live Collab
+# Requirements: Tandem
 
 **Defined:** 2026-10-10
 **Core Value:** Two editors change the same Premiere timeline at the same time, and each sees the other's change in their own Premiere within 1–2 seconds, live on stage at judging.

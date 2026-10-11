@@ -116,7 +116,7 @@ Do **not** use `-Link` here. **You should see:**
 ```
 PlayerDebugMode = 1 (CSXS.11)
 Copied panel to C:\Users\<you>\AppData\Roaming\Adobe\CEP\extensions\com.hacklanta.premierecollab
-Restart Premiere, then Window > Extensions > Live Collab
+Restart Premiere, then Window > Extensions > Tandem
 ```
 After any later code change, run this script again and click **Reload panel**.
 
@@ -158,7 +158,7 @@ Sync matches clips by their **position on V1**, never by file path. The project 
 
 ### C1. Ping the relay from the guest panel (Task 4)
 
-1. Guest: restart Premiere, open `C:\collab-demo\demo.prproj`, double-click **Sequence 01**, open **Window > Extensions > Live Collab**.
+1. Guest: restart Premiere, open `C:\collab-demo\demo.prproj`, double-click **Sequence 01**, open **Window > Extensions > Tandem**.
 2. **Host IP:** type the host's Tailscale IP (`100.101.102.103`, no `ws://`, no spaces). **Name:** for example `Guest`.
 3. Click **Connect**, then **Ping relay**.
 

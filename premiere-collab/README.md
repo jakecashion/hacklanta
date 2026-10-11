@@ -1,4 +1,4 @@
-# Premiere Live Collab
+# Tandem (live collaboration for Premiere Pro)
 
 Two editors, one Premiere 22.3.1 timeline, live. CEP 11 panel + Node `ws` relay.
 
@@ -17,7 +17,7 @@ powershell -ExecutionPolicy Bypass -File scripts\install-panel.ps1 -Link
 powershell -ExecutionPolicy Bypass -File scripts\install-panel.ps1
 ```
 
-Restart Premiere, then **Window > Extensions > Live Collab**. If the panel does not show up with `-Link`, run without it (CEP may not follow junctions).
+Restart Premiere, then **Window > Extensions > Tandem**. If the panel does not show up with `-Link`, run without it (CEP may not follow junctions).
 
 Debug the panel: open `http://localhost:8088` in Chrome.
 
