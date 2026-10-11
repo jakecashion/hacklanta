@@ -16,6 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [ ] **Phase 1: Panel + Kill Test** - Panel loads on both laptops, `setValue` kill test on Scale/Rotation/Opacity, guest reaches the host relay over Tailscale, demo project in place (~1 h)
 - [ ] **Phase 2: Live Param Sync** - Relay, sync engine and Premiere bridge; Scale, Rotation and Opacity sync both ways in 1-2 s, last write wins, no echo loops, connect by typed IP with names on the badge (~3 h)
+- [ ] **Phase 2.1: Position & Anchor Point Sync** (INSERTED) - Motion Position and Anchor Point sync like Scale/Rotation/Opacity (SYNC-02, SYNC-10); next work, via `/gsd-fast`
 - [ ] **Phase 3: Join, Live Cursor & Demo** - Snapshot join from the host, other editor's live mouse pointer over Premiere, change feed, demo script and one clean rehearsal (~3 h)
 - [ ] **Phase 4: Timeline Integration** - After Phase 3: probe Premiere's timing API, then sync clip rename, move on the same track, and trim between editors (future; not on the demo path)
 
@@ -50,6 +51,22 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: TBD
 **UI hint**: yes
 
+### Phase 02.1: Position & Anchor Point Sync (INSERTED)
+
+**Goal:** A Position or Anchor Point change (Effect Controls > Motion) made in one editor's Premiere shows up in the other's within 1-2 seconds, in both directions, with the same relay, `rev` order, catch-up on join and no-echo rules as Scale, Rotation and Opacity.
+**Mode:** mvp
+**Requirements**: SYNC-02, SYNC-10 (SYNC-02 pulled from the stretch list on 2026-10-10; next work, built with `/gsd-fast`)
+**Depends on:** Phase 2
+**Success Criteria** (what must be TRUE):
+  1. Units checked first (one `getValue()` read in Premiere 22.3.1): whether Position and Anchor Point come back as `[x, y]` normalized to the frame (0..1) or in pixels, and the epsilon is chosen to match (0.05 is far too coarse for normalized values)
+  2. Changing Position X or Y on a V1 clip in one editor moves the clip in the other's Program monitor within 1-2 s, both directions (SYNC-02)
+  3. Changing Anchor Point X or Y does the same (SYNC-10)
+  4. No echo: after one Position or Anchor Point change, the rev counter stays still (Premiere rounding on the read-back included)
+  5. A guest who connects after the host changed Position or Anchor Point catches up to it (SYNC-01 catch-up covers the new fields)
+  6. `npm test` covers the new fields; the relay accepts them (its `FIELDS` whitelist is updated) and still rejects unknown fields
+**Notes:** Each value is 2D, while ops carry one finite number. Simplest fit: four scalar fields (`Motion.Position.x`, `.y`, `Motion.AnchorPoint.x`, `.y`) mapped in `bridge.jsx` onto one `[x, y]` `setValue`, so `sync.js` and the op format stay unchanged.
+**Plans:** none (inline via `/gsd-fast`)
+
 ### Phase 3: Join, Live Cursor & Demo
 
 **Goal**: Connecting is all it takes to start from the host's timeline, each editor sees the other's mouse pointer moving live over their own Premiere window and a feed of what changed, and the demo has been written and run clean once on two laptops.
@@ -67,6 +84,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **UI hint**: yes
 
 ### Phase 4: Timeline Integration
+
 **Goal**: Timeline edits, not just effect values, sync between the two editors: renaming a clip, moving it along its track, and trimming its in and out points in one editor's Premiere show up in the other's within 1-2 seconds, using the same relay, `rev` order and no-echo rules as Phase 2.
 **Mode:** mvp
 **Depends on**: Phase 3 (all Phase 3 criteria pass first; this phase is not on the demo path)
@@ -77,34 +95,35 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Moving a clip along the same track in one editor moves it in the other, and the clip keeps its identity, so Phase 2 param sync still targets the right clip afterwards (EDIT-02; clip identity switches from position `v{track}:{clip}` to `nodeId` if the probes show it is stable)
   4. Trimming a clip's in or out point in one editor trims it in the other, sent as one combined timing op, so the other side never shows a half-applied trim (EDIT-03)
   5. None of these edits echo back: after one edit, the rev counter stays still
+
 **Plans**: TBD
 
 ## Stretch Gate (not a phase)
 
-v2 requirements are not part of this roadmap. They start only after every Phase 3 criterion passes, and only with time left in the 8 h ceiling. If the Phase 3 rehearsal is not clean, stretch does not start; fix the demo instead. Work down this list in order and stop when time runs out. The order is a judgment call (stage reliability first, then cheap visible polish), so reorder it if the demo story changes. Timeline edits (ENV-06, EDIT-01, EDIT-02, EDIT-03) moved out of this list into Phase 4.
+v2 requirements are not part of this roadmap. They start only after every Phase 3 criterion passes, and only with time left in the 8 h ceiling. If the Phase 3 rehearsal is not clean, stretch does not start; fix the demo instead. Work down this list in order and stop when time runs out. The order is a judgment call (stage reliability first, then cheap visible polish), so reorder it if the demo story changes. Timeline edits (ENV-06, EDIT-01, EDIT-02, EDIT-03) moved out of this list into Phase 4. SYNC-02 Position moved into Phase 2.1 (2026-10-10).
 
 1. DEMO-02 - 3 clean rehearsal runs in a row (stage reliability; no new code)
 2. RES-02 - Prerecorded fallback demo video (stage insurance; no new code)
 3. SYNC-08 - Resync button (one-click recovery if timelines drift on stage)
 4. PRES-02 - The other editor's playhead time (small, visible on stage)
 5. SESS-06 - User colors (makes presence and the feed easier to read)
-6. SYNC-02 - Motion Position sync (check the units first: normalized or pixels)
-7. SESS-01 - Host starts a session with a 6-character code and sees the LAN IP
-8. SESS-03 - Host sees the join request and clicks Approve
-9. SYNC-09 - Join refuses a mismatched project
-10. RES-01 - Rejoin button after a Wi-Fi blip
-11. RES-03 - Single-laptop live fallback against `fake-peer.js` (the script exists since Phase 2; this item is the stage-ready version)
-12. RES-04 - Automatic drift detection with a state hash (builds on SYNC-08)
-13. ENV-02 - One-script install (`install.ps1`); manual copy works for two laptops
+6. SESS-01 - Host starts a session with a 6-character code and sees the LAN IP
+7. SESS-03 - Host sees the join request and clicks Approve
+8. SYNC-09 - Join refuses a mismatched project
+9. RES-01 - Rejoin button after a Wi-Fi blip
+10. RES-03 - Single-laptop live fallback against `fake-peer.js` (the script exists since Phase 2; this item is the stage-ready version)
+11. RES-04 - Automatic drift detection with a state hash (builds on SYNC-08)
+12. ENV-02 - One-script install (`install.ps1`); manual copy works for two laptops
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4. Phase 4 starts only after every Phase 3 criterion passes; it is not on the demo path.
+Phases execute in numeric order: 1 -> 2 -> 2.1 -> 3 -> 4. Phase 4 starts only after every Phase 3 criterion passes; it is not on the demo path.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Panel + Kill Test | 0/TBD | Not started | - |
 | 2. Live Param Sync | 0/TBD | Not started | - |
+| 2.1. Position & Anchor Point Sync | inline | Not started | - |
 | 3. Join, Presence & Demo | 0/TBD | Not started | - |
 | 4. Timeline Integration | 0/TBD | Not started | - |

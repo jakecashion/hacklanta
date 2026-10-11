@@ -1,15 +1,15 @@
 ---
 gsd_state_version: "1.0"
-current_phase: 2
-current_phase_name: Live Param Sync
+current_phase: "2.1"
+current_phase_name: Position & Anchor Point Sync
 status: planning
 stopped_at: "Phase 2 verified on one laptop with fake-peer.js (89 remote edits applied, own edits sent, no echo, 0 apply errors). Next: two-laptop test (Phase 1 Tasks 4-5: Tailscale, firewall, guest install), then Phase 3"
-last_updated: "2026-10-10T23:36:47.084Z"
+last_updated: "2026-10-11T02:06:11.122Z"
 last_activity: 2026-10-10
 last_activity_desc: Roadmap revised for a 6-8 h build (3 phases, 16/16 v1 requirements mapped)
-state_head: de1a9ff668669006d0fd9fb21089fadc10c1c3a8
+state_head: 8b2ee7557aada3b7d3afb393e8313d9dccf4ab69
 progress:
-  total_phases: 4
+  total_phases: 5
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-10-10)
 
 ## Current Position
 
-Phase: 2 of 3 (Live Param Sync) - code built, untested in Premiere
+Phase: 2.1 of 5 (Position & Anchor Point Sync) - next, via /gsd-fast
 Plan: 0 of TBD in current phase
 Status: In progress (Phase 1 code built, awaiting manual kill test in Premiere)
 Last activity: 2026-10-10 — Roadmap revised for a 6-8 h build (3 phases, 16/16 v1 requirements mapped)
@@ -71,6 +71,7 @@ Recent decisions affecting current work:
 
 - Phase 4 added (2026-10-10): Timeline Integration (ENV-06 probes, EDIT-01 rename, EDIT-02 move, EDIT-03 trim), pulled out of the stretch list; runs after Phase 3, not on the demo path
 - Phase 3 edited: PRES-01 selection presence replaced by PRES-04 live mouse cursor over Premiere (per-laptop PowerShell overlay helper, probed first); PRES-01 moved to v2; Phase 3 budget ~3 h
+- Phase 02.1 inserted after Phase 2: Position & Anchor Point Sync (SYNC-02 from stretch + new SYNC-10); next work, via /gsd-fast
 
 ### Pending Todos
 

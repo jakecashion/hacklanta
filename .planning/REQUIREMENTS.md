@@ -29,6 +29,8 @@ Requirements for the 9am 2026-10-11 demo. Each one maps to a roadmap phase.
 - [ ] **SYNC-04**: Either editor can change Motion Rotation on a clip, and the other's Premiere shows it within 1–2 s
 - [ ] **SYNC-05**: Either editor can change Opacity on a clip, and the other's Premiere shows it within 1–2 s
 - [ ] **SYNC-06**: When both editors change the same field, both machines end up with the same value. The last edit in relay order wins; the relay assigns `rev` numbers.
+- [ ] **SYNC-02**: Either editor can change Motion Position (X or Y) on a clip, and the other's Premiere shows it within 1–2 s. Check the units first (normalized or pixels). Moved from v2 on 2026-10-10
+- [ ] **SYNC-10**: Either editor can change Motion Anchor Point (X or Y) on a clip, and the other's Premiere shows it within 1–2 s. Added 2026-10-10
 - [ ] **SYNC-07**: A remote edit is never sent back as a new edit (no echo loops). This holds even when Premiere rounds the value that was written.
 
 ### Presence & Feed
@@ -51,7 +53,6 @@ Stretch goals. Only start these after v1 is demo-solid.
 - **SESS-01**: Host starts a session with a 6-character code, and the panel shows the host's LAN IP
 - **SESS-03**: Host sees the join request and clicks Approve
 - **SESS-06**: User colors
-- **SYNC-02**: Motion Position sync. Its units are unverified (normalized or pixels).
 - **SYNC-08**: Resync button
 - **SYNC-09**: Join refuses a mismatched project
 - **PRES-01**: Each panel shows which clips the other editor has selected (replaced in Phase 3 by PRES-04 live cursor, 2026-10-10)
@@ -107,13 +108,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SYNC-05 | Phase 2 | Pending |
 | SYNC-06 | Phase 2 | Pending |
 | SYNC-07 | Phase 2 | Pending |
+| SYNC-02 | Phase 2.1 | Pending |
+| SYNC-10 | Phase 2.1 | Pending |
 | PRES-04 | Phase 3 | Pending |
 | PRES-03 | Phase 3 | Pending |
 | DEMO-01 | Phase 3 | Pending |
 
 **Coverage:**
-- v1 requirements: 16 total (ENV 4, SESS 3, SYNC 6, PRES 2, DEMO 1)
-- Mapped to phases: 16
+- v1 requirements: 18 total (ENV 4, SESS 3, SYNC 8, PRES 2, DEMO 1)
+- Mapped to phases: 18
 - Unmapped: 0 ✓
 
 ---
