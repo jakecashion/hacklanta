@@ -58,8 +58,13 @@ let clipNames = {};       // clipId -> clip name, from the last scan
 let polling = false;      // a poll is queued or running
 let lastScanErr = '';
 
-const FIELD_LABEL = { 'Motion.Scale': 'Scale', 'Motion.Rotation': 'Rotation', 'Opacity.Opacity': 'Opacity' };
-const fmt = (v) => Math.round(v * 100) / 100;
+const FIELD_LABEL = {
+  'Motion.Scale': 'Scale', 'Motion.Rotation': 'Rotation', 'Opacity.Opacity': 'Opacity',
+  'Motion.Position.x': 'Position X', 'Motion.Position.y': 'Position Y',
+  'Motion.AnchorPoint.x': 'Anchor Point X', 'Motion.AnchorPoint.y': 'Anchor Point Y',
+};
+// Position/Anchor Point values are fractions of the frame, so keep 3 decimals for those.
+const fmt = (v) => (Math.abs(v) < 2 ? Math.round(v * 1000) / 1000 : Math.round(v * 100) / 100);
 
 function feed(text) {
   const li = document.createElement('li');

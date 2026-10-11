@@ -5,7 +5,8 @@
 const os = require('os');
 const { WebSocketServer, WebSocket } = require('ws');
 
-const FIELDS = new Set(['Motion.Scale', 'Motion.Rotation', 'Opacity.Opacity']);
+const FIELDS = new Set(['Motion.Scale', 'Motion.Rotation', 'Opacity.Opacity',
+  'Motion.Position.x', 'Motion.Position.y', 'Motion.AnchorPoint.x', 'Motion.AnchorPoint.y']);
 const CLIP_ID = /^v\d+:\d+$/;
 
 function lanIps() {

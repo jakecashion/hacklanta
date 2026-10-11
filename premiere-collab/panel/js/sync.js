@@ -15,11 +15,17 @@
   if (typeof module === 'object' && module.exports) module.exports = factory();
   else root.PCSync = factory();
 })(typeof self !== 'undefined' ? self : this, function () {
-  const FIELDS = ['Motion.Scale', 'Motion.Rotation', 'Opacity.Opacity'];
+  const FIELDS = ['Motion.Scale', 'Motion.Rotation', 'Opacity.Opacity',
+    'Motion.Position.x', 'Motion.Position.y', 'Motion.AnchorPoint.x', 'Motion.AnchorPoint.y'];
+  // Position and Anchor Point are fractions of the frame (0..1): 0.0005 is about a third of a
+  // pixel at 640 wide. The other fields use the default epsilon.
+  const AXIS_EPSILON = 0.0005;
+  const isAxis = (f) => f.endsWith('.x') || f.endsWith('.y');
   const key = (clipId, field) => clipId + '|' + field;
 
   function createSync(opts = {}) {
     const epsilon = opts.epsilon ?? 0.05;
+    const eps = (f) => (isAxis(f) ? AXIS_EPSILON : epsilon);
     const author = opts.author || 'Editor';
     let opCounter = 0;
     const idPrefix = opts.idPrefix || Math.random().toString(36).slice(2, 8);
@@ -49,7 +55,7 @@
           const k = key(c.id, f);
           const old = shadow.get(k);
           if (old === undefined) { shadow.set(k, v); continue; } // new clip: baseline only
-          if (Math.abs(v - old) <= epsilon) continue;
+          if (Math.abs(v - old) <= eps(f)) continue;
           const opId = idPrefix + '-' + (++opCounter);
           shadow.set(k, v);
           pending.set(k, opId);
@@ -81,7 +87,7 @@
         const op = receiveCommit(c);
         if (!op) continue;
         const cur = shadow.get(key(op.clipId, op.field));
-        if (cur !== undefined && Math.abs(cur - op.value) <= epsilon) continue;
+        if (cur !== undefined && Math.abs(cur - op.value) <= eps(op.field)) continue;
         ops.push(op);
       }
       return ops;

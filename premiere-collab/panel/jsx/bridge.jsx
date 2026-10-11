@@ -2,11 +2,33 @@
 // Rules: var only, for loops only, always return a JSON string.
 
 var PC_FIELDS = {
-    // field: [component matchName, param displayName, fallback param index]
+    // field: [component matchName, param displayName, fallback param index, array index]
+    // Position and Anchor Point are [x, y] normalized to the frame (0..1); each axis is its own field.
     "Motion.Scale":    ["AE.ADBE Motion", "Scale", 1],
     "Motion.Rotation": ["AE.ADBE Motion", "Rotation", 4],
-    "Opacity.Opacity": ["AE.ADBE Opacity", "Opacity", 0]
+    "Opacity.Opacity": ["AE.ADBE Opacity", "Opacity", 0],
+    "Motion.Position.x":    ["AE.ADBE Motion", "Position", 0, 0],
+    "Motion.Position.y":    ["AE.ADBE Motion", "Position", 0, 1],
+    "Motion.AnchorPoint.x": ["AE.ADBE Motion", "Anchor Point", 5, 0],
+    "Motion.AnchorPoint.y": ["AE.ADBE Motion", "Anchor Point", 5, 1]
 };
+
+// Read one field: a number, or one axis of an [x, y] param.
+function pc_getField(param, field) {
+    var v = param.getValue();
+    var idx = PC_FIELDS[field][3];
+    return (idx === undefined) ? v : v[idx];
+}
+
+// Write one field. For an axis, keep the other axis as Premiere holds it now.
+function pc_setField(param, field, value) {
+    var idx = PC_FIELDS[field][3];
+    if (idx === undefined) { param.setValue(value, true); return; }
+    var cur = param.getValue();
+    var arr = [cur[0], cur[1]];
+    arr[idx] = value;
+    param.setValue(arr, true);
+}
 
 function pc_ok(data) { data = data || {}; data.ok = true; return JSON.stringify(data); }
 function pc_err(e) {
@@ -50,7 +72,7 @@ function pc_readFields(clip) {
     var out = {};
     for (var f in PC_FIELDS) {
         if (PC_FIELDS.hasOwnProperty(f)) {
-            try { out[f] = pc_findParam(clip, f).getValue(); }
+            try { out[f] = pc_getField(pc_findParam(clip, f), f); }
             catch (e) { out[f] = "ERR: " + String(e); }
         }
     }
@@ -176,8 +198,8 @@ function pc_applyOps(opsJson) {
                 if (!m) { throw new Error("Bad clipId " + op.clipId); }
                 var clip = pc_clip(parseInt(m[1], 10), parseInt(m[2], 10));
                 var param = pc_findParam(clip, op.field);
-                param.setValue(op.value, true);
-                results.push({ clipId: op.clipId, field: op.field, after: param.getValue(), ok: true });
+                pc_setField(param, op.field, op.value);
+                results.push({ clipId: op.clipId, field: op.field, after: pc_getField(param, op.field), ok: true });
             } catch (e1) {
                 results.push({ clipId: op.clipId, field: op.field, ok: false, err: String(e1) });
             }

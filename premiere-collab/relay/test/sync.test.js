@@ -93,3 +93,17 @@ test('a clip that appears later is baselined, not sent', () => {
   s.reset([clip('v0:0', 100, 0, 100)]);
   assert.deepEqual(s.diff([clip('v0:0', 100, 0, 100), clip('v0:1', 80, 10, 50)]), []);
 });
+
+test('Position and Anchor Point: a 1-pixel move is an op, float noise is not', () => {
+  const s = createSync();
+  const pos = (x, y) => ({ id: 'v0:0', p: { 'Motion.Position.x': x, 'Motion.Position.y': y, 'Motion.AnchorPoint.x': 0.40625 } });
+  s.reset([pos(0.375, 0.44444444775581)]);
+  assert.deepEqual(s.diff([pos(0.375 + 1e-9, 0.44444444775581)]), []);
+  const ops = s.diff([pos(0.375 + 1 / 640, 0.44444444775581)]);
+  assert.equal(ops.length, 1);
+  assert.equal(ops[0].field, 'Motion.Position.x');
+  // Scale keeps the coarse default epsilon.
+  const t = createSync();
+  t.reset([clip('v0:0', 100, 0, 100)]);
+  assert.deepEqual(t.diff([clip('v0:0', 100.01, 0, 100)]), []);
+});
