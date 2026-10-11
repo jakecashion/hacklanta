@@ -85,6 +85,24 @@ node relay.js
 ```
 **You should see** `Relay listening on port 8080` and one `Tell the guest:` line per network, including the Tailscale `100.x` address. Leave this window open.
 
+### A7. Start the live cursor helper
+
+The helper sends your mouse position inside Premiere to the relay. It draws the other editor's pointer and name over your Premiere. It is a separate window, because the panel cannot draw outside itself. There is no auto-start. Start it by hand each time.
+
+1. Maximize Premiere. Use the same workspace as the guest. If the windows differ, the pointer lands only near the right spot.
+2. Optional, first time only: check the mapping with no network:
+   ```powershell
+   cd C:UsersjakcaDevelopmenthacklantapremiere-collab
+   powershell -ExecutionPolicy Bypass -File cursorcursor.ps1 -Loopback
+   ```
+   **You should see** a ring around your own pointer. Clicks must still reach Premiere through it. Close the window.
+3. Start the helper (the relay from A6 must run):
+   ```powershell
+   cd C:UsersjakcaDevelopmenthacklantapremiere-collab
+   powershell -ExecutionPolicy Bypass -File cursorcursor.ps1 -Relay localhost -Name Jake
+   ```
+   Leave this window open. Put it behind Premiere.
+
 ---
 
 ## Part B: Guest laptop
@@ -152,6 +170,18 @@ Sync matches clips by their **position on V1**, never by file path. The project 
    ```
    (Use the host IP from A2.) **You should see** `pong from ...`. If it says `via DERP`, the laptops are connected through Tailscale's relay servers, which is fine; it just adds a little latency.
 
+### B6. Start the live cursor helper
+
+Do this after the panel connects in C1.
+
+1. Maximize Premiere. Use the same workspace as the host.
+2. From the repo folder:
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File .premiere-collabcursorcursor.ps1 -Relay 100.101.102.103 -Name Bradley
+   ```
+   (Use the host IP from A2.) Leave this window open. Put it behind Premiere.
+3. **Check:** move your mouse over Premiere. The host sees your pointer and name on the same spot. Then the host moves; you see the host's pointer.
+
 ---
 
 ## Part C: Connection and sync test
@@ -208,4 +238,6 @@ Put the playhead over **Hero** on both laptops.
 | Edit shows in the feed but the picture doesn't change | Playhead isn't over that clip | Move the playhead onto the clip |
 | Edit lands on the wrong clip | Clip order on V1 differs | Re-copy `demo.prproj` from the repo and relink (A1 step 7, B4) |
 | Clip shows "Media Offline" on the guest | Footage not relinked | In the Project panel, right-click the clip > **Link Media**, point it at the guest's copy, save |
+| Partner pointer is not shown | Helper window closed, or wrong relay IP | Start it again (A7 or B6). After a relay restart it reconnects by itself; wait a few seconds |
+| Partner pointer is on the wrong spot | Premiere not maximized, or workspaces differ | Maximize both. Use the same workspace |
 | Feed shows `Apply failed ... Param Scale not found` | Premiere UI not in English | Switch Premiere's language to English |

@@ -102,7 +102,7 @@ You need two Windows laptops with Premiere Pro 22.3.1 and Node.js on the host.
 
 - Setup and run steps: [premiere-collab/README.md](premiere-collab/README.md)
 - Two-laptop setup, step by step: [premiere-collab/SETUP-TWO-LAPTOPS.md](premiere-collab/SETUP-TWO-LAPTOPS.md)
-- Demo script and pre-demo checklist: [premiere-collab/DEMO-SCRIPT.md](premiere-collab/DEMO-SCRIPT.md)
+- Pre-demo checklist: [premiere-collab/DEMO-SCRIPT.md](premiere-collab/DEMO-SCRIPT.md). Video script: [VIDEO-SCRIPT.md](premiere-collab/VIDEO-SCRIPT.md). Live pitch script: [PITCH-SCRIPT.md](premiere-collab/PITCH-SCRIPT.md)
 
 ## Repo layout
 
