@@ -38,14 +38,15 @@
       "name": "Step 3 EDIT-01 rename: Clip.name string field (bridge trackItem.name get/set, relay string values 1-255 chars, sync.js exact compare, feed \"X renamed A to \"B\"\", fake-peer.js rename mode). 16/16 tests. Verified on two real laptops over Tailscale: host->guest (live + catch-up) and guest->host (rev 1, 12:16 AM). All 7 effect fields also confirmed both directions with the real guest",
       "status": "done",
       "commit": "f32667d"
+    },
+    {
+      "id": "0.cutoff",
+      "name": "Step 0: Phase 3 cutoff set to 4:30 AM EDT 2026-10-11. At cutoff stop feature work, tag stable, start Phase 4 wrap-up",
+      "status": "done",
+      "commit": null
     }
   ],
   "remaining_tasks": [
-    {
-      "id": "0.cutoff",
-      "name": "Step 0: pick Phase 3 cutoff time (suggested 4:00-4:30 AM; Phase 4 needs ~2-3 h on two laptops before 9am)",
-      "status": "not_started"
-    },
     {
       "id": "2",
       "name": "Step 2: record clip identity decision (nodeId for existing clips) in ROADMAP or phase notes",
@@ -70,11 +71,6 @@
   "blockers": [],
   "async_jobs": [],
   "human_actions_pending": [
-    {
-      "action": "Pick the Phase 3 cutoff time",
-      "context": "At cutoff stop features and start Phase 4",
-      "blocking": false
-    },
     {
       "action": "Real guest laptop: git pull, rerun install-panel.ps1, restart Premiere, open demo.prproj, pc_listClips -> expect V1 clip 0 nodeId 000f4242",
       "context": "Guest not available now; one-line confirm, add to Phase 4 checklist",
@@ -116,6 +112,11 @@
       "decision": "After every git pull the guest reruns install-panel.ps1 and reloads the panel",
       "rationale": "install-panel.ps1 copies (robocopy) by default; a pull alone left the guest on old code (Unknown field Clip.name). Host uses a junction, so pulls apply at once",
       "phase": "3"
+    },
+    {
+      "decision": "Phase 3 cutoff is 4:30 AM EDT 2026-10-11",
+      "rationale": "Leaves ~4.5 h for Phase 4 two-laptop checks, demo script and rehearsal before the 9am demo",
+      "phase": "3"
     }
   ],
   "uncommitted_files": [
@@ -123,6 +124,6 @@
     "?? .planning/quick/",
     "?? premiere-collab/docs/"
   ],
-  "next_action": "git fetch && git status -sb. Ask the user for the Phase 3 cutoff time. Then Step 2 (write nodeId identity decision), then Step 4 move (EDIT-02).",
+  "next_action": "git fetch && git status -sb. Check the clock against the 4:30 AM cutoff. Step 2 (write nodeId identity decision), then Step 4 move (EDIT-02). At 4:30 AM stop features and start Phase 4.",
   "context_notes": "Demo 9am 2026-10-11. Paused 23:42 EDT. 23.976 fps (10,594,584,000 ticks/frame). Run ExtendScript from Node via CDP on localhost:8088 (Node 24 global WebSocket + fetch; Runtime.evaluate of a Promise wrapping window.__adobe_cep__.evalScript, awaitPromise). Write JSX to files, never shell-quote. To inspect a project without Premiere: node premiere-collab/tools/prproj-nodeids.js <file>. app.openDocument opens a 2nd project without closing the active one; proj.closeDocument(0,0) closes without save. Relay restart resets rev to 0 and drops catch-up history. Panel CDP helper: scratchpad cdp.mjs pattern (fetch localhost:8088/json, Runtime.evaluate with awaitPromise, call jsx(...)). Panel log: premiere-collab/panel/panel-log.txt (newest first)."
 }

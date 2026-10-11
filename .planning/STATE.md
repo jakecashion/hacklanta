@@ -3,7 +3,7 @@ gsd_state_version: "1.0"
 current_phase: 3
 current_phase_name: Timeline Integration
 status: planning
-stopped_at: "Phase 3 Step 3 rename (EDIT-01) done and verified on two laptops (f32667d). Next: pick cutoff, Step 2 identity note, Step 4 move (EDIT-02)"
+stopped_at: "Phase 3 Step 3 rename (EDIT-01) done and verified on two laptops (f32667d). Cutoff 4:30 AM. Next: Step 2 identity note, Step 4 move (EDIT-02)"
 last_updated: "2026-10-11T04:20:00.000Z"
 last_activity: 2026-10-11
 last_activity_desc: EDIT-01 rename sync built and verified both directions on two real laptops; all 7 effect fields confirmed both directions with the real guest
@@ -97,5 +97,5 @@ Items acknowledged and deferred at milestone close, most recent first:
 ## Session Continuity
 
 Last session: 2026-10-11 00:20 (resumed)
-Stopped at: Phase 3 Step 3 rename (EDIT-01) done, verified host<->guest on two laptops (f32667d). Lesson: guest must rerun install-panel.ps1 and reopen the panel after every pull (copy install, not junction). Next: pick cutoff, Step 2 identity note, Step 4 move (EDIT-02)
+Stopped at: Phase 3 Step 3 rename (EDIT-01) done, verified host<->guest on two laptops (f32667d). Lesson: guest must rerun install-panel.ps1 and reopen the panel after every pull (copy install, not junction). Cutoff 4:30 AM EDT (then Phase 4). Next: Step 2 identity note, Step 4 move (EDIT-02)
 Resume file: .planning/phases/03-timeline-integration/.continue-here.md
