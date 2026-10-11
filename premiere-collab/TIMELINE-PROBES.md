@@ -6,7 +6,7 @@ Machine: dev laptop (host)  Premiere: 22.3.1  Date: 2026-10-10
 
 Sequence: 23.976 fps. One frame is 10,594,584,000 ticks (`sequence.timebase`). The demo clip is 8 frames long.
 
-**Status: partly done.** Two probes are still open. See "Open probes".
+**Status: partly done.** One probe is still open (guest laptop). See "Open probes".
 
 ## How the probes ran
 
@@ -17,7 +17,7 @@ Sequence: 23.976 fps. One frame is 10,594,584,000 ticks (`sequence.timebase`). T
 5. To see what Premiere plays, the script exported frames with `qe` `exportFramePNG`. Then it compared each frame with the source frames, pixel by pixel. All matches had a difference of 0.0.
 6. The user did the hand edits (drag, trim, rename, Scale) in Premiere.
 
-The project was not saved.
+The project was not saved during these probes. The save and reopen probe ran after them (section 1).
 
 ## Results
 
@@ -30,8 +30,13 @@ The project was not saved.
 | Premiere restart, same file, not saved | Same `nodeId` (`000f4242` before and after) |
 | Clips added during the session | They get new values from a counter (`000f4244`, `000f4245`, ...) |
 | Cloned sequence | The cloned clip gets a new `nodeId` |
+| Save, then reopen Premiere | All 12 clips keep the same `nodeId`, also clips added in the session and clips out of order on the track (`000f4250` after `000f4254`) |
 
-`nodeId` looks like a counter that Premiere sets when it loads the project.
+`nodeId` is stored in the project file. It is the `<TrackItem><Node><ID>` value in `demo.prproj` (gzip XML), written in hex. Example: `<ID>1000002</ID>` is `000f4242`. Premiere does not set it again at load.
+
+Thus a copy of the same `.prproj` file will probably give the same `nodeId` values on the guest. The guest probe must confirm this.
+
+Risk: each laptop gives new clips the next number from the same counter. If both editors add a clip, two different clips can get the same `nodeId`. This does not affect rename, move or trim of clips that are in the file. Do not sync added clips by `nodeId`.
 
 Do not use `nodeId` as the shared clip ID until the guest probe is done.
 
@@ -121,9 +126,14 @@ Decision: keep the 1 s scan to find edits. You can also start a scan when `onAct
 
 ## Open probes
 
-1. **Save and reopen.** Do clips that you add in a session keep their `nodeId` after a save and reopen? Delete the probe sequence first. Do not save it in `demo.prproj`.
-2. **Guest laptop.** Open the same `demo.prproj` on the guest. Read the `nodeId` of V1 clip 0 (`pc_listClips`). If it is `000f4242`, `nodeId` can be the shared clip ID. If it is different, keep `v{track}:{clip}` on the wire and map it to `nodeId` on each laptop.
+1. **Guest laptop.** Open the same `demo.prproj` on the guest. Read the `nodeId` of V1 clip 0 (`pc_listClips`). If it is `000f4242`, `nodeId` can be the shared clip ID. If it is different, keep `v{track}:{clip}` on the wire and map it to `nodeId` on each laptop.
 
 ## Clean up
 
-Delete the `PROBE (delete me)` sequence before you save the project.
+The local `C:\collab-demo\demo.prproj` was saved with the `PROBE (delete me)` sequence in it. To remove it, do these steps:
+
+1. In the Project panel, select `PROBE (delete me)`.
+2. Push Delete.
+3. Save the project.
+
+A closed timeline tab does not delete a sequence. The repo copy `premiere-collab/demo/demo.prproj` does not contain the probe sequence.
