@@ -138,6 +138,8 @@ Restart Premiere, then Window > Extensions > Tandem
 ```
 After any later code change, run this script again and click **Reload panel**.
 
+**macOS laptop (untested):** in Terminal, from the repo folder, run `bash premiere-collab/scripts/install-panel.sh`. You should see `PlayerDebugMode = 1 (CSXS.10-13)` and `Copied panel to ~/Library/Application Support/Adobe/CEP/extensions/com.hacklanta.premierecollab`. Sync works the same; the live cursor overlay is Windows-only.
+
 ### B4. Put the demo project in place
 
 Sync matches clips by their **position on V1**, never by file path. The project file and the footage can live anywhere on the guest; only the clip order on V1 has to match the host.
