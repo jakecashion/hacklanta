@@ -5,7 +5,7 @@ Two editors, one Premiere 22.3.1 timeline, live. CEP 11 panel + Node `ws` relay.
 ```
 panel/    CEP panel (copy into %APPDATA%\Adobe\CEP\extensions)
 relay/    Node relay, runs on the host laptop only
-scripts/  install-panel.ps1, firewall.ps1
+scripts/  install-panel.ps1 (Windows), install-panel.sh (macOS), firewall.ps1
 ```
 
 ## Setup (each laptop)
@@ -17,7 +17,11 @@ powershell -ExecutionPolicy Bypass -File scripts\install-panel.ps1 -Link
 powershell -ExecutionPolicy Bypass -File scripts\install-panel.ps1
 ```
 
-Restart Premiere, then **Window > Extensions > Tandem**. If the panel does not show up with `-Link`, run without it (CEP may not follow junctions).
+macOS (untested): `bash scripts/install-panel.sh` (copy) or `bash scripts/install-panel.sh --link` (symlink, dev machine).
+
+Restart Premiere, then **Window > Extensions > Tandem**. If the panel does not show up with `-Link` / `--link`, run without it (CEP may not follow junctions or symlinks).
+
+Platform support: panel, relay and sync should work on Windows and macOS. The live cursor overlay (`cursor/cursor.ps1`) is Windows-only; a Mac laptop sees no remote pointer and shows none for others. `firewall.ps1` is Windows-only; on a Mac host, allow incoming connections for Node when macOS asks.
 
 Debug the panel: open `http://localhost:8088` in Chrome.
 
